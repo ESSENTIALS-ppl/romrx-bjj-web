@@ -385,6 +385,61 @@
             margin-top: 20px;
         }
 
+        /* ===== FAQ SECTION ===== */
+        .faq {
+            background: var(--white);
+            padding: 80px 24px;
+        }
+        .faq .container {
+            max-width: 800px;
+        }
+        .faq-list {
+            margin-top: 40px;
+        }
+        .faq-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            text-align: left;
+            cursor: pointer;
+            gap: 16px;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--teal); }
+        .faq-chevron {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            color: var(--teal);
+            transition: transform 0.3s;
+        }
+        .faq-item.open .faq-chevron {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.2s;
+            color: #5a6a75;
+            font-size: 0.975rem;
+            line-height: 1.7;
+            padding: 0;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 400px;
+            padding-bottom: 20px;
+        }
+
         /* ===== FOOTER ===== */
         .footer {
             background: var(--charcoal-dark);
@@ -593,6 +648,93 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">Everything you need to know before you get started.</p>
+            <div class="faq-list">
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What is Range of Motion (ROM)?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">Range of Motion is how far a joint can move through its full arc of motion. In BJJ, limited ROM at the hip, shoulder, ankle, or spine can prevent you from achieving proper technique positions — and increases injury risk. ROMRxBJJ™ measures 14 joints bilaterally to build a complete picture of your mobility.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How does the self-assessment work?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">You’ll use a free goniometer app on your smartphone to measure joint angles at home. Each measurement takes seconds. The full assessment covers 14 joints — bilateral and midline — and is designed to be done solo, without equipment, in your living room.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How long does the assessment take?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">The ROM measurement portion takes 15–20 minutes. Entering your data into the submission form takes about 5 minutes. You only need to do it once every 6 weeks — each reassessment shows your progress and unlocks updated technique ratings.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What is the Position Readiness Score™?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">Every technique in the ROMRxBJJ™ system is rated GREEN (body-ready now), YELLOW (build toward it), or RED (avoid until ROM improves) based on the joint demands of that technique compared to YOUR measured ROM. It’s a personalized readiness signal, not a generic guide.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What happens after I submit?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">Within 48 hours, your personalized Position Readiness Profile™ is emailed to you. You’ll also receive dashboard access to explore your My Body radar chart, My Game technique flow, and My Protocol exercise prescription.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What is a promo code?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">Promo codes are given to pilot participants and early supporters. Entering a valid promo code at checkout unlocks your first full year of ROMRxBJJ™ for FREE (retail $149/yr). Ask your coach or check your invite email for a code.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How do I access my dashboard?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">After your assessment is processed, you’ll receive an email with your access code. Go to <strong>romrxbjj.com/dashboard</strong>, enter your email and code, and you’re in. No app download required.</div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What happens after 6 weeks?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">You reassess. Six weeks of consistent mobility work moves the needle. Your updated ROM measurements generate a new Position Readiness Profile™ — with more GREEN techniques unlocked and updated prescriptions for the joints still lagging. It’s a continuous improvement loop tied directly to your training.</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+        (function() {
+            document.querySelectorAll('.faq-item').forEach(function(item) {
+                item.querySelector('.faq-question').addEventListener('click', function() {
+                    var isOpen = item.classList.contains('open');
+                    document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+                    if (!isOpen) item.classList.add('open');
+                });
+            });
+        })();
+    </script>
 
     <!-- ===== SIGNUP ===== -->
     <section class="signup" id="signup">
