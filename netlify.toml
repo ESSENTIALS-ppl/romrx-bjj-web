@@ -1,0 +1,27 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/Dashboard/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/Dashboard/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/coach"
+  to = "/Coach/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/coach/*"
+  to = "/Coach/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
