@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROMRxBJJ — My Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="game.html" class="header-logo">ROMRxBJJ</a>
+      <div class="header-right">
+        <span class="header-greeting">Hi, <span id="user-name"></span></span>
+        <a href="#" id="logout-link" class="header-logout">Log Out</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <div class="nav-inner">
+      <a class="nav-pill" href="body.html">🏋️ My Body </a>
+      <a class="nav-pill" href="game.html">🎮 My Game</a>
+      <a class="nav-pill active" href="protocol.html">📋 My Protocol</a>
+    </div>
+  </nav>
+
+  <main class="app-main">
+    <div id="app">
+      <div class="protocol-loading">
+        <div class="spinner"></div>
+        <p>Loading your protocol...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-tagline">Your body. Your game. Your protocol.</div>
+    <div class="footer-copy">&copy; 2026 ROMRx LLC &middot; romrxbjj.com</div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/protocol.js"></script>
+</body>
+</html>

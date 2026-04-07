@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROMRxBJJ — Start Your Free Year</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .subscribe-container {
+            max-width: 520px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .subscribe-card {
+            background: #FFFFFF;
+            border: 2px solid #008080;
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .subscribe-badge {
+            display: inline-block;
+            background: #008080;
+            color: #FFFFFF;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .subscribe-card h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 28px;
+            color: #36454F;
+            margin: 0 0 8px 0;
+            line-height: 1.2;
+        }
+        .subscribe-card .price {
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .subscribe-card .price strong {
+            font-size: 36px;
+            font-weight: 700;
+            color: #36454F;
+        }
+        .subscribe-card .price .period {
+            font-size: 16px;
+            color: #999;
+        }
+        .subscribe-card .free-year {
+            background: linear-gradient(135deg, #008080 0%, #006666 100%);
+            color: #FFFFFF;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+        .subscribe-features {
+            text-align: left;
+            margin: 24px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .subscribe-features li {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: #36454F;
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            border-bottom: 1px solid #f0eeeb;
+        }
+        .subscribe-features li:last-child {
+            border-bottom: none;
+        }
+        .subscribe-features li::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            color: #28A745;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .subscribe-btn {
+            display: block;
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #008080 0%, #006666 100%);
+            color: #FFFFFF;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+            text-decoration: none;
+        }
+        .subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,128,128,0.4);
+        }
+        .subscribe-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .subscribe-promo {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0eeeb;
+        }
+        .subscribe-promo p {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        .promo-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .promo-input-row input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: border-color 0.2s;
+        }
+        .promo-input-row input:focus {
+            outline: none;
+            border-color: #008080;
+        }
+        .promo-input-row input::placeholder {
+            text-transform: none;
+            letter-spacing: 0;
+            color: #bbb;
+        }
+        .subscribe-footer {
+            margin-top: 24px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #999;
+        }
+        .subscribe-footer a {
+            color: #008080;
+            text-decoration: none;
+        }
+        .already-active {
+            display: none;
+        }
+        .already-active.show {
+            display: block;
+        }
+        .already-active .status-badge {
+            display: inline-block;
+            background: #28A745;
+            color: #FFFFFF;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        .already-active p {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: #36454F;
+            margin-bottom: 20px;
+        }
+        .dashboard-btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #008080;
+            color: #FFFFFF;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .dashboard-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,128,128,0.3);
+        }
+        .activating-container {
+            max-width: 520px;
+            margin: 100px auto;
+            padding: 0 20px;
+            text-align: center;
+            display: none;
+        }
+        .spinner {
+            margin: 30px auto;
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #008080;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .subscribe-container { margin: 30px auto; }
+            .subscribe-card { padding: 28px 20px; }
+            .subscribe-card h1 { font-size: 24px; }
+            .subscribe-card .price strong { font-size: 28px; }
+            .promo-input-row { flex-direction: column; }
+            .promo-input-row input { width: 100%; }
+        }
+    </style>
+</head>
+<body style="background: #FAF9F6; min-height: 100vh; margin: 0;">
+
+    <!-- STATE 1: Activating spinner (shown on ?activated=true return from Stripe) -->
+    <div class="activating-container" id="activatingView">
+        <div class="subscribe-card">
+            <h2 style="color:#008080;font-family:Montserrat,sans-serif;margin:0 0 12px;">Activating Your Dashboard&hellip;</h2>
+            <p style="color:#555;font-family:Inter,sans-serif;font-size:15px;">Confirming your subscription. This takes just a moment.</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- STATE 2: Subscribe form (shown when user needs to pay) -->
+    <div class="subscribe-container" id="subscribeForm">
+        <div class="subscribe-card">
+            <div class="subscribe-badge">ROMRxBJJ+ Dashboard</div>
+            <h1>Your Body. Your Game.<br>Your Protocol.</h1>
+
+            <div style="margin: 24px 0;">
+                <div class="price">
+                    <strong>$149</strong> <span class="period">/ year</span>
+                </div>
+                <div class="free-year">&#127942; First Year FREE With Promo Code</div>
+            </div>
+
+            <ul class="subscribe-features">
+                <li>Full ROM self-assessment (14 joints)</li>
+                <li>Personalized Position Readiness Profile</li>
+                <li>124 technique tier ratings (GREEN / YELLOW / RED)</li>
+                <li>Custom flow generator &mdash; offense &amp; defense paths</li>
+                <li>Priority joint exercise prescriptions</li>
+                <li>Quarterly reassessments &amp; progress tracking</li>
+                <li>Belt progression system (White &#8594; Blue &#8594; more coming)</li>
+            </ul>
+
+            <div class="subscribe-promo">
+                <p>Have a promo code? Enter it below for your free year.</p>
+                <div class="promo-input-row">
+                    <input type="text" id="promoCode" placeholder="Enter promo code" maxlength="20" autocomplete="off">
+                </div>
+            </div>
+
+            <button class="subscribe-btn" id="subscribeBtn">
+                Start Your Free Year
+            </button>
+
+            <div class="subscribe-footer">
+                <p>Secure checkout powered by Stripe.<br>
+                Cancel anytime. Questions? <a href="mailto:romrxbjj@gmail.com">romrxbjj@gmail.com</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATE 3: Already active (shown when user already has a subscription) -->
+    <div class="subscribe-container" id="alreadyActive" style="display:none;">
+        <div class="subscribe-card">
+            <div style="font-size:64px;margin-bottom:16px;">&#10003;</div>
+            <h1 style="font-size: 24px; margin-bottom: 12px;">You're All Set!</h1>
+            <p style="font-family:Inter,sans-serif;font-size:15px;color:#36454F;margin-bottom:20px;">Your ROMRxBJJ+ Dashboard is active.</p>
+            <a href="game.html" class="dashboard-btn">Go to My Dashboard</a>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        var STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/aFaeVd4js7h52aH6nS0gw00';
+
+        (function() {
+            var session = getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Hide everything first
+            document.getElementById('subscribeForm').style.display = 'none';
+            document.getElementById('alreadyActive').style.display = 'none';
+            document.getElementById('activatingView').style.display = 'none';
+
+            // ===== STATE 1: Returning from Stripe with ?activated=true =====
+            if (window.location.search.indexOf('activated=true') !== -1) {
+                document.getElementById('activatingView').style.display = 'block';
+
+                var attempts = 0;
+                var maxAttempts = 15; // 30 seconds total
+                var pollTimer = setInterval(async function() {
+                    attempts++;
+                    try {
+                        // Re-login to get fresh subscriptionStatus from the API
+                        var loginSession = JSON.parse(localStorage.getItem('romrxbjj_session'));
+                        if (loginSession && loginSession.email) {
+                            var res = await apiCall({
+                                action: 'login',
+                                email: loginSession.email,
+                                code: loginSession.code || ''
+                            });
+                            if (res.success && (res.subscriptionStatus === 'active' || res.subscriptionStatus === 'trialing')) {
+                                saveSession(res.email, res.name, res.subscriptionStatus, res.subscriptionExpiry);
+                                clearInterval(pollTimer);
+                                window.location.href = 'game.html';
+                                return;
+                            }
+                        }
+                    } catch(e) { /* retry silently */ }
+
+                    if (attempts >= maxAttempts) {
+                        clearInterval(pollTimer);
+                        document.getElementById('activatingView').querySelector('.subscribe-card').innerHTML =
+                            '<h2 style="color:#008080;font-family:Montserrat,sans-serif;margin:0 0 12px;">Almost There!</h2>' +
+                            '<p style="color:#555;font-family:Inter,sans-serif;font-size:15px;max-width:400px;margin:16px auto;">' +
+                            'Your payment was received. If the dashboard doesn\'t load automatically, ' +
+                            '<a href="game.html" style="color:#008080;font-weight:bold;">click here to try again</a>.</p>';
+                    }
+                }, 2000);
+                return;
+            }
+
+            // ===== STATE 3: Already subscribed =====
+            var status = session.subscriptionStatus;
+            if (status === 'active' || status === 'trial' || status === 'trialing') {
+                document.getElementById('alreadyActive').style.display = 'block';
+                return;
+            }
+
+            // ===== STATE 2: Needs to subscribe =====
+            document.getElementById('subscribeForm').style.display = 'block';
+
+            // Build Stripe URL with pre-filled email (BUG FIX #2)
+            var payUrl = STRIPE_PAYMENT_LINK + '?prefilled_email=' + encodeURIComponent(session.email) + '&client_reference_id=' + encodeURIComponent(session.email);
+
+
+            // Wire up the subscribe button
+            document.getElementById('subscribeBtn').addEventListener('click', function() {
+                window.location.href = payUrl;
+            });
+
+        })();
+    </script>
+</body>
+</html>

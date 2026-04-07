@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROMRxBJJ — Athlete Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-brand">
+      <h1 class="brand-logo">ROMRxBJJ</h1>
+      <p class="brand-tagline">Your body. Your game. Your protocol.</p>
+      <p class="brand-subtitle">Athlete Dashboard</p>
+    </div>
+    <div class="login-card">
+      <form id="login-form" autocomplete="off">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        <label for="code">Access Code</label>
+        <input type="text" id="code" name="code" maxlength="6" placeholder="6-character code" required>
+        <div id="login-error" class="error-msg" hidden></div>
+        <button type="submit" id="login-btn" class="btn btn-primary">Enter Dashboard</button>
+      </form>
+      <p class="help-text">Your access code was sent in your Position Readiness Profile\u2122 email.</p>
+    </div>
+  </main>
+  <footer class="login-footer">&copy; 2026 ROMRx LLC</footer>
+  <script src="js/api.js"></script>
+  <script>
+    (function () {
+      var session = getSession();
+      if (session) { window.location.href = 'game.html'; return; }
+
+      var form = document.getElementById('login-form');
+      var btn = document.getElementById('login-btn');
+      var errDiv = document.getElementById('login-error');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        errDiv.hidden = true;
+        var email = document.getElementById('email').value.trim().toLowerCase();
+        var code = document.getElementById('code').value.trim().toUpperCase();
+        if (!email || !code) { showErr('Please enter both email and access code.'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Verifying\u2026';
+
+        try {
+          var res = await apiLogin(email, code);
+          if (res.success) {
+            saveSession(res.email, res.name, res.subscriptionStatus, res.subscriptionExpiry, code);
+            window.location.href = 'game.html';
+          } else {
+            showErr(res.error || 'Login failed.');
+            var card = document.querySelector('.login-card');
+            card.classList.add('shake');
+            setTimeout(function () { card.classList.remove('shake'); }, 500);
+          }
+        } catch (ex) {
+          showErr('Network error. Please try again.');
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Enter Dashboard';
+      });
+
+      function showErr(msg) { errDiv.textContent = msg; errDiv.hidden = false; }
+    })();
+  </script>
+</body>
+</html>

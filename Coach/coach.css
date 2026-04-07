@@ -1,0 +1,669 @@
+/* ROMRxBJJ Coach Dashboard Styles */
+
+:root {
+  --coach-primary: #008080;
+  --coach-primary-light: #339999;
+  --coach-primary-bg: #E8F0F0;
+  --coach-accent: #FFB347;
+  --coach-text: #36454F;
+  --coach-bg: #FAF9F6;
+  --coach-card-bg: #FFFFFF;
+  --coach-secondary: #B87333;
+  --tier-green: #2ECC71;
+  --tier-yellow: #F39C12;
+  --tier-red: #E74C3C;
+}
+
+/* Coach Header */
+.coach-header {
+  background: var(--coach-primary);
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,128,128,0.15);
+}
+.coach-header h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+.coach-header .coach-user {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.coach-header .logout-link {
+  color: var(--coach-accent);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+.coach-header .logout-link:hover { opacity: 0.8; }
+
+/* Navigation Pills */
+.coach-nav {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border-bottom: 2px solid #E0E0E0;
+  padding: 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.coach-nav .nav-pill {
+  flex: 1;
+  text-align: center;
+  padding: 14px 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #6B7B8D;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.coach-nav .nav-pill.active {
+  color: var(--coach-primary);
+  border-bottom-color: var(--coach-primary);
+}
+.coach-nav .nav-pill:hover:not(.active) {
+  color: var(--coach-primary-light);
+  background: var(--coach-primary-bg);
+}
+.nav-pill .soon-badge {
+  display: inline-block;
+  background: var(--coach-accent);
+  color: var(--coach-text);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+/* Tab Content */
+.tab-content { display: none; padding: 20px 16px; max-width: 960px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* Class Overview Card */
+.class-overview {
+  background: var(--coach-primary);
+  color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,128,128,0.15);
+}
+.overview-stat { flex: 1; }
+.overview-stat .stat-value {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+}
+.overview-stat .stat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* Athlete Cards */
+.athlete-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.athlete-card {
+  background: var(--coach-card-bg);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border-left: 4px solid var(--coach-primary);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+.athlete-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+.athlete-card .athlete-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--coach-text);
+  margin-bottom: 4px;
+}
+.athlete-card .athlete-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #6B7B8D;
+  margin-bottom: 12px;
+}
+.athlete-card .belt-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
+}
+.belt-white { background: #F0F0F0; color: #555; }
+.belt-blue { background: #2196F3; color: #fff; }
+
+/* Technique Tier Bar */
+.tier-bar-container { margin: 12px 0 8px; }
+.tier-bar-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #6B7B8D;
+  margin-bottom: 4px;
+}
+.tier-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #F0F0F0;
+}
+.tier-bar .tier-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 28px;
+  transition: width 0.3s;
+}
+.tier-green { background: var(--tier-green); }
+.tier-yellow { background: var(--tier-yellow); color: var(--coach-text) !important; }
+.tier-red { background: var(--tier-red); }
+
+/* Priority Joint Badges (Roster) */
+.priority-joints { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.roster-joint-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+.roster-joint-badge.yellow-joint { background: #FFF3CD; color: #856404; }
+.roster-joint-badge.red-joint { background: #F8D7DA; color: #721C24; }
+
+/* Expandable Detail */
+.athlete-detail {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #E0E0E0;
+}
+.athlete-card.expanded .athlete-detail { display: block; }
+
+/* === WARMUP TAB === */
+.warmup-header {
+  background: linear-gradient(135deg, var(--coach-primary), var(--coach-primary-light));
+  color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.warmup-header h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+.warmup-header p {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.warmup-total {
+  text-align: center;
+  padding: 16px;
+  background: var(--coach-primary-bg);
+  border-radius: 10px;
+  margin-top: 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--coach-primary);
+}
+
+/* ── RAMP WARMUP RENDERER ── */
+.warmup-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+
+.warmup-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.warmup-meta-item {
+  font-size: 0.88rem;
+  color: #36454F;
+  background: #F0F4F4;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.warmup-joints-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  background: #FFF8F0;
+  border-left: 4px solid #FFB347;
+  border-radius: 6px;
+}
+
+.warmup-joints-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #36454F;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.joint-badge {
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.joint-badge em {
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.joint-optimal { background: #E8F8F0; color: #1a7a4a; }
+.joint-monitor { background: #FFF3CD; color: #856404; }
+.joint-at-risk { background: #FDECEA; color: #a41c1c; }
+
+.ramp-phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.ramp-phase-card {
+  border-radius: 10px;
+  padding: 16px;
+  border-top: 5px solid;
+}
+
+.ramp-raise    { background: #FFF8F0; border-color: #FFB347; }
+.ramp-activate { background: #F0F8F8; border-color: #008080; }
+.ramp-mobilize { background: #FBF6F0; border-color: #B87333; }
+.ramp-potentiate { background: #F0FAF5; border-color: #2ECC71; }
+
+.ramp-phase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.ramp-phase-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ramp-phase-icon { font-size: 1.1rem; }
+
+.ramp-phase-label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #36454F;
+}
+
+.ramp-phase-duration {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #666;
+  background: rgba(255,255,255,0.7);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.ramp-phase-purpose {
+  font-size: 0.78rem;
+  color: #777;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.ramp-drill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ramp-drill-item {
+  background: rgba(255,255,255,0.75);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.ramp-drill-name {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: #36454F;
+}
+
+.ramp-drill-meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 3px;
+}
+
+.ramp-drill-joint, .ramp-drill-tech {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.ramp-drill-empty {
+  font-size: 0.82rem;
+  color: #999;
+  font-style: italic;
+  padding: 6px 0;
+}
+
+.warmup-footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.btn-regenerate {
+  background: var(--coach-bg);
+  color: var(--coach-primary);
+  border: 2px solid var(--coach-primary);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-regenerate:hover {
+  background: var(--coach-primary);
+  color: #FAF9F6;
+}
+
+.btn-save-soon {
+  display: inline-block;
+  padding: 10px 24px;
+  background: #E0E0E0;
+  color: #6B7B8D;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: not-allowed;
+  margin-top: 16px;
+  margin-left: 8px;
+}
+
+/* Loading state */
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  color: #6B7B8D;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+.loading-spinner::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E0E0E0;
+  border-top-color: var(--coach-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .class-overview { flex-direction: column; gap: 16px; }
+  .athlete-grid { grid-template-columns: 1fr; }
+  .coach-header h1 { font-size: 15px; }
+  .ramp-phases { grid-template-columns: 1fr; }
+  .warmup-meta { gap: 8px; }
+}
+/* Category Pills */
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid #E0DDD8;
+  margin-bottom: 16px;
+}
+.cat-pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #1B3A5C;
+  background: transparent;
+  color: #1B3A5C;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-pill:hover { background: rgba(27,58,92,0.08); }
+.cat-pill.active {
+  background: #1B3A5C;
+  color: #FAF9F6;
+}
+
+/* Belt Separators */
+.belt-separator {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #8A9BAE;
+  padding: 8px 0 4px;
+  margin-top: 8px;
+}
+
+/* Technique Grid */
+.technique-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 0 20px;
+  align-items: center;
+}
+.tech-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #D4D0CB;
+  background: #FAF9F6;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tech-btn:hover {
+  border-color: #1B3A5C;
+  background: rgba(27,58,92,0.04);
+}
+.tech-btn.selected {
+  background: #1B3A5C;
+  border-color: #1B3A5C;
+  color: #FAF9F6;
+}
+.tech-code {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+/* RAMP Placeholder */
+.ramp-placeholder {
+  text-align: center;
+  padding: 48px 20px;
+  color: #8A9BAE;
+}
+.ramp-icon { font-size: 48px; margin-bottom: 12px; }
+.ramp-placeholder p { font-size: 15px; }
+
+/* RAMP Header */
+.ramp-header {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid #E0DDD8;
+  margin-bottom: 16px;
+}
+.ramp-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1B3A5C;
+  margin: 0 0 8px;
+}
+.ramp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: #5A6B7D;
+}
+.ramp-belt {
+  background: #1B3A5C;
+  color: #FAF9F6;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 11px;
+}
+.ramp-joints { font-style: italic; }
+.ramp-duration { font-weight: 600; }
+
+/* RAMP Cards */
+.ramp-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ramp-card {
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.ramp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.ramp-phase-icon { font-size: 20px; }
+.ramp-phase-label {
+  font-weight: 700;
+  font-size: 15px;
+  color: #36454F;
+  flex: 1;
+}
+.ramp-phase-dur {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8A9BAE;
+  background: #F0EEEA;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+.ramp-purpose {
+  font-size: 13px;
+  color: #6B7B8D;
+  margin: 0 0 10px;
+  font-style: italic;
+}
+.ramp-drills {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ramp-drills li {
+  padding: 6px 0;
+  border-top: 1px solid #F0EEEA;
+  font-size: 14px;
+  color: #36454F;
+  font-weight: 500;
+}
+.ramp-drills li:first-child { border-top: none; }
+
+/* Loading & Error */
+.loading-msg {
+  text-align: center;
+  color: #8A9BAE;
+  padding: 32px;
+  font-size: 14px;
+}
+.error-msg {
+  text-align: center;
+  color: #DC3545;
+  padding: 32px;
+  font-size: 14px;
+}
+.empty-msg {
+  color: #8A9BAE;
+  font-size: 13px;
+  padding: 12px 0;
+  width: 100%;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .category-pills { gap: 6px; }
+  .cat-pill { padding: 5px 12px; font-size: 12px; }
+  .tech-btn { padding: 6px 10px; }
+  .tech-code { font-size: 12px; }
+  .ramp-header h3 { font-size: 16px; }
+  .ramp-card { padding: 12px; }
+}

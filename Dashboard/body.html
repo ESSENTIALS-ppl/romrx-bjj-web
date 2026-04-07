@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ROMRxBJJ | My Body</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <!-- ADD THIS: Chart.js for radar chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="#" class="header-logo">ROMRxBJJ</a>
+      <div class="header-right">
+        <span id="user-name" class="header-greeting">Athlete</span>
+        <a href="#" id="logout-link" class="header-logout">Log Out</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="app-nav">
+    <div class="nav-inner">
+      <a href="body.html" class="nav-pill active">
+        <span>🏋️</span> My Body
+      </a>
+      <a href="game.html" class="nav-pill">
+        <span>🥋</span> My Game
+      </a>
+      <a href="protocol.html" class="nav-pill">
+        <span>📋</span> My Protocol
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    
+    <!-- Profile Header -->
+    <div id="profile-header-container">
+      <!-- Injected by JS -->
+      <div class="protocol-loading">
+        <div class="spinner"></div>
+        <p>Loading your profile...</p>
+      </div>
+    </div>
+<div id="belt-promotion-container" class="dashboard-section" style="display:none;"></div>
+
+    <!-- ADD THIS: Radar Chart Container (before technique summary) -->
+    <div id="radar-container" style="display:none;">
+      <h3 style="font-family:Montserrat,sans-serif; font-size:1.1rem; color:#008080; text-align:center; margin:1.5rem 0 0.5rem;">Your Mobility Shape</h3>
+      <div id="radar-chart" style="max-width:500px; margin:0 auto; padding:0 1rem;"></div>
+    </div>
+
+    <!-- Technique Readiness Traffic Lights -->
+    <div id="tech-summary-container" style="display:none;">
+      <h3 class="section-title">Game Readiness</h3>
+      <div class="tech-summary">
+        <div class="tech-stat-card green">
+          <div class="tech-count color-green" id="count-green">-</div>
+          <div class="tech-label">Ready</div>
+        </div>
+        <div class="tech-stat-card yellow">
+          <div class="tech-count color-yellow" id="count-yellow">-</div>
+          <div class="tech-label">Caution</div>
+        </div>
+        <div class="tech-stat-card red">
+          <div class="tech-count color-red" id="count-red">-</div>
+          <div class="tech-label">Restricted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bilateral Joints -->
+    <div id="bilateral-container" style="display:none;">
+      <h3 class="section-title">Bilateral Mobility (Left vs Right)</h3>
+      <div class="joint-list" id="bilateral-list">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- Midline Joints -->
+    <div id="midline-container" style="display:none;">
+      <h3 class="section-title">Spine & Midline Mobility</h3>
+      <div class="joint-list" id="midline-list">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <div class="app-footer">
+      <div class="footer-tagline">Your body. Your game. Your protocol.</div>
+      <div class="footer-copy">© 2026 ROMRxBJJ</div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast" style="display: none;"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/body.js"></script>
+
+</body>
+</html>

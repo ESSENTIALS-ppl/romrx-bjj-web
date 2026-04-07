@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROMRxBJJ Coach Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="coach.css">
+</head>
+<body>
+
+  <!-- ===== LOGIN VIEW ===== -->
+  <div id="login-view">
+    <div class="login-page">
+      <div class="login-brand">
+        <h1 class="brand-logo">ROMRxBJJ</h1>
+        <p class="brand-tagline">Your body. Your game. Your protocol.</p>
+        <p class="brand-subtitle">Coach Dashboard</p>
+      </div>
+      <div class="login-card">
+        <form id="login-form" autocomplete="off">
+          <label for="coach-email">Email</label>
+          <input type="email" id="coach-email" name="email" placeholder="Enter your coach email" required>
+          <label for="coach-code">Access Code</label>
+          <input type="text" id="coach-code" name="code" maxlength="6" placeholder="6-character code" required>
+          <div id="login-error" class="error-msg" hidden></div>
+          <button type="submit" id="login-btn" class="btn-coach-primary">Enter Coach Dashboard</button>
+        </form>
+        <p class="help-text">Your access code was provided by the ROMRxBJJ admin.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD VIEW (hidden until login) ===== -->
+  <div id="dashboard-view" style="display:none;">
+
+    <header class="coach-header">
+      <h1>ROMRxBJJ <span style="font-weight:400;opacity:0.85;">Coach</span></h1>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="coach-user" id="coach-name"></span>
+        <a href="#" class="logout-link" id="coach-logout">Log Out</a>
+      </div>
+    </header>
+
+    <nav class="coach-nav">
+      <button class="nav-pill active" data-tab="roster">Athlete Roster</button>
+      <button class="nav-pill" data-tab="warmup">Class Warmup</button>
+      <button class="nav-pill" data-tab="trends">Trends <span class="soon-badge">SOON</span></button>
+      <button class="nav-pill" data-tab="alerts">Alerts <span class="soon-badge">SOON</span></button>
+    </nav>
+
+    <!-- Tab: Athlete Roster -->
+    <div class="tab-content active" id="tab-roster">
+      <div id="roster-loading" class="loading-spinner">Loading athlete roster...</div>
+      <div id="roster-overview" class="class-overview" style="display:none;">
+        <div class="overview-stat">
+          <div class="stat-value" id="stat-total">&mdash;</div>
+          <div class="stat-label">Total Athletes</div>
+        </div>
+        <div class="overview-stat">
+          <div class="stat-value" id="stat-avg-flags">&mdash;</div>
+          <div class="stat-label">Avg Flagged Joints</div>
+        </div>
+        <div class="overview-stat">
+          <div class="stat-value" id="stat-common">&mdash;</div>
+          <div class="stat-label">Most Common Issue</div>
+        </div>
+      </div>
+      <div id="athlete-grid" class="athlete-grid"></div>
+    </div>
+
+<!-- Tab: Class Warmup -->
+<div class="tab-content" id="tab-warmup">
+  <div id="warmup-content"></div>
+</div>
+
+    <!-- Tab: Trends (placeholder) -->
+    <div class="tab-content" id="tab-trends">
+      <div style="text-align:center;padding:60px 20px;color:#6B7B8D;">
+        <div style="font-size:48px;margin-bottom:12px;">📊</div>
+        <h2 style="font-family:'Montserrat',sans-serif;color:#008080;margin-bottom:8px;">Class Trends Coming Soon</h2>
+        <p>Track mobility improvements across your athletes over time.</p>
+      </div>
+    </div>
+
+    <!-- Tab: Alerts (placeholder) -->
+    <div class="tab-content" id="tab-alerts">
+      <div style="text-align:center;padding:60px 20px;color:#6B7B8D;">
+        <div style="font-size:48px;margin-bottom:12px;">🔔</div>
+        <h2 style="font-family:'Montserrat',sans-serif;color:#008080;margin-bottom:8px;">Injury Alerts Coming Soon</h2>
+        <p>Get notified when athletes hit critical asymmetry thresholds.</p>
+      </div>
+    </div>
+
+    <footer style="text-align:center;padding:20px;font-size:12px;color:#aaa;border-top:1px solid #E0E0E0;margin-top:40px;">
+      &copy; 2026 ROMRx LLC &middot; romrxbjj.com
+    </footer>
+  </div>
+
+  <script src="coach-auth.js"></script>
+  <script src="coach.js"></script>
+  <script>
+    // ===== LOGIN LOGIC =====
+    (function() {
+      var session = getCoachSession();
+      if (session) { showDashboard(session); return; }
+
+      document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var errDiv = document.getElementById('login-error');
+        errDiv.hidden = true;
+        var email = document.getElementById('coach-email').value.trim().toLowerCase();
+        var code = document.getElementById('coach-code').value.trim().toUpperCase();
+        var btn = document.getElementById('login-btn');
+        if (!email || !code) { errDiv.textContent = 'Please enter both email and access code.'; errDiv.hidden = false; return; }
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        try {
+          var res = await apiCoachLogin(email, code);
+          if (res.success) {
+            var sess = { email: res.email || email, name: res.name || 'Coach', loginTime: Date.now() };
+            sessionStorage.setItem('romrxbjj_coach', JSON.stringify(sess));
+            showDashboard(sess);
+          } else { errDiv.textContent = res.error || 'Login failed. Check your credentials.'; errDiv.hidden = false; }
+        } catch(ex) { errDiv.textContent = 'Network error. Please try again.'; errDiv.hidden = false; }
+        btn.disabled = false;
+        btn.textContent = 'Enter Coach Dashboard';
+      });
+    })();
+
+    // ===== DASHBOARD INIT =====
+    function showDashboard(session) {
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('dashboard-view').style.display = 'block';
+      document.getElementById('coach-name').textContent = session.name.split(' ')[0];
+      document.getElementById('coach-logout').addEventListener('click', function(e) { e.preventDefault(); coachLogout(); });
+
+      var pills = document.querySelectorAll('.coach-nav .nav-pill');
+      pills.forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          var tab = this.getAttribute('data-tab');
+          if (this.querySelector('.soon-badge')) return;
+          pills.forEach(function(p) { p.classList.remove('active'); });
+          this.classList.add('active');
+          document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+          document.getElementById('tab-' + tab).classList.add('active');
+if (tab === 'warmup') {
+  loadWarmupTab();
+}
+        });
+      });
+      loadRoster(session.email);
+    }
+
+    // ===== ROSTER TAB =====
+    async function loadRoster(coachEmail) {
+      try {
+        var data = await apiGetRoster(coachEmail);
+        document.getElementById('roster-loading').style.display = 'none';
+        if (!data.success && data.success !== undefined) {
+          document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">Unable to load roster. ' + (data.error || '') + '</p>';
+          return;
+        }
+        var athletes = data.athletes || [];
+        if (athletes.length === 0) {
+          document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">No athletes found. Athletes will appear here after they complete their assessment.</p>';
+          return;
+        }
+        document.getElementById('roster-overview').style.display = 'flex';
+        document.getElementById('stat-total').textContent = athletes.length;
+        var totalFlags = 0, jointCounts = {};
+        athletes.forEach(function(a) {
+          totalFlags += (a.priorityJoints || []).length;
+          (a.priorityJoints || []).forEach(function(j) {
+            var name = j.joint || j.name || 'Unknown';
+            jointCounts[name] = (jointCounts[name] || 0) + 1;
+          });
+        });
+        document.getElementById('stat-avg-flags').textContent = athletes.length > 0 ? (totalFlags / athletes.length).toFixed(1) : '0';
+        var commonJoint = '\u2014', maxCount = 0;
+        for (var jn in jointCounts) { if (jointCounts[jn] > maxCount) { maxCount = jointCounts[jn]; commonJoint = jn; } }
+        document.getElementById('stat-common').textContent = commonJoint;
+        var grid = document.getElementById('athlete-grid');
+        grid.innerHTML = '';
+        athletes.forEach(function(a) { grid.innerHTML += renderAthleteCard(a); });
+        grid.querySelectorAll('.athlete-card').forEach(function(card) {
+          card.addEventListener('click', function() { this.classList.toggle('expanded'); });
+        });
+      } catch(err) {
+        document.getElementById('roster-loading').style.display = 'none';
+        document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#E74C3C;padding:40px;">Error loading roster. Please try again.</p>';
+      }
+    }
+
+    function renderAthleteCard(a) {
+      var name = a.name || a.fullName || 'Athlete';
+      var belt = (a.belt || 'white').toLowerCase();
+      var beltClass = belt === 'blue' ? 'belt-blue' : 'belt-white';
+      var beltLabel = belt.charAt(0).toUpperCase() + belt.slice(1) + ' Belt';
+      var g = a.greenCount || a.green || 0, y = a.yellowCount || a.yellow || 0, r = a.redCount || a.red || 0;
+      var total = g + y + r || 1;
+      var gPct = Math.round((g / total) * 100), yPct = Math.round((y / total) * 100), rPct = 100 - gPct - yPct;
+      var joints = a.priorityJoints || [], jointBadges = '';
+      joints.forEach(function(j) {
+        var jName = j.joint || j.name || '';
+        var asym = j.asymmetry ? ' ' + j.asymmetry.toFixed(1) + '%' : '';
+        var cls = (j.status === 'At-Risk' || j.status === 'RED') ? 'red-joint' : 'yellow-joint';
+        jointBadges += '<span class="roster-joint-badge ' + cls + '">' + jName + asym + '</span>';
+      });
+      var html = '<div class="athlete-card">';
+      html += '<div class="athlete-name">' + name + '</div>';
+      html += '<div class="athlete-meta"><span class="belt-badge ' + beltClass + '">' + beltLabel + '</span></div>';
+      html += '<div class="tier-bar-container"><div class="tier-bar-label">Technique Readiness</div><div class="tier-bar">';
+      if (gPct > 0) html += '<div class="tier-segment tier-green" style="width:' + gPct + '%">' + g + '</div>';
+      if (yPct > 0) html += '<div class="tier-segment tier-yellow" style="width:' + yPct + '%">' + y + '</div>';
+      if (rPct > 0) html += '<div class="tier-segment tier-red" style="width:' + rPct + '%">' + r + '</div>';
+      html += '</div></div>';
+      if (jointBadges) html += '<div class="priority-joints">' + jointBadges + '</div>';
+      html += '<div class="athlete-detail"><p style="font-size:12px;color:#6B7B8D;">Tap to view full profile (coming soon)</p></div>';
+      html += '</div>';
+      return html;
+    }
+
+    // ===== WARMUP TAB (RAMP PROTOCOL) =====
+      var ramp = data.rampPlan || { raise: [], activate: [], mobilize: [], potentiate: [] };
+      var priorityJoints = data.priorityJoints || [];
+      var classSize = data.classSize || 0;
+      var phases = [
+        { label: 'R — Raise', duration: '2 min', purpose: 'Elevate heart rate and body temperature', icon: '🔥', colorClass: 'ramp-raise', drills: ramp.raise || [] },
+        { label: 'A — Activate', duration: '3 min', purpose: 'Wake up key muscles for target techniques', icon: '⚡', colorClass: 'ramp-activate', drills: ramp.activate || [] },
+        { label: 'M — Mobilize', duration: '3 min', purpose: 'Joint ROM prep targeting priority areas', icon: '🔄', colorClass: 'ramp-mobilize', drills: ramp.mobilize || [] },
+        { label: 'P — Potentiate', duration: '2 min', purpose: 'Sport-specific movement primer', icon: '🥋', colorClass: 'ramp-potentiate', drills: ramp.potentiate || [] }
+      ];
+      var totalDrills = 0;
+      phases.forEach(function(p) { totalDrills += p.drills.length; });
+
+      var jointBadgesHtml = '';
+      priorityJoints.forEach(function(pj) {
+        var pct = pj.avgAsymmetry || 0;
+        var sc = pct > 25 ? 'joint-at-risk' : pct > 15 ? 'joint-monitor' : 'joint-optimal';
+        jointBadgesHtml += '<span class="joint-badge ' + sc + '">' + pj.joint + ' <em>' + pct.toFixed(1) + '% avg asym</em></span>';
+      });
+      var jointBar = priorityJoints.length > 0
+        ? '<div class="warmup-joints-bar"><span class="warmup-joints-label">Class Priority Joints:</span>' + jointBadgesHtml + '</div>' : '';
+
+      var phaseCards = '';
+      phases.forEach(function(phase) {
+        var items = '';
+        if (phase.drills.length > 0) {
+          phase.drills.forEach(function(d) {
+            items += '<li class="ramp-drill-item"><div class="ramp-drill-name">' + (d.drill || 'Unnamed drill') + '</div>';
+            items += '<div class="ramp-drill-meta"><span class="ramp-drill-joint">🎯 ' + (d.targetJoint || '') + '</span>';
+            if (d.techniqueName) items += '<span class="ramp-drill-tech">for ' + d.techniqueName + '</span>';
+            items += '</div></li>';
+          });
+        } else {
+          items = '<li class="ramp-drill-empty">No drills matched for this phase — add rows to Technique_Warmups tab.</li>';
+        }
+        phaseCards += '<div class="ramp-phase-card ' + phase.colorClass + '">';
+        phaseCards += '<div class="ramp-phase-header"><div class="ramp-phase-title"><span class="ramp-phase-icon">' + phase.icon + '</span><span class="ramp-phase-label">' + phase.label + '</span></div>';
+        phaseCards += '<div class="ramp-phase-duration">' + phase.duration + '</div></div>';
+        phaseCards += '<div class="ramp-phase-purpose">' + phase.purpose + '</div>';
+        phaseCards += '<ul class="ramp-drill-list">' + items + '</ul></div>';
+      });
+
+      container.innerHTML = '<div class="warmup-card">'
+        + '<div class="warmup-meta">'
+        + '<span class="warmup-meta-item">👥 Based on <strong>' + classSize + '</strong> athlete' + (classSize !== 1 ? 's' : '') + '</span>'
+        + '<span class="warmup-meta-item">⏱ <strong>10 min</strong> total</span>'
+        + '<span class="warmup-meta-item">📋 <strong>' + totalDrills + '</strong> drill' + (totalDrills !== 1 ? 's' : '') + '</span>'
+        + '<span class="warmup-meta-item">📅 ' + (data.generatedDate || new Date().toLocaleDateString()) + '</span>'
+        + '</div>'
+        + jointBar
+        + '<div class="ramp-phases">' + phaseCards + '</div>'
+        + '<div class="warmup-footer"><button class="btn-regenerate" onclick="generateWarmup()">🔄 Regenerate Warmup</button></div>'
+        + '</div>';
+    }
+  </script>
+
+  <!-- Login-specific styles -->
+  <style>
+    .login-page { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; background:#FAF9F6; }
+    .login-brand { text-align:center; margin-bottom:32px; }
+    .brand-logo { font-family:'Montserrat',sans-serif; font-weight:700; font-size:2rem; color:#008080; letter-spacing:1px; }
+    .brand-tagline { font-style:italic; color:#B87333; margin-top:4px; font-size:1rem; font-family:'Inter',sans-serif; }
+    .brand-subtitle { color:#36454F; margin-top:8px; font-size:1.1rem; font-family:'Inter',sans-serif; }
+    .login-card { background:#fff; padding:32px; border-radius:12px; box-shadow:0 2px 12px rgba(0,128,128,0.10); width:100%; max-width:420px; }
+    .login-card form { display:flex; flex-direction:column; gap:16px; }
+    .login-card label { font-family:'Inter',sans-serif; font-weight:500; font-size:0.9rem; color:#36454F; margin-bottom:-8px; }
+    .login-card input { display:block; width:100%; min-height:48px; padding:12px 16px; border:2px solid #ddd; border-radius:8px; font-family:'Inter',sans-serif; font-size:16px; color:#36454F; background:#fff; box-sizing:border-box; }
+    .login-card input:focus { outline:none; border-color:#008080; }
+    .login-card input[name="code"] { text-transform:uppercase; letter-spacing:4px; font-weight:600; text-align:center; }
+    .btn-coach-primary { display:block; width:100%; min-height:48px; padding:14px 24px; background:#FFB347; color:#36454F; border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; transition:background 0.2s; margin-top:8px; }
+    .btn-coach-primary:hover { background:#f0a030; }
+    .error-msg { color:#E74C3C; font-size:0.9rem; padding:8px 12px; background:#fdecea; border-radius:6px; text-align:center; font-family:'Inter',sans-serif; }
+    .help-text { margin-top:16px; font-size:0.8rem; color:#888; text-align:center; font-family:'Inter',sans-serif; }
+  </style>
+
+</body>
+</html>
