@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -47,8 +48,8 @@
     <nav class="coach-nav">
       <button class="nav-pill active" data-tab="roster">Athlete Roster</button>
       <button class="nav-pill" data-tab="warmup">Class Warmup</button>
-      <button class="nav-pill" data-tab="trends">Trends <span class="soon-badge">SOON</span></button>
-      <button class="nav-pill" data-tab="alerts">Alerts <span class="soon-badge">SOON</span></button>
+      <button class="nav-pill" data-tab="trends">Trends</button>
+      <button class="nav-pill" data-tab="alerts">Alerts <span id="alert-badge" class="alert-count-badge" style="display:none;">0</span></button>
     </nav>
 
     <!-- Tab: Athlete Roster -->
@@ -71,27 +72,19 @@
       <div id="athlete-grid" class="athlete-grid"></div>
     </div>
 
-<!-- Tab: Class Warmup -->
-<div class="tab-content" id="tab-warmup">
-  <div id="warmup-content"></div>
-</div>
-
-    <!-- Tab: Trends (placeholder) -->
-    <div class="tab-content" id="tab-trends">
-      <div style="text-align:center;padding:60px 20px;color:#6B7B8D;">
-        <div style="font-size:48px;margin-bottom:12px;">📊</div>
-        <h2 style="font-family:'Montserrat',sans-serif;color:#008080;margin-bottom:8px;">Class Trends Coming Soon</h2>
-        <p>Track mobility improvements across your athletes over time.</p>
-      </div>
+    <!-- Tab: Class Warmup -->
+    <div class="tab-content" id="tab-warmup">
+      <div id="warmup-content"></div>
     </div>
 
-    <!-- Tab: Alerts (placeholder) -->
+    <!-- Tab: Trends -->
+    <div class="tab-content" id="tab-trends">
+      <div id="trends-content"><div class="loading-spinner">Loading trends...</div></div>
+    </div>
+
+    <!-- Tab: Alerts -->
     <div class="tab-content" id="tab-alerts">
-      <div style="text-align:center;padding:60px 20px;color:#6B7B8D;">
-        <div style="font-size:48px;margin-bottom:12px;">🔔</div>
-        <h2 style="font-family:'Montserrat',sans-serif;color:#008080;margin-bottom:8px;">Injury Alerts Coming Soon</h2>
-        <p>Get notified when athletes hit critical asymmetry thresholds.</p>
-      </div>
+      <div id="alerts-content"><div class="loading-spinner">Loading alerts...</div></div>
     </div>
 
     <footer style="text-align:center;padding:20px;font-size:12px;color:#aaa;border-top:1px solid #E0E0E0;margin-top:40px;">
@@ -131,6 +124,11 @@
     })();
 
     // ===== DASHBOARD INIT =====
+    var _rosterData = null;
+    var _trendsLoaded = false;
+    var _alertsLoaded = false;
+    var _dismissedAlerts = {};
+
     function showDashboard(session) {
       document.getElementById('login-view').style.display = 'none';
       document.getElementById('dashboard-view').style.display = 'block';
@@ -141,14 +139,13 @@
       pills.forEach(function(pill) {
         pill.addEventListener('click', function() {
           var tab = this.getAttribute('data-tab');
-          if (this.querySelector('.soon-badge')) return;
           pills.forEach(function(p) { p.classList.remove('active'); });
           this.classList.add('active');
           document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
           document.getElementById('tab-' + tab).classList.add('active');
-if (tab === 'warmup') {
-  loadWarmupTab();
-}
+          if (tab === 'warmup') loadWarmupTab();
+          if (tab === 'trends' && !_trendsLoaded) { _trendsLoaded = true; renderTrendsTab(); }
+          if (tab === 'alerts' && !_alertsLoaded) { _alertsLoaded = true; renderAlertsTab(); }
         });
       });
       loadRoster(session.email);
@@ -158,6 +155,7 @@ if (tab === 'warmup') {
     async function loadRoster(coachEmail) {
       try {
         var data = await apiGetRoster(coachEmail);
+        _rosterData = data;
         document.getElementById('roster-loading').style.display = 'none';
         if (!data.success && data.success !== undefined) {
           document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">Unable to load roster. ' + (data.error || '') + '</p>';
@@ -165,7 +163,7 @@ if (tab === 'warmup') {
         }
         var athletes = data.athletes || [];
         if (athletes.length === 0) {
-          document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">No athletes found. Athletes will appear here after they complete their assessment.</p>';
+          document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">No athletes found.</p>';
           return;
         }
         document.getElementById('roster-overview').style.display = 'flex';
@@ -182,15 +180,41 @@ if (tab === 'warmup') {
         var commonJoint = '\u2014', maxCount = 0;
         for (var jn in jointCounts) { if (jointCounts[jn] > maxCount) { maxCount = jointCounts[jn]; commonJoint = jn; } }
         document.getElementById('stat-common').textContent = commonJoint;
+
+        // Update alert badge
+        var atRiskCount = 0;
+        athletes.forEach(function(a) {
+          (a.priorityJoints || []).forEach(function(j) {
+            if ((j.asymmetry || 0) > 25 || j.status === 'At-Risk' || j.status === 'RED') atRiskCount++;
+          });
+        });
+        if (atRiskCount > 0) {
+          var badge = document.getElementById('alert-badge');
+          badge.textContent = atRiskCount;
+          badge.style.display = 'inline-block';
+        }
+
         var grid = document.getElementById('athlete-grid');
         grid.innerHTML = '';
         athletes.forEach(function(a) { grid.innerHTML += renderAthleteCard(a); });
         grid.querySelectorAll('.athlete-card').forEach(function(card) {
-          card.addEventListener('click', function() { this.classList.toggle('expanded'); });
+          card.addEventListener('click', function(e) {
+            if (e.target.closest('.protocol-toggle')) return;
+            this.classList.toggle('expanded');
+          });
+        });
+        grid.querySelectorAll('.protocol-toggle').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var panel = this.closest('.athlete-card').querySelector('.protocol-panel');
+            var isOpen = panel.style.display !== 'none';
+            panel.style.display = isOpen ? 'none' : 'block';
+            this.textContent = isOpen ? '+ View Protocol' : '\u2212 Hide Protocol';
+          });
         });
       } catch(err) {
         document.getElementById('roster-loading').style.display = 'none';
-        document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#E74C3C;padding:40px;">Error loading roster. Please try again.</p>';
+        document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#E74C3C;padding:40px;">Error loading roster.</p>';
       }
     }
 
@@ -209,6 +233,42 @@ if (tab === 'warmup') {
         var cls = (j.status === 'At-Risk' || j.status === 'RED') ? 'red-joint' : 'yellow-joint';
         jointBadges += '<span class="roster-joint-badge ' + cls + '">' + jName + asym + '</span>';
       });
+
+      // ===== #13 PROTOCOL EXERCISES =====
+      var protocolRows = '';
+      var protocols = a.protocols || a.exercises || [];
+      if (protocols.length > 0) {
+        protocols.forEach(function(ex) {
+          var exName = ex.exercise || ex.name || 'Exercise';
+          var exJoint = ex.joint || '';
+          var exSets = ex.sets || '';
+          var exReps = ex.reps || '';
+          var exNotes = ex.notes || ex.cue || '';
+          protocolRows += '<div class="protocol-row">';
+          protocolRows += '<div class="protocol-ex-name">' + exName + '</div>';
+          protocolRows += '<div class="protocol-ex-meta">';
+          if (exJoint) protocolRows += '<span class="protocol-joint-tag">' + exJoint + '</span>';
+          if (exSets && exReps) protocolRows += '<span class="protocol-sets">' + exSets + 'x' + exReps + '</span>';
+          if (exNotes) protocolRows += '<span class="protocol-cue">' + exNotes + '</span>';
+          protocolRows += '</div></div>';
+        });
+      } else if (joints.length > 0) {
+        // Fallback: generate generic protocol from priority joints
+        joints.forEach(function(j) {
+          var jName = j.joint || j.name || 'Joint';
+          var isRed = (j.status === 'At-Risk' || j.status === 'RED');
+          protocolRows += '<div class="protocol-row">';
+          protocolRows += '<div class="protocol-ex-name">' + jName + ' Mobility Drill</div>';
+          protocolRows += '<div class="protocol-ex-meta">';
+          protocolRows += '<span class="protocol-joint-tag">' + jName + '</span>';
+          protocolRows += '<span class="protocol-sets">3x10</span>';
+          if (isRed) protocolRows += '<span class="protocol-cue">At-Risk — controlled range only</span>';
+          protocolRows += '</div></div>';
+        });
+      } else {
+        protocolRows = '<p class="protocol-empty">No protocol assigned yet.</p>';
+      }
+
       var html = '<div class="athlete-card">';
       html += '<div class="athlete-name">' + name + '</div>';
       html += '<div class="athlete-meta"><span class="belt-badge ' + beltClass + '">' + beltLabel + '</span></div>';
@@ -218,69 +278,195 @@ if (tab === 'warmup') {
       if (rPct > 0) html += '<div class="tier-segment tier-red" style="width:' + rPct + '%">' + r + '</div>';
       html += '</div></div>';
       if (jointBadges) html += '<div class="priority-joints">' + jointBadges + '</div>';
-      html += '<div class="athlete-detail"><p style="font-size:12px;color:#6B7B8D;">Tap to view full profile (coming soon)</p></div>';
+      html += '<div class="athlete-detail">';
+      html += '<button class="protocol-toggle">+ View Protocol</button>';
+      html += '<div class="protocol-panel" style="display:none;">' + protocolRows + '</div>';
+      html += '</div>';
       html += '</div>';
       return html;
     }
 
-    // ===== WARMUP TAB (RAMP PROTOCOL) =====
-      var ramp = data.rampPlan || { raise: [], activate: [], mobilize: [], potentiate: [] };
-      var priorityJoints = data.priorityJoints || [];
-      var classSize = data.classSize || 0;
-      var phases = [
-        { label: 'R — Raise', duration: '2 min', purpose: 'Elevate heart rate and body temperature', icon: '🔥', colorClass: 'ramp-raise', drills: ramp.raise || [] },
-        { label: 'A — Activate', duration: '3 min', purpose: 'Wake up key muscles for target techniques', icon: '⚡', colorClass: 'ramp-activate', drills: ramp.activate || [] },
-        { label: 'M — Mobilize', duration: '3 min', purpose: 'Joint ROM prep targeting priority areas', icon: '🔄', colorClass: 'ramp-mobilize', drills: ramp.mobilize || [] },
-        { label: 'P — Potentiate', duration: '2 min', purpose: 'Sport-specific movement primer', icon: '🥋', colorClass: 'ramp-potentiate', drills: ramp.potentiate || [] }
-      ];
-      var totalDrills = 0;
-      phases.forEach(function(p) { totalDrills += p.drills.length; });
+    // ===== #11 TRENDS TAB =====
+    function renderTrendsTab() {
+      var container = document.getElementById('trends-content');
+      if (!_rosterData || !(_rosterData.athletes || []).length) {
+        container.innerHTML = '<div class="trends-empty"><div style="font-size:48px;">&#x1F4CA;</div><h2>No roster data yet</h2><p>Trends will appear once athletes complete assessments.</p></div>';
+        return;
+      }
+      var athletes = _rosterData.athletes || [];
 
-      var jointBadgesHtml = '';
-      priorityJoints.forEach(function(pj) {
-        var pct = pj.avgAsymmetry || 0;
-        var sc = pct > 25 ? 'joint-at-risk' : pct > 15 ? 'joint-monitor' : 'joint-optimal';
-        jointBadgesHtml += '<span class="joint-badge ' + sc + '">' + pj.joint + ' <em>' + pct.toFixed(1) + '% avg asym</em></span>';
-      });
-      var jointBar = priorityJoints.length > 0
-        ? '<div class="warmup-joints-bar"><span class="warmup-joints-label">Class Priority Joints:</span>' + jointBadgesHtml + '</div>' : '';
-
-      var phaseCards = '';
-      phases.forEach(function(phase) {
-        var items = '';
-        if (phase.drills.length > 0) {
-          phase.drills.forEach(function(d) {
-            items += '<li class="ramp-drill-item"><div class="ramp-drill-name">' + (d.drill || 'Unnamed drill') + '</div>';
-            items += '<div class="ramp-drill-meta"><span class="ramp-drill-joint">🎯 ' + (d.targetJoint || '') + '</span>';
-            if (d.techniqueName) items += '<span class="ramp-drill-tech">for ' + d.techniqueName + '</span>';
-            items += '</div></li>';
-          });
-        } else {
-          items = '<li class="ramp-drill-empty">No drills matched for this phase — add rows to Technique_Warmups tab.</li>';
-        }
-        phaseCards += '<div class="ramp-phase-card ' + phase.colorClass + '">';
-        phaseCards += '<div class="ramp-phase-header"><div class="ramp-phase-title"><span class="ramp-phase-icon">' + phase.icon + '</span><span class="ramp-phase-label">' + phase.label + '</span></div>';
-        phaseCards += '<div class="ramp-phase-duration">' + phase.duration + '</div></div>';
-        phaseCards += '<div class="ramp-phase-purpose">' + phase.purpose + '</div>';
-        phaseCards += '<ul class="ramp-drill-list">' + items + '</ul></div>';
+      // Aggregate joint data across all athletes
+      var jointMap = {};
+      athletes.forEach(function(a) {
+        (a.priorityJoints || []).forEach(function(j) {
+          var jName = j.joint || j.name || 'Unknown';
+          if (!jointMap[jName]) jointMap[jName] = { total: 0, count: 0, atRisk: 0 };
+          jointMap[jName].total += (j.asymmetry || 0);
+          jointMap[jName].count++;
+          if (j.status === 'At-Risk' || j.status === 'RED' || (j.asymmetry || 0) > 25) jointMap[jName].atRisk++;
+        });
       });
 
-      container.innerHTML = '<div class="warmup-card">'
-        + '<div class="warmup-meta">'
-        + '<span class="warmup-meta-item">👥 Based on <strong>' + classSize + '</strong> athlete' + (classSize !== 1 ? 's' : '') + '</span>'
-        + '<span class="warmup-meta-item">⏱ <strong>10 min</strong> total</span>'
-        + '<span class="warmup-meta-item">📋 <strong>' + totalDrills + '</strong> drill' + (totalDrills !== 1 ? 's' : '') + '</span>'
-        + '<span class="warmup-meta-item">📅 ' + (data.generatedDate || new Date().toLocaleDateString()) + '</span>'
-        + '</div>'
-        + jointBar
-        + '<div class="ramp-phases">' + phaseCards + '</div>'
-        + '<div class="warmup-footer"><button class="btn-regenerate" onclick="generateWarmup()">🔄 Regenerate Warmup</button></div>'
-        + '</div>';
+      var jointNames = Object.keys(jointMap);
+      var avgAsyms = jointNames.map(function(jn) { return jointMap[jn].count > 0 ? +(jointMap[jn].total / jointMap[jn].count).toFixed(1) : 0; });
+      var atRiskCounts = jointNames.map(function(jn) { return jointMap[jn].atRisk; });
+
+      // Athlete readiness scores
+      var sortedAthletes = athletes.slice().sort(function(a, b) {
+        var aScore = (a.greenCount || 0) / Math.max(1, (a.greenCount || 0) + (a.yellowCount || 0) + (a.redCount || 0));
+        var bScore = (b.greenCount || 0) / Math.max(1, (b.greenCount || 0) + (b.yellowCount || 0) + (b.redCount || 0));
+        return bScore - aScore;
+      });
+
+      var totalG = 0, totalY = 0, totalR = 0;
+      athletes.forEach(function(a) { totalG += (a.greenCount || 0); totalY += (a.yellowCount || 0); totalR += (a.redCount || 0); });
+      var grandTotal = totalG + totalY + totalR || 1;
+
+      container.innerHTML =
+        '<div class="trends-wrap">' +
+        '<div class="trends-section">' +
+        '<h2 class="trends-heading">Class Readiness Breakdown</h2>' +
+        '<div class="trends-donut-row">' +
+        '<div class="trends-chart-box"><canvas id="chart-readiness" width="220" height="220"></canvas></div>' +
+        '<div class="trends-legend">' +
+        '<div class="legend-item"><span class="legend-dot" style="background:#28A745;"></span><span class="legend-label">Ready</span><span class="legend-val">' + totalG + ' joints (' + Math.round(totalG/grandTotal*100) + '%)</span></div>' +
+        '<div class="legend-item"><span class="legend-dot" style="background:#FFB347;"></span><span class="legend-label">Monitor</span><span class="legend-val">' + totalY + ' joints (' + Math.round(totalY/grandTotal*100) + '%)</span></div>' +
+        '<div class="legend-item"><span class="legend-dot" style="background:#E74C3C;"></span><span class="legend-label">At-Risk</span><span class="legend-val">' + totalR + ' joints (' + Math.round(totalR/grandTotal*100) + '%)</span></div>' +
+        '</div></div></div>' +
+        (jointNames.length > 0 ?
+        '<div class="trends-section">' +
+        '<h2 class="trends-heading">Avg Asymmetry by Joint</h2>' +
+        '<div class="trends-chart-box trends-chart-wide"><canvas id="chart-joints" height="160"></canvas></div>' +
+        '</div>' : '') +
+        '<div class="trends-section">' +
+        '<h2 class="trends-heading">Athlete Readiness Ranking</h2>' +
+        '<div class="trends-ranking">' +
+        sortedAthletes.map(function(a, i) {
+          var g = a.greenCount || 0, y = a.yellowCount || 0, r = a.redCount || 0;
+          var tot = g + y + r || 1;
+          var pct = Math.round((g / tot) * 100);
+          var medal = i === 0 ? '&#x1F947;' : i === 1 ? '&#x1F948;' : i === 2 ? '&#x1F949;' : '';
+          return '<div class="rank-row">' +
+            '<span class="rank-num">' + (medal || (i+1)) + '</span>' +
+            '<span class="rank-name">' + (a.name || 'Athlete') + '</span>' +
+            '<div class="rank-bar-wrap"><div class="rank-bar" style="width:' + pct + '%;background:' + (pct > 70 ? '#28A745' : pct > 40 ? '#FFB347' : '#E74C3C') + ';"></div></div>' +
+            '<span class="rank-pct">' + pct + '%</span>' +
+            '</div>';
+        }).join('') +
+        '</div></div>' +
+        '</div>';
+
+      // Render donut chart
+      new Chart(document.getElementById('chart-readiness'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Ready', 'Monitor', 'At-Risk'],
+          datasets: [{ data: [totalG, totalY, totalR], backgroundColor: ['#28A745','#FFB347','#E74C3C'], borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: { cutout: '65%', plugins: { legend: { display: false } }, animation: { animateRotate: true } }
+      });
+
+      // Render bar chart if joint data exists
+      if (jointNames.length > 0) {
+        new Chart(document.getElementById('chart-joints'), {
+          type: 'bar',
+          data: {
+            labels: jointNames,
+            datasets: [{
+              label: 'Avg Asymmetry %',
+              data: avgAsyms,
+              backgroundColor: avgAsyms.map(function(v) { return v > 25 ? '#E74C3C' : v > 15 ? '#FFB347' : '#28A745'; }),
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { beginAtZero: true, max: 50, ticks: { callback: function(v) { return v + '%'; } } },
+              y: { ticks: { font: { size: 12 } } }
+            }
+          }
+        });
+      }
     }
+
+    // ===== #12 ALERTS TAB =====
+    function renderAlertsTab() {
+      var container = document.getElementById('alerts-content');
+      if (!_rosterData || !(_rosterData.athletes || []).length) {
+        container.innerHTML = '<div class="alerts-empty"><div style="font-size:48px;">&#x1F514;</div><h2>No alerts</h2><p>All athletes are within normal thresholds.</p></div>';
+        return;
+      }
+      var athletes = _rosterData.athletes || [];
+      var alerts = [];
+
+      athletes.forEach(function(a) {
+        var name = a.name || a.fullName || 'Athlete';
+        (a.priorityJoints || []).forEach(function(j) {
+          var jName = j.joint || j.name || 'Unknown';
+          var asym = j.asymmetry || 0;
+          var isRed = (j.status === 'At-Risk' || j.status === 'RED' || asym > 25);
+          var isYellow = !isRed && (j.status === 'Monitor' || j.status === 'YELLOW' || asym > 15);
+          if (isRed || isYellow) {
+            alerts.push({ athlete: name, joint: jName, asym: asym, level: isRed ? 'critical' : 'monitor', belt: a.belt || 'white' });
+          }
+        });
+      });
+
+      alerts.sort(function(a, b) { return b.asym - a.asym; });
+
+      if (alerts.length === 0) {
+        container.innerHTML = '<div class="alerts-empty"><div style="font-size:48px;">&#x2705;</div><h2>All Clear</h2><p>No athletes are currently flagged above threshold.</p></div>';
+        return;
+      }
+
+      var critCount = alerts.filter(function(a) { return a.level === 'critical'; }).length;
+      var monCount = alerts.filter(function(a) { return a.level === 'monitor'; }).length;
+
+      var html = '<div class="alerts-wrap">';
+      html += '<div class="alerts-summary">';
+      html += '<div class="alert-sum-box critical-box"><div class="alert-sum-num">' + critCount + '</div><div class="alert-sum-label">Critical (>25% asym)</div></div>';
+      html += '<div class="alert-sum-box monitor-box"><div class="alert-sum-num">' + monCount + '</div><div class="alert-sum-label">Monitor (>15% asym)</div></div>';
+      html += '</div>';
+      html += '<div class="alerts-list">';
+
+      alerts.forEach(function(al, idx) {
+        var key = al.athlete + '_' + al.joint;
+        if (_dismissedAlerts[key]) return;
+        var levelClass = al.level === 'critical' ? 'alert-critical' : 'alert-monitor';
+        var levelLabel = al.level === 'critical' ? '&#x26A0; At-Risk' : '&#x1F7E1; Monitor';
+        html += '<div class="alert-row ' + levelClass + '" id="alert-' + idx + '">';
+        html += '<div class="alert-row-main">';
+        html += '<span class="alert-level-badge">' + levelLabel + '</span>';
+        html += '<span class="alert-athlete">' + al.athlete + '</span>';
+        html += '<span class="alert-joint">' + al.joint + '</span>';
+        html += '<span class="alert-asym">' + al.asym.toFixed(1) + '% asymmetry</span>';
+        html += '</div>';
+        html += '<button class="alert-dismiss-btn" onclick="dismissAlert(\'' + key + '\', \'alert-' + idx + '\')" title="Acknowledge">&#x2713; Acknowledge</button>';
+        html += '</div>';
+      });
+
+      html += '</div></div>';
+      container.innerHTML = html;
+    }
+
+    function dismissAlert(key, rowId) {
+      _dismissedAlerts[key] = true;
+      var el = document.getElementById(rowId);
+      if (el) {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.3s';
+        setTimeout(function() { el.style.display = 'none'; }, 300);
+      }
+    }
+
+    // ===== WARMUP TAB (RAMP PROTOCOL) =====
+    // (handled in coach.js via loadWarmupTab)
   </script>
 
-  <!-- Login-specific styles -->
   <style>
+    /* Login */
     .login-page { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; background:#FAF9F6; }
     .login-brand { text-align:center; margin-bottom:32px; }
     .brand-logo { font-family:'Montserrat',sans-serif; font-weight:700; font-size:2rem; color:#008080; letter-spacing:1px; }
@@ -296,6 +482,68 @@ if (tab === 'warmup') {
     .btn-coach-primary:hover { background:#f0a030; }
     .error-msg { color:#E74C3C; font-size:0.9rem; padding:8px 12px; background:#fdecea; border-radius:6px; text-align:center; font-family:'Inter',sans-serif; }
     .help-text { margin-top:16px; font-size:0.8rem; color:#888; text-align:center; font-family:'Inter',sans-serif; }
+
+    /* Alert badge on nav */
+    .alert-count-badge { background:#E74C3C; color:#fff; font-size:11px; font-weight:700; border-radius:99px; padding:1px 7px; margin-left:4px; font-family:'Inter',sans-serif; }
+
+    /* Protocol panel (#13) */
+    .protocol-toggle { background:none; border:1px solid #008080; color:#008080; border-radius:6px; padding:6px 14px; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; margin-top:8px; transition:background 0.15s; }
+    .protocol-toggle:hover { background:#e6f7f7; }
+    .protocol-panel { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
+    .protocol-row { padding:8px 0; border-bottom:1px solid #f0f0f0; }
+    .protocol-row:last-child { border-bottom:none; }
+    .protocol-ex-name { font-family:'Inter',sans-serif; font-weight:600; font-size:0.9rem; color:#36454F; margin-bottom:4px; }
+    .protocol-ex-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+    .protocol-joint-tag { background:#e6f7f7; color:#008080; font-size:0.75rem; border-radius:4px; padding:2px 8px; font-family:'Inter',sans-serif; }
+    .protocol-sets { background:#f5f5f5; color:#36454F; font-size:0.75rem; border-radius:4px; padding:2px 8px; font-family:'Inter',sans-serif; font-weight:600; }
+    .protocol-cue { color:#6B7B8D; font-size:0.75rem; font-style:italic; font-family:'Inter',sans-serif; }
+    .protocol-empty { color:#aaa; font-size:0.85rem; font-style:italic; font-family:'Inter',sans-serif; }
+
+    /* Trends tab (#11) */
+    .trends-wrap { max-width:860px; margin:0 auto; padding:20px 16px 40px; }
+    .trends-section { background:#fff; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    .trends-heading { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1rem; color:#008080; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.5px; }
+    .trends-donut-row { display:flex; align-items:center; gap:32px; flex-wrap:wrap; }
+    .trends-chart-box { flex-shrink:0; }
+    .trends-chart-wide { width:100%; }
+    .trends-legend { display:flex; flex-direction:column; gap:10px; }
+    .legend-item { display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; font-size:0.9rem; }
+    .legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .legend-label { color:#36454F; font-weight:500; min-width:70px; }
+    .legend-val { color:#6B7B8D; }
+    .trends-ranking { display:flex; flex-direction:column; gap:8px; }
+    .rank-row { display:flex; align-items:center; gap:10px; font-family:'Inter',sans-serif; font-size:0.9rem; }
+    .rank-num { width:28px; text-align:center; font-size:1.1rem; flex-shrink:0; }
+    .rank-name { min-width:120px; font-weight:500; color:#36454F; }
+    .rank-bar-wrap { flex:1; background:#f0f0f0; border-radius:99px; height:10px; overflow:hidden; }
+    .rank-bar { height:100%; border-radius:99px; transition:width 0.6s ease; }
+    .rank-pct { width:40px; text-align:right; color:#6B7B8D; font-size:0.82rem; }
+    .trends-empty { text-align:center; padding:60px 20px; color:#6B7B8D; font-family:'Inter',sans-serif; }
+    .trends-empty h2 { font-family:'Montserrat',sans-serif; color:#008080; margin:12px 0 8px; }
+
+    /* Alerts tab (#12) */
+    .alerts-wrap { max-width:860px; margin:0 auto; padding:20px 16px 40px; }
+    .alerts-summary { display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+    .alert-sum-box { flex:1; min-width:140px; border-radius:10px; padding:16px 20px; text-align:center; }
+    .critical-box { background:#fdecea; border:1px solid #f5c6c6; }
+    .monitor-box { background:#fff8ec; border:1px solid #ffe5b4; }
+    .alert-sum-num { font-family:'Montserrat',sans-serif; font-size:2rem; font-weight:800; }
+    .critical-box .alert-sum-num { color:#E74C3C; }
+    .monitor-box .alert-sum-num { color:#B87333; }
+    .alert-sum-label { font-family:'Inter',sans-serif; font-size:0.8rem; color:#6B7B8D; margin-top:4px; }
+    .alerts-list { display:flex; flex-direction:column; gap:10px; }
+    .alert-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-radius:10px; gap:12px; flex-wrap:wrap; transition:opacity 0.3s; }
+    .alert-critical { background:#fdecea; border-left:4px solid #E74C3C; }
+    .alert-monitor { background:#fff8ec; border-left:4px solid #FFB347; }
+    .alert-row-main { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-family:'Inter',sans-serif; }
+    .alert-level-badge { font-size:0.75rem; font-weight:700; border-radius:4px; padding:2px 8px; background:rgba(0,0,0,0.06); color:#36454F; }
+    .alert-athlete { font-weight:600; color:#36454F; font-size:0.9rem; }
+    .alert-joint { color:#008080; font-size:0.85rem; background:#e6f7f7; border-radius:4px; padding:2px 8px; }
+    .alert-asym { color:#6B7B8D; font-size:0.82rem; }
+    .alert-dismiss-btn { background:none; border:1px solid #ccc; border-radius:6px; padding:5px 12px; font-family:'Inter',sans-serif; font-size:0.8rem; color:#6B7B8D; cursor:pointer; white-space:nowrap; transition:background 0.15s, color 0.15s; }
+    .alert-dismiss-btn:hover { background:#e6f7f7; color:#008080; border-color:#008080; }
+    .alerts-empty { text-align:center; padding:60px 20px; color:#6B7B8D; font-family:'Inter',sans-serif; }
+    .alerts-empty h2 { font-family:'Montserrat',sans-serif; color:#008080; margin:12px 0 8px; }
   </style>
 
 </body>
