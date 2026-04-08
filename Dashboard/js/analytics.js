@@ -1,5 +1,5 @@
 // ROMRxBJJ — GA4 Analytics Helper — #36 Sprint 5
-// Replace G-XXXXXXXXXX with your real GA4 Measurement ID
+// Replace G-G6GXJWW0F1 with your real GA4 Measurement ID
 // in the gtag snippet added to each HTML page's <head>.
 
 /**
