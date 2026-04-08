@@ -1,7 +1,7 @@
 // ROMRxBJJ Coach Dashboard API Client
 // Same caching pattern as athlete api.js
 
-const COACH_API_URL = 'https://script.google.com/macros/s/AKfycbyyeMmDsIECs1mRQVaoDX-sAWAvbgIB2e5suY-rSWzqif4PZJgNFYCk9XOhYbcE4wm6Lw/exec';
+const COACH_API_URL = ROMRX_API_URL; // defined in Dashboard/js/config.js — do not hardcode here
 const COACH_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function coachCacheGet(key) {

@@ -1,5 +1,5 @@
 // ROMRxBJJ Dashboard API Client — v2 (Optimized)
-const API_BASE = "https://script.google.com/macros/s/AKfycbyyeMmDsIECs1mRQVaoDX-sAWAvbgIB2e5suY-rSWzqif4PZJgNFYCk9XOhYbcE4wm6Lw/exec";
+const API_BASE = ROMRX_API_URL; // defined in config.js — do not hardcode here
 
 
 // ========================================
