@@ -98,6 +98,7 @@
 
     <!-- Tab: Class Warmup -->
     <div class="tab-content" id="tab-warmup">
+      <button class="print-warmup-btn" onclick="window.print()">&#x1F5A8; Print Warmup Card</button>
       <div id="warmup-content"></div>
     </div>
 
@@ -604,7 +605,24 @@
     .alert-dismiss-btn:hover { background:#e6f7f7; color:#008080; border-color:#008080; }
     .alerts-empty { text-align:center; padding:60px 20px; color:#6B7B8D; font-family:'Inter',sans-serif; }
     .alerts-empty h2 { font-family:'Montserrat',sans-serif; color:#008080; margin:12px 0 8px; }
-  </style>
+  
+      /* #41 Print Warmup Card */
+      .print-warmup-btn {
+        display: inline-block; margin-bottom: 16px; padding: 10px 24px;
+        background: #36454F; color: #fff; border: none; border-radius: 8px;
+        font-family: 'Montserrat', sans-serif; font-weight: 600;
+        font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+      }
+      .print-warmup-btn:hover { background: #2a363f; }
+      @media print {
+        .coach-nav, .coach-header, .tab-content:not(#tab-warmup),
+        .print-warmup-btn, .roster-filters,
+        #tab-roster, #tab-trends, #tab-alerts { display: none !important; }
+        #tab-warmup { display: block !important; }
+        .ramp-card { page-break-inside: avoid; }
+        body { background: #fff; }
+      }
+</style>
 
 
   <script>
