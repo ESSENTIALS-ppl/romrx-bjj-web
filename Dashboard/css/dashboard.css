@@ -110,26 +110,10 @@ label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem;
 .nav-pill.disabled { opacity: 0.55; cursor: not-allowed; }
 .soon-badge { font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 8px; background: var(--copper); color: var(--white); }
 
-/* --- Nav Pill Link Styles (for <a> tabs) --- */
-a.nav-pill {
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border: 2px solid #ddd;
-  border-radius: 24px;
-  background: #fff;
-  color: #36454F;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-a.nav-pill:hover { text-decoration: none; border-color: #008080; }
-a.nav-pill.active { background: #FFB347; border-color: #FFB347; color: #36454F; font-weight: 600; }
+/* --- Nav Pill Link Styles (for <a> tags) --- */
+/* Inherits all base styles from .nav-pill; only anchor-specific overrides needed */
+a.nav-pill { text-decoration: none; }
+a.nav-pill:hover { text-decoration: none; border-color: var(--primary); }
 
 /* --- App Main --- */
 .app-main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
