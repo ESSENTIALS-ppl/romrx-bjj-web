@@ -62,6 +62,21 @@ function renderProfileHeader(data) {
   const container = document.getElementById('profile-header-container');
   const dateStr = data.assessmentDate ? new Date(data.assessmentDate).toLocaleDateString() : 'Unknown Date';
 
+  // #47 Time to Reassess countdown (6 weeks from assessment date)
+  let countdownHtml = '';
+  if (data.assessmentDate) {
+    const assessed  = new Date(data.assessmentDate);
+    const reassessOn = new Date(assessed.getTime() + 42 * 24 * 60 * 60 * 1000); // +42 days
+    const now       = new Date();
+    const diffDays  = Math.ceil((reassessOn - now) / (1000 * 60 * 60 * 24));
+    if (diffDays > 0) {
+      countdownHtml = `<span class="reassess-badge">&#x1F4C5; Reassess in ${diffDays} day${diffDays !== 1 ? 's' : ''}</span>`;
+    } else {
+      const overdueDays = Math.abs(diffDays);
+      countdownHtml = `<span class="reassess-badge reassess-overdue">&#x26A0;&#xFE0F; Reassessment overdue by ${overdueDays} day${overdueDays !== 1 ? 's' : ''}</span>`;
+    }
+  }
+
   let injuryHtml = '';
   if (data.injuries) {
     if (data.injuries.hip && data.injuries.hip !== 'None')
@@ -82,6 +97,7 @@ function renderProfileHeader(data) {
         <div class="profile-badges">
           ${data.dominantSide ? `<span class="stat-badge">Dominant: ${data.dominantSide}</span>` : ''}
           ${data.experience ? `<span class="stat-badge">${data.experience}</span>` : ''}
+          ${countdownHtml}
         </div>
       </div>
       <div class="profile-bottom">
