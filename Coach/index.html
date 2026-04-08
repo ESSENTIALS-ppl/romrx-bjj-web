@@ -85,6 +85,14 @@
           <div class="stat-label">Most Common Issue</div>
         </div>
       </div>
+      <!-- #39 Roster filter pills -->
+      <div class="roster-filters" id="roster-filters">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="white">White Belt</button>
+        <button class="filter-pill" data-filter="blue">Blue Belt</button>
+        <button class="filter-pill at-risk" data-filter="at-risk">&#x1F534; At-Risk</button>
+        <button class="filter-pill monitor" data-filter="monitor">&#x1F7E1; Monitor</button>
+      </div>
       <div id="athlete-grid" class="athlete-grid"></div>
     </div>
 
@@ -259,6 +267,11 @@
             lmContainer.appendChild(lmBtn);
           }
         }
+        // #39 Re-apply active filter after render
+        if (window.applyRosterFilter) {
+          const activeFilter = document.querySelector('.filter-pill.active');
+          if (activeFilter) window.applyRosterFilter(activeFilter.dataset.filter);
+        }
       } catch(err) {
         document.getElementById('roster-loading').style.display = 'none';
         document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#E74C3C;padding:40px;">Error loading roster.</p>';
@@ -316,7 +329,7 @@
         protocolRows = '<p class="protocol-empty">No protocol assigned yet.</p>';
       }
 
-      var html = '<div class="athlete-card">';
+      var html = '<div class="athlete-card" data-belt="' + (a.currentBelt||'white') + '" data-flags="' + (a.priorityJoints||[]).length + '" data-max-asym="' + ((a.priorityJoints&&a.priorityJoints[0])?a.priorityJoints[0].asymmetry:0) + '">';
       html += '<div class="athlete-name">' + name + '</div>';
       html += '<div class="athlete-meta"><span class="belt-badge ' + beltClass + '">' + beltLabel + '</span></div>';
       html += '<div class="tier-bar-container"><div class="tier-bar-label">Technique Readiness</div><div class="tier-bar">';
@@ -592,6 +605,38 @@
     .alerts-empty { text-align:center; padding:60px 20px; color:#6B7B8D; font-family:'Inter',sans-serif; }
     .alerts-empty h2 { font-family:'Montserrat',sans-serif; color:#008080; margin:12px 0 8px; }
   </style>
+
+
+  <script>
+    // #39 Roster client-side filtering
+    (function() {
+      let _activeFilter = 'all';
+
+      document.getElementById('roster-filters').addEventListener('click', function(e) {
+        const pill = e.target.closest('.filter-pill');
+        if (!pill) return;
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        _activeFilter = pill.dataset.filter;
+        applyRosterFilter(_activeFilter);
+      });
+
+      window.applyRosterFilter = function(filter) {
+        const cards = document.querySelectorAll('#athlete-grid .athlete-card');
+        cards.forEach(card => {
+          const belt  = (card.dataset.belt  || '').toLowerCase();
+          const flags = parseInt(card.dataset.flags || '0', 10);
+          const maxAsym = parseFloat(card.dataset.maxAsym || '0');
+          let show = true;
+          if (filter === 'white')   show = belt.includes('white');
+          if (filter === 'blue')    show = belt.includes('blue');
+          if (filter === 'at-risk') show = maxAsym >= 25;
+          if (filter === 'monitor') show = maxAsym >= 15 && maxAsym < 25;
+          card.style.display = show ? '' : 'none';
+        });
+      };
+    })();
+  </script>
 
 </body>
 </html>
