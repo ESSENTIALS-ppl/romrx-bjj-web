@@ -199,26 +199,18 @@
             box-shadow: 0 12px 32px rgba(0,128,128,0.15);
         }
         .preview-img-box {
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, #e6f4f4 0%, #d0ecec 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            overflow: hidden;
             border-bottom: 2px solid var(--teal);
+            background: #e6f4f4;
+            display: block;
         }
-        .preview-img-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
+        .preview-img-box img {
+            width: 100%;
+            display: block;
+            transition: transform 0.4s ease;
         }
-        .preview-img-label {
-            font-family: 'Montserrat', 'Inter', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--teal);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+        .preview-card:hover .preview-img-box img {
+            transform: scale(1.02);
         }
         .preview-caption {
             padding: 18px 20px;
@@ -626,8 +618,7 @@
             <div class="preview-grid">
                 <div class="preview-card">
                     <div class="preview-img-box">
-                        <div class="preview-img-icon">&#x1F6F8;</div>
-                        <div class="preview-img-label">Screenshot coming soon</div>
+                        <img src="images/MyBodyDashboard.jpg" alt="My Body dashboard showing radar chart of ROM scores across 14 joints" loading="lazy">
                     </div>
                     <div class="preview-caption">
                         <h3>My Body</h3>
@@ -636,8 +627,7 @@
                 </div>
                 <div class="preview-card">
                     <div class="preview-img-box">
-                        <div class="preview-img-icon">&#x1F9E9;</div>
-                        <div class="preview-img-label">Screenshot coming soon</div>
+                        <img src="images/MyGameDashboard.jpg" alt="My Game dashboard showing technique flow builder with GREEN, YELLOW, RED readiness ratings" loading="lazy">
                     </div>
                     <div class="preview-caption">
                         <h3>My Game</h3>
@@ -646,8 +636,7 @@
                 </div>
                 <div class="preview-card">
                     <div class="preview-img-box">
-                        <div class="preview-img-icon">&#x1F4CB;</div>
-                        <div class="preview-img-label">Screenshot coming soon</div>
+                        <img src="images/MyProtocolDashboard.jpg" alt="My Protocol dashboard showing priority joint exercises, stretches, and weekly plan" loading="lazy">
                     </div>
                     <div class="preview-caption">
                         <h3>My Protocol</h3>
