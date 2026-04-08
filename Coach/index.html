@@ -180,6 +180,7 @@
       });
       loadRoster(session.email);
       loadCoachNotes(session.email);
+      loadAlertDismissals(session.email); // #43
     }
 
     // ===== ROSTER TAB =====
@@ -566,14 +567,33 @@
       container.innerHTML = html;
     }
 
+    // #43 Load persisted dismissals from GAS on init
+    async function loadAlertDismissals(coachEmail) {
+      try {
+        const res = await coachApiCall({ action: 'getAlertDismissals', coachEmail });
+        if (res.success && res.dismissals) {
+          res.dismissals.forEach(d => {
+            _dismissedAlerts[d.athleteEmail + '::' + d.joint] = true;
+          });
+        }
+      } catch(e) { /* fail silently */ }
+    }
+
     function dismissAlert(key, rowId) {
       _dismissedAlerts[key] = true;
-      var el = document.getElementById(rowId);
+      const el = document.getElementById(rowId);
       if (el) {
         el.style.opacity = '0';
         el.style.transition = 'opacity 0.3s';
-        setTimeout(function() { el.style.display = 'none'; }, 300);
+        setTimeout(() => { el.style.display = 'none'; }, 300);
       }
+      // #43 Persist to GAS
+      const coachEmail = (JSON.parse(sessionStorage.getItem('romrxbjj_coach') || '{}').email || '');
+      if (!coachEmail) return;
+      const parts = key.split('::');
+      const athleteEmail = parts[0] || '';
+      const joint        = parts[1] || '';
+      coachApiCall({ action: 'dismissAlert', coachEmail, athleteEmail, joint }).catch(() => {});
     }
 
     // ===== WARMUP TAB (RAMP PROTOCOL) =====
