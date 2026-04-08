@@ -137,6 +137,9 @@
     var _trendsLoaded = false;
     var _alertsLoaded = false;
     var _dismissedAlerts = {};
+    var _currentPage = 1;        // #33 pagination
+    var _currentCoachEmail = ''; // #33 pagination
+    var _hasMore = false;        // #33 pagination
 
     function showDashboard(session) {
       document.getElementById('login-view').style.display = 'none';
@@ -161,22 +164,27 @@
     }
 
     // ===== ROSTER TAB =====
-    async function loadRoster(coachEmail) {
+    async function loadRoster(coachEmail, page) {
+      page = page || 1;
+      _currentCoachEmail = coachEmail;
+      _currentPage = page;
+      if (page === 1) document.getElementById('roster-loading').style.display = 'block';
       try {
-        var data = await apiGetRoster(coachEmail);
+        var data = await apiGetRoster(coachEmail, page, 50);
         _rosterData = data;
+        _hasMore = data.hasMore || false;
         document.getElementById('roster-loading').style.display = 'none';
         if (!data.success && data.success !== undefined) {
           document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">Unable to load roster. ' + (data.error || '') + '</p>';
           return;
         }
         var athletes = data.athletes || [];
-        if (athletes.length === 0) {
+        if (page === 1 && athletes.length === 0) {
           document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#6B7B8D;padding:40px;">No athletes found.</p>';
           return;
         }
         document.getElementById('roster-overview').style.display = 'flex';
-        document.getElementById('stat-total').textContent = athletes.length;
+        document.getElementById('stat-total').textContent = data.total || athletes.length;
         var totalFlags = 0, jointCounts = {};
         athletes.forEach(function(a) {
           totalFlags += (a.priorityJoints || []).length;
@@ -204,7 +212,12 @@
         }
 
         var grid = document.getElementById('athlete-grid');
-        grid.innerHTML = '';
+        // #33: append on pages > 1, replace on first page
+        if (page === 1) {
+          grid.innerHTML = '';
+          var lmc = document.getElementById('load-more-container');
+          if (lmc) lmc.innerHTML = '';
+        }
         athletes.forEach(function(a) { grid.innerHTML += renderAthleteCard(a); });
         grid.querySelectorAll('.athlete-card').forEach(function(card) {
           card.addEventListener('click', function(e) {
@@ -221,6 +234,22 @@
             this.textContent = isOpen ? '+ View Protocol' : '\u2212 Hide Protocol';
           });
         });
+        // #33 Load More button
+        var lmContainer = document.getElementById('load-more-container');
+        if (lmContainer) {
+          lmContainer.innerHTML = '';
+          if (_hasMore) {
+            var lmBtn = document.createElement('button');
+            lmBtn.className = 'load-more-btn';
+            lmBtn.textContent = 'Load More Athletes';
+            lmBtn.addEventListener('click', function() {
+              lmBtn.disabled = true;
+              lmBtn.textContent = 'Loading\u2026';
+              loadRoster(_currentCoachEmail, _currentPage + 1);
+            });
+            lmContainer.appendChild(lmBtn);
+          }
+        }
       } catch(err) {
         document.getElementById('roster-loading').style.display = 'none';
         document.getElementById('athlete-grid').innerHTML = '<p style="text-align:center;color:#E74C3C;padding:40px;">Error loading roster.</p>';

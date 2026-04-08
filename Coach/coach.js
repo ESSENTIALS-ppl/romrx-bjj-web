@@ -37,11 +37,19 @@ async function apiCoachLogin(email, code) {
   return await coachApiCall({ action: 'coachLogin', email: email, code: code });
 }
 
-async function apiGetRoster(coachEmail) {
-  var cacheKey = 'romrxbjj_coach_roster';
+// #33 Paginated roster — page/pageSize supported, first page cached
+async function apiGetRoster(coachEmail, page, pageSize) {
+  page     = page     || 1;
+  pageSize = pageSize || 50;
+  var cacheKey = 'romrxbjj_coach_roster_p' + page;
   var cached = coachCacheGet(cacheKey);
   if (cached) return cached;
-  var result = await coachApiCall({ action: 'coachRoster', coachEmail: coachEmail });
+  var result = await coachApiCall({
+    action:     'coachRoster',
+    coachEmail:  coachEmail,
+    page:        page,
+    pageSize:    pageSize
+  });
   if (result.success !== false) coachCacheSet(cacheKey, result);
   return result;
 }
