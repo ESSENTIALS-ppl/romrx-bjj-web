@@ -351,8 +351,16 @@
     }
 
     // ===== #11 TRENDS TAB =====
-    function renderTrendsTab() {
-      var container = document.getElementById('trends-content');
+    async function renderTrendsTab() {
+      const container = document.getElementById('trends-content');
+      const coachEmail = (JSON.parse(sessionStorage.getItem('romrxbjj_coach')||'{}').email || '');
+
+      // #42 Load time-series data
+      let trendsData = null;
+      try {
+        const tr = await coachApiCall({ action: 'coachTrends', coachEmail });
+        if (tr.success) trendsData = tr;
+      } catch(e) { /* non-blocking */ }
       if (!_rosterData || !(_rosterData.athletes || []).length) {
         container.innerHTML = '<div class="trends-empty"><div style="font-size:48px;">&#x1F4CA;</div><h2>No roster data yet</h2><p>Trends will appear once athletes complete assessments.</p></div>';
         return;
@@ -387,7 +395,18 @@
       var grandTotal = totalG + totalY + totalR || 1;
 
       container.innerHTML =
-        '<div class="trends-wrap">' +
+        (() => {
+        // #42 Time-series block
+        if (trendsData && trendsData.series && trendsData.series.length > 0) {
+          const seriesBlock = trendsData.hasEnoughData
+            ? '<div class="trends-section"><h2 class="trends-heading">Class Progress Over Time</h2><div class="trends-chart-box trends-chart-wide"><canvas id="chart-trends-line" height="160"></canvas></div></div>'
+            : '<div class="trends-section"><div class="trends-empty" style="padding:24px;"><div style="font-size:32px;">&#x1F4C5;</div><h2 style="font-size:1rem;">Waiting on Reassessments</h2><p style="font-size:0.88rem;">Time-based progress will appear once athletes complete a second assessment.</p></div></div>';
+          container.innerHTML = '<div class="trends-wrap">' + seriesBlock;
+        } else {
+          container.innerHTML = '<div class="trends-wrap">';
+        }
+      })();
+      container.innerHTML +=
         '<div class="trends-section">' +
         '<h2 class="trends-heading">Class Readiness Breakdown</h2>' +
         '<div class="trends-donut-row">' +
@@ -455,6 +474,38 @@
       }
     }
 
+
+      // #42 Render time-series line chart if enough data
+      if (trendsData && trendsData.hasEnoughData) {
+        const labels  = trendsData.series.map(s => s.date);
+        const greens  = trendsData.series.map(s => s.green);
+        const yellows = trendsData.series.map(s => s.yellow);
+        const reds    = trendsData.series.map(s => s.red);
+        setTimeout(() => {
+          const lineEl = document.getElementById('chart-trends-line');
+          if (lineEl) {
+            new Chart(lineEl, {
+              type: 'line',
+              data: {
+                labels,
+                datasets: [
+                  { label: 'Green (Ready)',    data: greens,  borderColor: '#28A745', backgroundColor: 'rgba(40,167,69,0.08)',  tension: 0.3, fill: true, pointRadius: 4 },
+                  { label: 'Yellow (Monitor)', data: yellows, borderColor: '#FFB347', backgroundColor: 'rgba(255,179,71,0.08)', tension: 0.3, fill: true, pointRadius: 4 },
+                  { label: 'Red (At-Risk)',    data: reds,    borderColor: '#E74C3C', backgroundColor: 'rgba(231,76,60,0.08)',  tension: 0.3, fill: true, pointRadius: 4 }
+                ]
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                  y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                  x: { ticks: { maxRotation: 30 } }
+                }
+              }
+            });
+          }
+        }, 80);
+      }
     // ===== #12 ALERTS TAB =====
     function renderAlertsTab() {
       var container = document.getElementById('alerts-content');
