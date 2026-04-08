@@ -33,6 +33,10 @@ async function initProtocol() {
     await loadCheckIns(session.email); // #46 load today's check-ins before render
     renderProtocol();
     wireCheckIns(session.email);      // #46 wire checkbox events
+
+    // #27 Auto-expand first joint accordion on load
+    const firstAccordion = document.querySelector('.joint-section-header');
+    if (firstAccordion) firstAccordion.click();
   } catch (error) {
     console.error('Protocol load error:', error);
     renderError('Failed to load protocol. Please refresh the page.');
