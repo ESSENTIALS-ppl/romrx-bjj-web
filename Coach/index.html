@@ -179,6 +179,7 @@
         });
       });
       loadRoster(session.email);
+      loadCoachNotes(session.email);
     }
 
     // ===== ROSTER TAB =====
@@ -341,6 +342,8 @@
       if (jointBadges) html += '<div class="priority-joints">' + jointBadges + '</div>';
       html += '<div class="athlete-detail">';
       html += '<button class="protocol-toggle">+ View Protocol</button>';
+      html += '<div class="coach-note-area"><textarea class="coach-note-input" data-athlete="' + (a.email||'') + '" placeholder="Coach notes for ' + (a.name||'Athlete').split(' ')[0] + '..."></textarea>';
+      html += '<button class="coach-note-save" data-athlete="' + (a.email||'') + '">Save Note</button></div>';
       html += '<div class="protocol-panel" style="display:none;">' + protocolRows + '</div>';
       html += '</div>';
       html += '</div>';
@@ -622,6 +625,23 @@
         .ramp-card { page-break-inside: avoid; }
         body { background: #fff; }
       }
+
+      /* #40 Coach notes */
+      .coach-note-area { margin-top: 12px; }
+      .coach-note-area textarea {
+        width: 100%; box-sizing: border-box; min-height: 72px;
+        padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px;
+        font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #36454F;
+        resize: vertical; transition: border-color 0.2s;
+      }
+      .coach-note-area textarea:focus { outline: none; border-color: #008080; }
+      .coach-note-save {
+        margin-top: 6px; padding: 6px 16px; background: #008080; color: #fff;
+        border: none; border-radius: 6px; font-family: 'Inter', sans-serif;
+        font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      }
+      .coach-note-save:hover { background: #006666; }
+      .coach-note-save.saved { background: #27ae60; }
 </style>
 
 
@@ -654,6 +674,47 @@
         });
       };
     })();
+  </script>
+
+
+  <script>
+    // #40 Coach notes — load on roster init, save on button click
+    let _coachNotes = {};
+
+    async function loadCoachNotes(coachEmail) {
+      try {
+        const res = await coachApiCall({ action: 'getCoachNotes', coachEmail });
+        if (res.success) {
+          _coachNotes = res.notes || {};
+          applyNotesToCards();
+        }
+      } catch(e) { /* fail silently */ }
+    }
+
+    function applyNotesToCards() {
+      document.querySelectorAll('.coach-note-input').forEach(ta => {
+        const email = ta.dataset.athlete;
+        if (_coachNotes[email]) ta.value = _coachNotes[email];
+      });
+    }
+
+    document.addEventListener('click', async function(e) {
+      const btn = e.target.closest('.coach-note-save');
+      if (!btn) return;
+      const athleteEmail = btn.dataset.athlete;
+      const ta = btn.closest('.coach-note-area').querySelector('textarea');
+      const note = ta.value.trim();
+      const coachEmail = (JSON.parse(sessionStorage.getItem('romrxbjj_coach')||'{}').email || '');
+      btn.textContent = 'Saving…'; btn.disabled = true;
+      try {
+        await coachApiCall({ action: 'saveCoachNote', coachEmail, athleteEmail, note });
+        _coachNotes[athleteEmail] = note;
+        btn.textContent = 'Saved ✓'; btn.classList.add('saved');
+        setTimeout(() => { btn.textContent = 'Save Note'; btn.classList.remove('saved'); btn.disabled = false; }, 1800);
+      } catch(err) {
+        btn.textContent = 'Error'; btn.disabled = false;
+      }
+    });
   </script>
 
 </body>
