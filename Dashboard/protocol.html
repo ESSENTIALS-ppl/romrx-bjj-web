@@ -16,6 +16,50 @@
     gtag('js', new Date());
     gtag('config', 'G-G6GXJWW0F1');
   </script>
+  <style>
+    /* #44 Video link */
+    .rx-video-link {
+      display: inline-block; margin-left: 12px; padding: 3px 10px;
+      background: #e74c3c; color: #fff; border-radius: 4px; font-size: 0.78rem;
+      font-weight: 600; text-decoration: none; vertical-align: middle;
+      transition: background 0.2s;
+    }
+    .rx-video-link:hover { background: #c0392b; text-decoration: none; }
+
+    /* #46 Check-in */
+    .rx-checkin-label {
+      display: flex; align-items: center; gap: 10px; margin-top: 12px;
+      cursor: pointer; user-select: none;
+    }
+    .rx-checkin-box { width: 18px; height: 18px; accent-color: #28A745; cursor: pointer; flex-shrink: 0; }
+    .rx-checkin-text { font-size: 0.85rem; color: #5a6a75; font-family: 'Inter', sans-serif; }
+    .rx-checkin-box:checked + .rx-checkin-text { color: #28A745; font-weight: 600; }
+
+    /* #46 Streak badge */
+    .streak-badge {
+      display: inline-block; margin-top: 8px; padding: 6px 16px;
+      background: #fff3cd; border: 1px solid #ffc107; border-radius: 20px;
+      font-size: 0.85rem; font-weight: 600; color: #856404;
+    }
+
+    /* #45 Print button */
+    .print-protocol-btn {
+      display: inline-block; margin: 16px 0; padding: 10px 24px;
+      background: #36454F; color: #fff; border: none; border-radius: 8px;
+      font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .print-protocol-btn:hover { background: #2a363f; }
+
+    /* #45 Print CSS */
+    @media print {
+      .app-header, .app-nav, .app-footer, .print-protocol-btn,
+      .rx-checkin-label, .rx-video-link, #refresh-btn { display: none !important; }
+      .rx-card { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 12px; }
+      .protocol-hero { padding: 12px 0; }
+      body { background: #fff; font-size: 12pt; }
+    }
+  </style>
 </head>
 <body>
   <header class="app-header">
@@ -38,6 +82,9 @@
   </nav>
 
   <main class="app-main">
+    <div style="padding: 12px 20px 0;">
+      <button class="print-protocol-btn" onclick="window.print()">&#x1F5A8; Print / Save PDF</button>
+    </div>
     <div id="app">
       <div class="protocol-loading">
         <div class="spinner"></div>

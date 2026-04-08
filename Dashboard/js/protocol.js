@@ -1,7 +1,9 @@
 // ROMRxBJJ Protocol Renderer v1
 // Renders the My Protocol tab — top 3 priority joints with exercises/stretches/foam rolls
 
-let protocolData = null;
+let protocolData     = null;
+let _checkedInToday  = new Set(); // #46 exercise check-in keys for today
+let _weekDaysCompleted = 0;       // #46 streak
 
 async function initProtocol() {
   const session = requireAuth();
@@ -28,7 +30,9 @@ async function initProtocol() {
     }
 
     protocolData = data;
+    await loadCheckIns(session.email); // #46 load today's check-ins before render
     renderProtocol();
+    wireCheckIns(session.email);      // #46 wire checkbox events
   } catch (error) {
     console.error('Protocol load error:', error);
     renderError('Failed to load protocol. Please refresh the page.');
@@ -186,7 +190,7 @@ function renderJointBlock(priority) {
   if (priority.exercises && priority.exercises.length > 0) {
     html += `<div class="rx-section-title">💪 Exercises</div>`;
     priority.exercises.forEach(ex => {
-      html += renderExerciseCard(ex, 'exercise');
+      html += renderExerciseCard(ex, 'exercise', priority.joint);
     });
   }
 
@@ -194,7 +198,7 @@ function renderJointBlock(priority) {
   if (priority.stretches && priority.stretches.length > 0) {
     html += `<div class="rx-section-title">🧘 Stretches</div>`;
     priority.stretches.forEach(ex => {
-      html += renderExerciseCard(ex, 'stretch');
+      html += renderExerciseCard(ex, 'stretch', priority.joint);
     });
   }
 
@@ -202,7 +206,7 @@ function renderJointBlock(priority) {
   if (priority.foamRolls && priority.foamRolls.length > 0) {
     html += `<div class="rx-section-title">🔄 Foam Roll</div>`;
     priority.foamRolls.forEach(ex => {
-      html += renderExerciseCard(ex, 'foam-roll');
+      html += renderExerciseCard(ex, 'foam-roll', priority.joint);
     });
   }
 
@@ -214,13 +218,25 @@ function renderJointBlock(priority) {
   return html;
 }
 
-function renderExerciseCard(exercise, cardType) {
-  const steps = exercise.how.split('|').map(s => s.trim()).filter(s => s.length > 0);
+function renderExerciseCard(exercise, cardType, joint) {
+  const steps      = exercise.how.split('|').map(s => s.trim()).filter(s => s.length > 0);
+  const exKey      = (exercise.name || '').toLowerCase().replace(/\s+/g, '_');
+  const isChecked  = _checkedInToday.has(exKey);
+  const videoLink  = exercise.video_url
+    ? `<a href="${exercise.video_url}" target="_blank" rel="noopener" class="rx-video-link">&#x25B6; Watch Demo</a>`
+    : '';
+  const checkbox   = `
+    <label class="rx-checkin-label">
+      <input type="checkbox" class="rx-checkin-box" data-exercise="${exKey}" data-joint="${joint || ''}"
+        data-name="${exercise.name}" ${isChecked ? 'checked' : ''}>
+      <span class="rx-checkin-text">${isChecked ? 'Done today &#x2713;' : 'Mark as done today'}</span>
+    </label>`;
 
   return `
     <div class="rx-card rx-card-${cardType}">
       <div class="rx-card-header">
         <strong>${exercise.name}</strong>
+        ${videoLink}
       </div>
       <div class="rx-card-body">
         <div class="rx-row">
@@ -239,11 +255,70 @@ function renderExerciseCard(exercise, cardType) {
           <span class="rx-label">Equipment:</span> ${exercise.equipment}
         </div>
         <div class="rx-context">
-          <em>🥋 ${exercise.bjjContext}</em>
+          <em>&#x1F94B; ${exercise.bjjContext}</em>
         </div>
+        ${checkbox}
       </div>
     </div>
   `;
+}
+
+
+// #46 Load today's exercise check-ins from GAS
+async function loadCheckIns(email) {
+  try {
+    const res = await apiCall({ action: 'getCheckIns', email });
+    if (res.success) {
+      const today = new Date().toISOString().slice(0, 10);
+      _checkedInToday.clear();
+      (res.checkIns || []).forEach(ci => {
+        if (ci.date === today) {
+          _checkedInToday.add((ci.exerciseName || '').toLowerCase().replace(/\s+/g, '_'));
+        }
+      });
+      _weekDaysCompleted = res.weekDaysCompleted || 0;
+    }
+  } catch(e) { /* fail silently */ }
+}
+
+function wireCheckIns(email) {
+  document.querySelectorAll('.rx-checkin-box').forEach(cb => {
+    cb.addEventListener('change', async function() {
+      const exKey  = this.dataset.exercise;
+      const joint  = this.dataset.joint;
+      const name   = this.dataset.name;
+      const label  = this.closest('.rx-checkin-label').querySelector('.rx-checkin-text');
+      const today  = new Date().toISOString().slice(0, 10);
+      try {
+        const res = await apiCall({ action: 'logCheckIn', email, date: today, joint, exerciseName: name });
+        if (res.checked) {
+          _checkedInToday.add(exKey);
+          this.checked = true;
+          label.innerHTML = 'Done today &#x2713;';
+          trackEvent('protocol_checkin', { joint, exercise: name });
+        } else {
+          _checkedInToday.delete(exKey);
+          this.checked = false;
+          label.textContent = 'Mark as done today';
+        }
+        renderStreakBadge();
+      } catch(e) { this.checked = !this.checked; }
+    });
+  });
+  renderStreakBadge();
+}
+
+function renderStreakBadge() {
+  const existing = document.getElementById('streak-badge');
+  if (existing) existing.remove();
+  if (_weekDaysCompleted === 0) return;
+  const hero = document.querySelector('.protocol-hero');
+  if (!hero) return;
+  const badge = document.createElement('div');
+  badge.id = 'streak-badge';
+  badge.className = 'streak-badge';
+  badge.innerHTML = '&#x1F525; ' + _weekDaysCompleted + ' day' + (_weekDaysCompleted !== 1 ? 's' : '') + ' this week';
+  hero.appendChild(badge);
 }
 
 // Initialize on page load
