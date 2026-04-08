@@ -42,6 +42,14 @@
       .forgot-msg.success { background: #e6f7f7; color: #006666; display: block; }
       .forgot-msg.error { background: #fdecea; color: #c0392b; display: block; }
     </style>
+  <!-- GA4 — #36 Replace G-XXXXXXXXXX with your real Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
 </head>
 <body>
   <main class="login-page">
@@ -72,12 +80,14 @@
     </div>
   </main>
   <footer class="login-footer">&copy; 2026 ROMRx LLC</footer>
+  <script src="js/analytics.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script>
     (function () {
       var session = getSession();
-      if (session) { window.location.href = 'game.html'; return; }
+      if (session) { trackEvent('login_success', { email: email });
+          window.location.href = 'game.html'; return; }
 
       var form = document.getElementById('login-form');
       var btn = document.getElementById('login-btn');

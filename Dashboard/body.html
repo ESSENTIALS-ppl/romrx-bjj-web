@@ -7,6 +7,14 @@
   <link rel="stylesheet" href="css/dashboard.css">
   <!-- ADD THIS: Chart.js for radar chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- GA4 — #36 Replace G-XXXXXXXXXX with your real Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
 </head>
 <body>
 
@@ -111,6 +119,7 @@
   <div id="toast" class="toast" style="display: none;"></div>
 
   <!-- Scripts -->
+  <script src="js/analytics.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/body.js"></script>

@@ -232,6 +232,14 @@
             .promo-input-row input { width: 100%; }
         }
     </style>
+  <!-- GA4 — #36 Replace G-XXXXXXXXXX with your real Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
 </head>
 <body style="background: #FAF9F6; min-height: 100vh; margin: 0;">
 
@@ -295,7 +303,8 @@
         </div>
     </div>
 
-    <script src="js/config.js"></script>
+    <script src="js/analytics.js"></script>
+  <script src="js/config.js"></script>
   <script src="js/api.js"></script>
     <script>
         var STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/aFaeVd4js7h52aH6nS0gw00';
@@ -371,5 +380,14 @@
 
         })();
     </script>
+  <script>
+    // #36 GA4: subscribe + stripe events
+    document.querySelectorAll('a[href*="stripe"], button.subscribe-btn, .subscribe-cta, a.subscribe-cta').forEach(function(el) {
+      el.addEventListener('click', function() {
+        trackEvent('subscribe_click');
+        setTimeout(function() { trackEvent('stripe_redirect'); }, 300);
+      });
+    });
+  </script>
 </body>
 </html>
