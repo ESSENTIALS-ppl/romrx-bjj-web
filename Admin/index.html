@@ -141,7 +141,7 @@
   <!-- ADMIN DASHBOARD -->
   <div id="admin-view">
     <header class="admin-header">
-      <div class="admin-logo">ROMRxBJJ&#8482; &mdash; Admin</div>
+      <div class="admin-logo">ROMRxBJJ&#8482; - Admin</div>
       <button class="admin-logout" id="admin-logout-btn">Log Out</button>
     </header>
 
@@ -154,9 +154,9 @@
     <!-- Athletes Tab -->
     <div class="tab-pane active" id="pane-athletes">
       <div class="stats-bar">
-        <div class="stat-chip"><div class="val" id="stat-total">&#8212;</div><div class="lbl">Total Athletes</div></div>
-        <div class="stat-chip"><div class="val" id="stat-active">&#8212;</div><div class="lbl">Active</div></div>
-        <div class="stat-chip"><div class="val" id="stat-disabled">&#8212;</div><div class="lbl">Disabled</div></div>
+        <div class="stat-chip"><div class="val" id="stat-total">-</div><div class="lbl">Total Athletes</div></div>
+        <div class="stat-chip"><div class="val" id="stat-active">-</div><div class="lbl">Active</div></div>
+        <div class="stat-chip"><div class="val" id="stat-disabled">-</div><div class="lbl">Disabled</div></div>
       </div>
       <div class="search-row">
         <input type="text" id="athlete-search" class="search-input" placeholder="Search by name or email&hellip;">
@@ -198,7 +198,7 @@
         <h2>Bulk CSV Import</h2>
         <p class="bulk-hint">
           Paste CSV data below. Columns: <code>Email, Full_Name, Belt, Gym, Coach</code><br>
-          Include or omit the header row &mdash; it&rsquo;s detected automatically. Duplicate emails are skipped.
+          Include or omit the header row - it&rsquo;s detected automatically. Duplicate emails are skipped.
           Welcome emails are sent automatically per row.
         </p>
         <textarea id="bulk-csv" class="bulk-textarea" placeholder="john@example.com,John Smith,white,Alpha BJJ,coach@alpha.com&#10;jane@example.com,Jane Doe,blue,Alpha BJJ,coach@alpha.com"></textarea>
@@ -324,9 +324,9 @@
           + '<td>' + a.email + '</td>'
           + '<td>' + a.name + '</td>'
           + '<td>' + (a.belt || 'white') + '</td>'
-          + '<td><span class="code-mono">' + (a.code || '&mdash;') + '</span></td>'
+          + '<td><span class="code-mono">' + (a.code || '-') + '</span></td>'
           + '<td><span class="badge-enabled ' + (enabled ? 'badge-y' : 'badge-n') + '">' + (enabled ? 'Active' : 'Disabled') + '</span></td>'
-          + '<td>' + (a.lastLogin ? new Date(a.lastLogin).toLocaleDateString() : '&mdash;') + '</td>'
+          + '<td>' + (a.lastLogin ? new Date(a.lastLogin).toLocaleDateString() : '-') + '</td>'
           + '<td>'
           + '<button class="action-btn btn-resend" onclick="resendCode(\'' + a.email + '\')">Resend Code</button>'
           + (enabled

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ROMRxBJJ™ Coach Dashboard — View your athlete roster, ROM readiness scores, RAMP warmup protocols, and asymmetry alerts across your full team.">
+    <meta name="description" content="ROMRxBJJ™ Coach Dashboard, View your athlete roster, ROM readiness scores, RAMP warmup protocols, and asymmetry alerts across your full team.">
     <meta property="og:title" content="ROMRxBJJ™ | Coach Dashboard">
     <meta property="og:description" content="Run smarter classes. Know every athlete’s mobility before they step on the mat.">
     <meta property="og:url" content="https://romrxbjj.com/coach">
@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="coach.css">
-  <!-- GA4 — #36 Replace G-G6GXJWW0F1 with your real Measurement ID -->
+  <!-- GA4, #36 Replace G-G6GXJWW0F1 with your real Measurement ID -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6GXJWW0F1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -73,15 +73,15 @@
       <div id="roster-loading" class="loading-spinner">Loading athlete roster...</div>
       <div id="roster-overview" class="class-overview" style="display:none;">
         <div class="overview-stat">
-          <div class="stat-value" id="stat-total">&mdash;</div>
+          <div class="stat-value" id="stat-total">-</div>
           <div class="stat-label">Total Athletes</div>
         </div>
         <div class="overview-stat">
-          <div class="stat-value" id="stat-avg-flags">&mdash;</div>
+          <div class="stat-value" id="stat-avg-flags">-</div>
           <div class="stat-label">Avg Flagged Joints</div>
         </div>
         <div class="overview-stat">
-          <div class="stat-value" id="stat-common">&mdash;</div>
+          <div class="stat-value" id="stat-common">-</div>
           <div class="stat-label">Most Common Issue</div>
         </div>
       </div>
@@ -325,7 +325,7 @@
           protocolRows += '<div class="protocol-ex-meta">';
           protocolRows += '<span class="protocol-joint-tag">' + jName + '</span>';
           protocolRows += '<span class="protocol-sets">3x10</span>';
-          if (isRed) protocolRows += '<span class="protocol-cue">At-Risk — controlled range only</span>';
+          if (isRed) protocolRows += '<span class="protocol-cue">At-Risk, controlled range only</span>';
           protocolRows += '</div></div>';
         });
       } else {
@@ -763,7 +763,7 @@
 
 
   <script>
-    // #40 Coach notes — load on roster init, save on button click
+    // #40 Coach notes, load on roster init, save on button click
     let _coachNotes = {};
 
     async function loadCoachNotes(coachEmail) {
