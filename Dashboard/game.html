@@ -3,11 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROMRxBJJ — My Game</title>
+  <title>ROMRxBJJ &mdash; My Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    /* #24 First-login onboarding overlay */
+    .onboard-overlay {
+      position: fixed; inset: 0; background: rgba(54,69,79,0.75);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      padding: 20px; animation: fadeInOverlay 0.3s ease;
+    }
+    @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+    .onboard-card {
+      background: #FAF9F6; border-radius: 20px; padding: 40px 32px;
+      max-width: 480px; width: 100%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .onboard-logo {
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.5rem;
+      color: #008080; margin-bottom: 6px;
+    }
+    .onboard-welcome { font-size: 0.9rem; color: #888; margin-bottom: 32px; }
+    .onboard-steps { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; text-align: left; }
+    .onboard-step { display: flex; align-items: flex-start; gap: 16px; }
+    .onboard-step-icon {
+      font-size: 1.6rem; width: 48px; height: 48px; display: flex; align-items: center;
+      justify-content: center; background: #e6f4f4; border-radius: 12px; flex-shrink: 0;
+    }
+    .onboard-step-text h3 {
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem;
+      color: #008080; margin-bottom: 4px;
+    }
+    .onboard-step-text p { font-size: 0.88rem; color: #5a6a75; line-height: 1.5; margin: 0; }
+    .onboard-dismiss {
+      display: block; width: 100%; padding: 16px 24px;
+      background: #FFB347; color: #36454F; border: none; border-radius: 10px;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem;
+      cursor: pointer; transition: background 0.2s, transform 0.2s;
+    }
+    .onboard-dismiss:hover { background: #ffa52e; transform: translateY(-1px); }
+  </style>
 </head>
 <body>
   <header class="app-header">
@@ -22,9 +59,9 @@
 
   <nav class="app-nav">
     <div class="nav-inner">
-      <a class="nav-pill" href="body.html">🏋️ My Body </a>
-      <a class="nav-pill active" href="game.html">🎮 My Game</a>
-      <a class="nav-pill" href="protocol.html">📋 My Protocol </a>
+      <a class="nav-pill" href="body.html">&#x1F3CB;&#xFE0F; My Body </a>
+      <a class="nav-pill active" href="game.html">&#x1F3AE; My Game</a>
+      <a class="nav-pill" href="protocol.html">&#x1F4CB; My Protocol </a>
     </div>
   </nav>
 
@@ -34,14 +71,70 @@
     <div id="tier-progress-container" style="display:none;"></div>
   </main>
 
-
   <footer class="app-footer">
     <div class="footer-tagline">Your body. Your game. Your protocol.</div>
     <div class="footer-copy">&copy; 2026 ROMRx LLC &middot; romrxbjj.com</div>
   </footer>
 
+  <!-- #24 First-login onboarding overlay -->
+  <div id="onboard-overlay" class="onboard-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Welcome to ROMRxBJJ">
+    <div class="onboard-card">
+      <div class="onboard-logo">ROMRxBJJ&#8482;</div>
+      <p class="onboard-welcome">Welcome to your dashboard. Here&#8217;s what you&#8217;ve got:</p>
+      <div class="onboard-steps">
+        <div class="onboard-step">
+          <div class="onboard-step-icon">&#x1F3CB;&#xFE0F;</div>
+          <div class="onboard-step-text">
+            <h3>My Body</h3>
+            <p>See your ROM scores across 14 joints. Your radar chart shows your full mobility shape &#8212; green, yellow, and red.</p>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-step-icon">&#x1F94B;</div>
+          <div class="onboard-step-text">
+            <h3>My Game</h3>
+            <p>Build your personalized technique flow. Choose a role and build offense or defense paths based on YOUR body&#8217;s readiness.</p>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-step-icon">&#x1F4CB;</div>
+          <div class="onboard-step-text">
+            <h3>My Protocol</h3>
+            <p>Follow your 6-week mobility Rx &#8212; priority joint exercises, stretches, and foam rolling targeted to YOUR limitations.</p>
+          </div>
+        </div>
+      </div>
+      <button class="onboard-dismiss" id="onboard-dismiss">Got It &#8212; Let&#8217;s Go</button>
+    </div>
+  </div>
+
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    // #24 First-login onboarding overlay
+    (function() {
+      var ONBOARD_KEY = 'romrxbjj_onboarded';
+      var overlay = document.getElementById('onboard-overlay');
+      var dismissBtn = document.getElementById('onboard-dismiss');
+
+      if (!localStorage.getItem(ONBOARD_KEY)) {
+        overlay.style.display = 'flex';
+      }
+
+      dismissBtn.addEventListener('click', function() {
+        overlay.style.display = 'none';
+        localStorage.setItem(ONBOARD_KEY, '1');
+      });
+
+      // Dismiss on backdrop click
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+          overlay.style.display = 'none';
+          localStorage.setItem(ONBOARD_KEY, '1');
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
