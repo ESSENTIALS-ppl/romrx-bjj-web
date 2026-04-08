@@ -6,9 +6,9 @@ const COACH_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function coachCacheGet(key) {
   try {
-    var raw = localStorage.getItem(key);
+    let raw = localStorage.getItem(key);
     if (!raw) return null;
-    var cached = JSON.parse(raw);
+    let cached = JSON.parse(raw);
     if (Date.now() - cached.ts > COACH_CACHE_TTL) {
       localStorage.removeItem(key);
       return null;
@@ -24,11 +24,11 @@ function coachCacheSet(key, data) {
 }
 
 async function coachApiCall(params) {
-  var url = new URL(COACH_API_URL);
-  for (var k in params) {
+  let url = new URL(COACH_API_URL);
+  for (let k in params) {
     url.searchParams.set(k, params[k]);
   }
-  var resp = await fetch(url.toString(), { redirect: 'follow' });
+  let resp = await fetch(url.toString(), { redirect: 'follow' });
   if (!resp.ok) throw new Error('API request failed: ' + resp.status);
   return await resp.json();
 }
@@ -41,10 +41,10 @@ async function apiCoachLogin(email, code) {
 async function apiGetRoster(coachEmail, page, pageSize) {
   page     = page     || 1;
   pageSize = pageSize || 50;
-  var cacheKey = 'romrxbjj_coach_roster_p' + page;
-  var cached = coachCacheGet(cacheKey);
+  let cacheKey = 'romrxbjj_coach_roster_p' + page;
+  let cached = coachCacheGet(cacheKey);
   if (cached) return cached;
-  var result = await coachApiCall({
+  let result = await coachApiCall({
     action:     'coachRoster',
     coachEmail:  coachEmail,
     page:        page,
@@ -55,23 +55,23 @@ async function apiGetRoster(coachEmail, page, pageSize) {
 }
 
 async function apiGetTechniqueList(coachEmail) {
-  var cacheKey = 'romrxbjj_coach_techlist';
-  var cached = coachCacheGet(cacheKey);
+  let cacheKey = 'romrxbjj_coach_techlist';
+  let cached = coachCacheGet(cacheKey);
   if (cached) return cached;
-  var result = await coachApiCall({ action: 'techniqueList', coachEmail: coachEmail });
+  let result = await coachApiCall({ action: 'techniqueList', coachEmail: coachEmail });
   if (result.success !== false) coachCacheSet(cacheKey, result);
   return result;
 }
 
 async function apiGetClassWarmup(coachEmail, techniqueCode) {
   // No cache — coach picks different techniques rapidly
-  var params = { action: 'classWarmup', coachEmail: coachEmail };
+  let params = { action: 'classWarmup', coachEmail: coachEmail };
   if (techniqueCode) params.techniqueCode = techniqueCode;
   return await coachApiCall(params);
 }
 
 function clearCoachCache() {
-  var keys = Object.keys(localStorage);
+  let keys = Object.keys(localStorage);
   keys.forEach(function(k) {
     if (k.startsWith('romrxbjj_coach_')) localStorage.removeItem(k);
   });

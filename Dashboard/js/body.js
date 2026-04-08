@@ -143,16 +143,16 @@ function renderRadarChart(progressData) {
   ];
 
   // Show most recent assessments (max 3), most recent first
-  var recent = assessments.slice(-3).reverse();
+  let recent = assessments.slice(-3).reverse();
 
-  var datasets = recent.map(function(a, i) {
-    var color = colorSets[i] || colorSets[2];
-    var dateLabel = new Date(a.date).toLocaleDateString();
-    var values = radarJoints.map(function(j) {
-      var jointData = a.joints[j];
+  let datasets = recent.map(function(a, i) {
+    let color = colorSets[i] || colorSets[2];
+    let dateLabel = new Date(a.date).toLocaleDateString();
+    let values = radarJoints.map(function(j) {
+      let jointData = a.joints[j];
       if (!jointData) return 0;
-      var avg = jointData.avg || jointData.value || ((jointData.left + jointData.right) / 2) || 0;
-      var threshold = thresholds[j] || 1;
+      let avg = jointData.avg || jointData.value || ((jointData.left + jointData.right) / 2) || 0;
+      let threshold = thresholds[j] || 1;
       return Math.round((avg / threshold) * 100);
     });
 
@@ -169,18 +169,18 @@ function renderRadarChart(progressData) {
   });
 
   // Build legend HTML
-  var legendHtml = '<div class="radar-legend">';
+  let legendHtml = '<div class="radar-legend">';
   recent.forEach(function(a, i) {
-    var color = colorSets[i] || colorSets[2];
-    var dateLabel = new Date(a.date).toLocaleDateString();
-    var label = i === 0 ? dateLabel + ' (Latest)' : dateLabel;
+    let color = colorSets[i] || colorSets[2];
+    let dateLabel = new Date(a.date).toLocaleDateString();
+    let label = i === 0 ? dateLabel + ' (Latest)' : dateLabel;
     legendHtml += '<div class="radar-legend-item"><span class="radar-legend-swatch" style="background:' + color.border + '"></span> ' + label + '</div>';
   });
   legendHtml += '</div>';
 
   container.innerHTML = legendHtml + '<canvas id="radarCanvas"></canvas>';
 
-  var ctx = document.getElementById('radarCanvas').getContext('2d');
+  let ctx = document.getElementById('radarCanvas').getContext('2d');
   new Chart(ctx, {
     type: 'radar',
     data: { labels: labels, datasets: datasets },

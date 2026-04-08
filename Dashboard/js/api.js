@@ -165,7 +165,7 @@ function setCached(key, data) {
 // Clear all cached API data (keeps session alive)
 // Use this for a future "Refresh My Data" button
 function clearCache() {
-  var keys = Object.keys(localStorage);
+  let keys = Object.keys(localStorage);
   keys.forEach(function(key) {
     if (key.startsWith('romrxbjj_cache_')) {
       localStorage.removeItem(key);
