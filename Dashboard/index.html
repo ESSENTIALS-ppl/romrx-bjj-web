@@ -16,6 +16,32 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+      /* #23 Forgot Access Code */
+      .forgot-code-link { margin-top: 12px; text-align: center; }
+      .forgot-code-link button {
+        background: none; border: none; color: #008080; font-family: 'Inter', sans-serif;
+        font-size: 0.82rem; cursor: pointer; text-decoration: underline; padding: 0;
+      }
+      .forgot-code-link button:hover { color: #006666; }
+      .forgot-panel {
+        margin-top: 16px; padding: 16px; background: #f0fafa;
+        border: 1px solid #008080; border-radius: 8px; display: none;
+      }
+      .forgot-panel.open { display: block; }
+      .forgot-panel label { font-size: 0.85rem; font-weight: 500; color: #36454F; margin-bottom: 6px; display: block; }
+      .forgot-panel input { margin-bottom: 10px; }
+      .forgot-panel .forgot-submit {
+        display: block; width: 100%; padding: 10px 16px; background: #008080; color: #fff;
+        border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 600;
+        font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+      }
+      .forgot-panel .forgot-submit:hover { background: #006666; }
+      .forgot-panel .forgot-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+      .forgot-msg { margin-top: 10px; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px; text-align: center; display: none; }
+      .forgot-msg.success { background: #e6f7f7; color: #006666; display: block; }
+      .forgot-msg.error { background: #fdecea; color: #c0392b; display: block; }
+    </style>
 </head>
 <body>
   <main class="login-page">
@@ -34,6 +60,15 @@
         <button type="submit" id="login-btn" class="btn btn-primary">Enter Dashboard</button>
       </form>
       <p class="help-text">Your access code was sent in your Position Readiness Profile\u2122 email.</p>
+      <div class="forgot-code-link">
+        <button id="forgot-code-btn" type="button">Forgot my access code?</button>
+      </div>
+      <div class="forgot-panel" id="forgot-panel">
+        <label for="forgot-email">Enter your email to receive your code</label>
+        <input type="email" id="forgot-email" placeholder="your@email.com" autocomplete="email">
+        <button class="forgot-submit" id="forgot-submit" type="button">Send My Code</button>
+        <div class="forgot-msg" id="forgot-msg"></div>
+      </div>
     </div>
   </main>
   <footer class="login-footer">&copy; 2026 ROMRx LLC</footer>
@@ -79,6 +114,53 @@
 
       function showErr(msg) { errDiv.textContent = msg; errDiv.hidden = false; }
     })();
+  </script>
+  <script>
+    // #23 Forgot access code flow
+    (function() {
+      var btn = document.getElementById('forgot-code-btn');
+      var panel = document.getElementById('forgot-panel');
+      var submitBtn = document.getElementById('forgot-submit');
+      var msgDiv = document.getElementById('forgot-msg');
+
+      btn.addEventListener('click', function() {
+        panel.classList.toggle('open');
+        if (panel.classList.contains('open')) {
+          document.getElementById('forgot-email').focus();
+        }
+        msgDiv.className = 'forgot-msg';
+        msgDiv.textContent = '';
+      });
+
+      submitBtn.addEventListener('click', async function() {
+        var email = document.getElementById('forgot-email').value.trim().toLowerCase();
+        if (!email) {
+          msgDiv.className = 'forgot-msg error';
+          msgDiv.textContent = 'Please enter your email address.';
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        msgDiv.className = 'forgot-msg';
+        msgDiv.textContent = '';
+        try {
+          var res = await apiCall({ action: 'resendCode', email: email });
+          if (res.success) {
+            msgDiv.className = 'forgot-msg success';
+            msgDiv.textContent = res.message || 'Check your inbox — your access code is on its way.';
+          } else {
+            msgDiv.className = 'forgot-msg error';
+            msgDiv.textContent = res.error || 'Something went wrong. Please try again.';
+          }
+        } catch (ex) {
+          msgDiv.className = 'forgot-msg error';
+          msgDiv.textContent = 'Network error. Please try again.';
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send My Code';
+      });
+    })();
+
   </script>
 </body>
 </html>
