@@ -630,6 +630,336 @@
             .stat-card .number { font-size: 2rem; }
             .steps-grid { gap: 40px; }
         }
+
+        /* ============================================
+           OPTION C — CONVERSION MACHINE STYLES
+           ============================================ */
+
+        /* ===== STICKY NAV ===== */
+        .sticky-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(54,69,79,0.97);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+        }
+        .sticky-nav-logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--teal);
+            text-decoration: none;
+        }
+        .sticky-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .sticky-nav-links a {
+            color: rgba(250,249,246,0.8);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .sticky-nav-links a:hover { color: #FAF9F6; }
+        .sticky-nav-cta {
+            background: var(--gold) !important;
+            color: var(--charcoal) !important;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 700 !important;
+            font-size: 0.875rem !important;
+            transition: background 0.2s, transform 0.15s !important;
+        }
+        .sticky-nav-cta:hover { background: #ffa52e !important; transform: translateY(-1px); }
+        @media (max-width: 600px) {
+            .sticky-nav-links { gap: 14px; }
+            .sticky-nav-links a:not(.sticky-nav-cta) { display: none; }
+        }
+        body { padding-top: 60px; }
+
+        /* ===== HERO — 2 COLUMN ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--charcoal) 0%, #2a363f 100%);
+            padding: 80px 24px;
+            min-height: auto;
+        }
+        .hero .container {
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            align-items: center;
+        }
+        .hero-content {}
+        .hero-eyebrow {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            color: #FAF9F6;
+            margin-bottom: 20px;
+        }
+        .hero-sub {
+            font-size: 1.05rem;
+            color: rgba(250,249,246,0.78);
+            line-height: 1.65;
+            margin-bottom: 32px;
+        }
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn-hero-primary {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--charcoal);
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-hero-primary:hover { background: #ffa52e; transform: translateY(-2px); }
+        .btn-hero-ghost {
+            color: rgba(250,249,246,0.75);
+            font-size: 0.9rem;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .btn-hero-ghost:hover { color: #FAF9F6; }
+        .hero-screenshot {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+            border: 2px solid rgba(0,128,128,0.4);
+            transform: perspective(1200px) rotateY(-3deg);
+            transition: transform 0.4s;
+        }
+        .hero-screenshot:hover { transform: perspective(1200px) rotateY(0deg); }
+        .hero-screenshot img {
+            width: 100%;
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .hero .container { grid-template-columns: 1fr; gap: 36px; }
+            .hero-screenshot { transform: none; }
+            .hero h1 { font-size: 1.9rem; }
+        }
+
+        /* ===== TRUST BAR ===== */
+        .trust-bar {
+            background: var(--teal);
+            padding: 18px 24px;
+        }
+        .trust-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .trust-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(250,249,246,0.95);
+            font-size: 0.88rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .trust-stat-icon { font-size: 1.1rem; }
+        .trust-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(250,249,246,0.25);
+        }
+        @media (max-width: 600px) { .trust-divider { display: none; } }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonials {
+            background: var(--warm-white);
+            padding: 80px 24px;
+            text-align: center;
+        }
+        .testimonials .section-title { color: var(--charcoal); }
+        .testimonials .section-subtitle { color: #888; }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .testimonial-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-align: left;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            border: 1px solid #f0eeeb;
+            position: relative;
+        }
+        .testimonial-stars {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 14px;
+        }
+        .testimonial-stars span {
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+        .testimonial-quote {
+            font-size: 0.95rem;
+            color: #36454F;
+            line-height: 1.65;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e6f4f4, #d0ecec);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .testimonial-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+        }
+        .testimonial-meta {
+            font-size: 0.78rem;
+            color: #888;
+        }
+        .testimonial-placeholder-note {
+            display: block;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #bbb;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        /* ===== SIDE-BY-SIDE PRICING ===== */
+        .pricing-dual {
+            background: var(--charcoal);
+            padding: 80px 24px;
+            text-align: center;
+        }
+        .pricing-dual .section-title { color: #FAF9F6; }
+        .pricing-dual .section-subtitle { color: rgba(250,249,246,0.65); }
+        .pricing-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            max-width: 900px;
+            margin: 48px auto 0;
+        }
+        @media (max-width: 700px) { .pricing-cards-grid { grid-template-columns: 1fr; } }
+        .pricing-dual-card {
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            border-radius: 18px;
+            padding: 36px 28px;
+            text-align: left;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .pricing-dual-card:hover { border-color: rgba(0,128,128,0.6); transform: translateY(-2px); }
+        .pricing-dual-card.featured {
+            border-color: var(--gold);
+            position: relative;
+        }
+        .pricing-dual-card.featured::before {
+            content: "Most Popular";
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: var(--charcoal);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+        .pricing-dual-plan { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.1rem; color: #FAF9F6; margin-bottom: 4px; }
+        .pricing-dual-sub { font-size: 0.8rem; color: rgba(250,249,246,0.5); margin-bottom: 20px; }
+        .pricing-dual-amount { font-family: 'Montserrat', sans-serif; font-size: 3rem; font-weight: 800; color: #FAF9F6; line-height: 1; }
+        .pricing-dual-period { font-size: 0.88rem; color: rgba(250,249,246,0.5); margin-bottom: 24px; }
+        .pricing-dual-badge {
+            display: inline-block;
+            background: var(--teal);
+            color: #FAF9F6;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+        .pricing-dual-features { list-style: none; padding: 0; margin: 0 0 28px; }
+        .pricing-dual-features li {
+            font-size: 0.88rem;
+            color: rgba(250,249,246,0.82);
+            padding: 8px 0 8px 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+        }
+        .pricing-dual-features li:last-child { border-bottom: none; }
+        .pricing-dual-features li::before { content: "\2713"; position: absolute; left: 0; color: var(--teal); font-weight: 700; }
+        .pricing-dual-card.featured .pricing-dual-features li::before { color: var(--gold); }
+        .pricing-dual-cta {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.1);
+            color: #FAF9F6;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .pricing-dual-cta:hover { background: rgba(255,255,255,0.18); }
+        .pricing-dual-card.featured .pricing-dual-cta { background: var(--gold); color: var(--charcoal); }
+        .pricing-dual-card.featured .pricing-dual-cta:hover { background: #ffa52e; }
+        .pricing-note { font-size: 0.78rem; color: rgba(250,249,246,0.35); margin-top: 20px; }
+
     </style>
   <!-- GA4, #36 Replace G-G6GXJWW0F1 with your real Measurement ID -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6GXJWW0F1"></script>
@@ -641,14 +971,83 @@
   </script>
 </head>
 <body>
+    <!-- STICKY NAV -->
+    <nav class="sticky-nav">
+        <a href="#" class="sticky-nav-logo">ROMRxBJJ&#8482;</a>
+        <div class="sticky-nav-links">
+            <a href="#screenshots">Dashboard</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#coaches">Coaches</a>
+            <a href="#faq">FAQ</a>
+            <a href="#signup" class="sticky-nav-cta">Start Free &rarr;</a>
+        </div>
+    </nav>
 
     <!-- ===== HERO ===== -->
     <section class="hero">
         <div class="container">
-            <div class="hero-logo">ROMRxBJJ™</div>
-            <h1>Know What Your Body Is Ready For™</h1>
-            <p>The only ROM assessment system built for Brazilian Jiu-Jitsu. Know exactly which of 124 techniques your body is ready for , rated GREEN, YELLOW, or RED based on YOUR mobility. Includes a full athlete dashboard and a coach dashboard so your instructor knows your readiness before you step on the mat.</p>
-            <a href="#signup" class="btn">Start Your Assessment</a>
+            <div class="hero-content">
+                <p class="hero-eyebrow">Built for BJJ Athletes</p>
+                <h1>Know What Your Body Is Ready For&#8482;</h1>
+                <p class="hero-sub">The only ROM assessment built for Brazilian Jiu-Jitsu. Get your 124 techniques rated GREEN, YELLOW, or RED based on YOUR mobility, not generic standards. Plus a coach dashboard so your instructor knows your readiness before you step on the mat.</p>
+                <div class="hero-ctas">
+                    <a href="#signup" class="btn-hero-primary">Start Your Assessment</a>
+                    <a href="#screenshots" class="btn-hero-ghost">See the dashboard &darr;</a>
+                </div>
+            </div>
+            <div class="hero-screenshot">
+                <img src="images/MyBodyDashboard.jpg" alt="ROMRxBJJ My Body dashboard showing radar chart of ROM scores" loading="eager">
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST BAR -->
+    <div class="trust-bar">
+        <div class="container">
+            <div class="trust-stat"><span class="trust-stat-icon">&#x1F4CA;</span> 124 techniques rated</div>
+            <div class="trust-divider"></div>
+            <div class="trust-stat"><span class="trust-stat-icon">&#x1F94B;</span> White Belt + Blue Belt</div>
+            <div class="trust-divider"></div>
+            <div class="trust-stat"><span class="trust-stat-icon">&#x2705;</span> Athlete + Coach dashboards</div>
+            <div class="trust-divider"></div>
+            <div class="trust-stat"><span class="trust-stat-icon">&#x1F525;</span> Live now</div>
+        </div>
+    </div>
+
+    <!-- ===== SEE IT IN ACTION ===== -->
+    <section class="preview" id="screenshots">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            <p class="section-subtitle">Your personalized dashboard, built around your body, your belt, your game.</p>
+            <div class="preview-grid">
+                <div class="preview-card">
+                    <div class="preview-img-box">
+                        <img src="images/MyBodyDashboard.jpg" alt="My Body dashboard showing radar chart of ROM scores across 14 joints" loading="lazy">
+                    </div>
+                    <div class="preview-caption">
+                        <h3>My Body</h3>
+                        <p>Radar chart showing ROM scores across all 14 joints, bilateral asymmetry flagged at a glance.</p>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-img-box">
+                        <img src="images/MyGameDashboard.jpg" alt="My Game dashboard showing technique flow builder with GREEN, YELLOW, RED readiness ratings" loading="lazy">
+                    </div>
+                    <div class="preview-caption">
+                        <h3>My Game</h3>
+                        <p>Flow builder showing your GREEN, YELLOW, and RED technique paths, offense and defense branches personalized to your mobility.</p>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-img-box">
+                        <img src="images/MyProtocolDashboard.jpg" alt="My Protocol dashboard showing priority joint exercises, stretches, and weekly plan" loading="lazy">
+                    </div>
+                    <div class="preview-caption">
+                        <h3>My Protocol</h3>
+                        <p>Priority joint exercise cards with sets, reps, and coaching cues, targeted to YOUR mobility deficits.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -705,147 +1104,109 @@
         </div>
     </section>
 
-    <!-- ===== SEE IT IN ACTION ===== -->
-    <section class="preview">
-        <div class="container">
-            <h2 class="section-title">See It In Action</h2>
-            <p class="section-subtitle">Your personalized dashboard, built around your body, your belt, your game.</p>
-            <div class="preview-grid">
-                <div class="preview-card">
-                    <div class="preview-img-box">
-                        <img src="images/MyBodyDashboard.jpg" alt="My Body dashboard showing radar chart of ROM scores across 14 joints" loading="lazy">
-                    </div>
-                    <div class="preview-caption">
-                        <h3>My Body</h3>
-                        <p>Radar chart showing ROM scores across all 14 joints, bilateral asymmetry flagged at a glance.</p>
-                    </div>
-                </div>
-                <div class="preview-card">
-                    <div class="preview-img-box">
-                        <img src="images/MyGameDashboard.jpg" alt="My Game dashboard showing technique flow builder with GREEN, YELLOW, RED readiness ratings" loading="lazy">
-                    </div>
-                    <div class="preview-caption">
-                        <h3>My Game</h3>
-                        <p>Flow builder showing your GREEN, YELLOW, and RED technique paths, offense and defense branches personalized to your mobility.</p>
-                    </div>
-                </div>
-                <div class="preview-card">
-                    <div class="preview-img-box">
-                        <img src="images/MyProtocolDashboard.jpg" alt="My Protocol dashboard showing priority joint exercises, stretches, and weekly plan" loading="lazy">
-                    </div>
-                    <div class="preview-caption">
-                        <h3>My Protocol</h3>
-                        <p>Priority joint exercise cards with sets, reps, and coaching cues, targeted to YOUR mobility deficits.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== BENEFITS ===== -->
-    <section class="benefits">
-        <div class="container">
-            <h2 class="section-title">Everything Included</h2>
-            <div class="benefits-list">
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">Personalized report evaluating 124 techniques (White + Blue Belt)</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">Position Readiness Score™ for every technique</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">Your specific Range of Motion deficits identified</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">6-week mobility Rx targeting YOUR limitations</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">My Game Generator, build your personalized technique flow (live now)</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">6-week reassessment to track progress</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-check">✓</span>
-                    <span class="benefit-text">Help others by giving us your input on the ROMRxBJJ™ system</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ===== FOR COACHES ===== -->
-    <section class="for-coaches">
-        <div class="container">
-            <h2 class="section-title">For Coaches</h2>
-            <p class="section-subtitle">Run a smarter class. Know every athlete&#8217;s mobility before they step on the mat.</p>
-            <div class="coaches-grid">
-                <div class="coach-benefit">
-                    <div class="coach-benefit-icon">&#x1F4CB;</div>
-                    <h3>Athlete Roster</h3>
-                    <p>GREEN, YELLOW, and RED readiness at a glance across your full roster. See who is ready to drill and who needs modification before class starts.</p>
-                </div>
-                <div class="coach-benefit">
-                    <div class="coach-benefit-icon">&#x26A1;</div>
-                    <h3>Class Warmup RAMP Protocol</h3>
-                    <p>Auto-generated warmup protocol per technique, targeted to the specific joint demands of what you are teaching that day.</p>
-                </div>
-                <div class="coach-benefit">
-                    <div class="coach-benefit-icon">&#x1F4CA;</div>
-                    <h3>Trend Tracking + Alerts</h3>
-                    <p>Asymmetry flags across your roster surface automatically. Catch bilateral imbalances before they become injuries.</p>
-                </div>
-            </div>
-            <div class="coach-pricing-card">
-                <div class="coach-plan-name">Coach Starter</div>
-                <div class="coach-plan-sub">Individual coaches and small academies</div>
-                <div class="coach-price-amount">$349</div>
-                <div class="coach-price-period">per year</div>
-                <ul class="coach-price-features">
-                    <li>Full athlete roster with ROM readiness dashboard</li>
-                    <li>GREEN / YELLOW / RED status for every athlete</li>
-                    <li>Auto-generated class warmup RAMP protocols</li>
-                    <li>Asymmetry alerts and trend tracking</li>
-                    <li>Coach notes per athlete</li>
-                    <li>Belt promotion approval workflow</li>
-                    <li>Unlimited athletes</li>
-                </ul>
-                <a href="mailto:romrxbjj@gmail.com?subject=Coach%20Starter%20Access" class="coach-cta-btn">Get Coach Access &rarr;</a>
-                <p class="coach-stripe-note">Online enrollment opening soon. Email to get set up today.</p>
-            </div>
-        </div>
-    </section>
-
     <!-- ===== PRICING ===== -->
-    <section class="pricing" id="pricing">
+    <section class="pricing-dual" id="pricing">
         <div class="container">
-            <h2 class="section-title">Simple Pricing</h2>
-            <p class="section-subtitle">One plan. Everything included. No hidden fees.</p>
-            <div class="pricing-card">
-                <div class="pricing-badge">🏆 First Year FREE with Promo Code</div>
-                <div class="pricing-amount">$149</div>
-                <div class="pricing-period">per year</div>
-                <ul class="pricing-features">
-                    <li>Full ROM self-assessment - 14 joints assessed</li>
-                    <li>124 technique tier ratings, White Belt + Blue Belt (GREEN / YELLOW / RED)</li>
-                    <li>Custom My Game flow generator - offense &amp; defense paths</li>
-                    <li>Quarterly reassessments + progress tracking</li>
-                    <li>Belt progression system (White &rarr; Blue &rarr; more coming)</li>
-                    <li>6-week personalized mobility Rx</li>
-                </ul>
-                <a href="#signup" class="pricing-cta">Start Free</a>
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">One plan for athletes. One plan for coaches. No hidden fees.</p>
+            <div class="pricing-cards-grid">
+
+                <div class="pricing-dual-card featured">
+                    <div class="pricing-dual-plan">Athlete</div>
+                    <div class="pricing-dual-sub">Individual BJJ practitioners</div>
+                    <div class="pricing-dual-amount">$149</div>
+                    <div class="pricing-dual-period">per year</div>
+                    <div class="pricing-dual-badge">&#127942; First Year FREE with Promo Code</div>
+                    <ul class="pricing-dual-features">
+                        <li>Full ROM self-assessment, 14 joints</li>
+                        <li>124 technique ratings (White + Blue Belt)</li>
+                        <li>My Body radar chart + asymmetry tracking</li>
+                        <li>My Game personalized technique flow builder</li>
+                        <li>My Protocol 6-week mobility Rx</li>
+                        <li>Quarterly reassessments + progress tracking</li>
+                        <li>Belt progression system</li>
+                    </ul>
+                    <a href="#signup" class="pricing-dual-cta">Start Free</a>
+                </div>
+
+                <div class="pricing-dual-card" id="coaches">
+                    <div class="pricing-dual-plan">Coach Starter</div>
+                    <div class="pricing-dual-sub">Individual coaches and small academies</div>
+                    <div class="pricing-dual-amount">$349</div>
+                    <div class="pricing-dual-period">per year</div>
+                    <ul class="pricing-dual-features" style="margin-top:30px;">
+                        <li>Full athlete roster with ROM readiness dashboard</li>
+                        <li>GREEN / YELLOW / RED status for every athlete</li>
+                        <li>Auto-generated class warmup RAMP protocols</li>
+                        <li>Asymmetry alerts and trend tracking</li>
+                        <li>Coach notes per athlete</li>
+                        <li>Belt promotion approval workflow</li>
+                        <li>Unlimited athletes</li>
+                    </ul>
+                    <a href="mailto:romrxbjj@gmail.com?subject=Coach%20Starter%20Access" class="pricing-dual-cta">Get Coach Access</a>
+                    <p class="pricing-note">Online enrollment opening soon. Email to get set up today.</p>
+                </div>
+
             </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Athletes Are Saying</h2>
+            <p class="section-subtitle">Real feedback from real grapplers.</p>
+            <div class="testimonials-grid">
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-quote">"[Athlete quote goes here. Ask your first two athletes for a sentence or two about what changed for them.]"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">&#x1F94B;</div>
+                        <div>
+                            <div class="testimonial-name">Athlete Name</div>
+                            <div class="testimonial-meta">White Belt &middot; Gym Name</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-quote">"[Second athlete quote here. Even one line about their specific result is more powerful than a paragraph.]"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">&#x1F94B;</div>
+                        <div>
+                            <div class="testimonial-name">Athlete Name</div>
+                            <div class="testimonial-meta">Blue Belt &middot; Gym Name</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-quote">"[Coach quote here. What does knowing your athletes' readiness change about how you run class?]"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">&#x1F4CB;</div>
+                        <div>
+                            <div class="testimonial-name">Coach Name</div>
+                            <div class="testimonial-meta">Head Coach &middot; Gym Name</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <span class="testimonial-placeholder-note">Testimonials pending, drop in real quotes from your athletes and they display immediately.</span>
         </div>
     </section>
 
     <!-- ===== FAQ ===== -->
-    <section class="faq">
+    <section class="faq" id="faq">
         <div class="container">
             <h2 class="section-title">Frequently Asked Questions</h2>
             <p class="section-subtitle">Everything you need to know before you get started.</p>
