@@ -420,7 +420,7 @@ function renderFlowSummary() {
     return '<tr><td>' + sel.code + '</td><td>' + (sel.name || sel.code) + '</td><td><span class="tier-badge ' + sel.tier + '">' + sel.tier.toUpperCase() + '</span></td><td>' + notes + '</td></tr>';
   }).join('');
 
-  document.getElementById('app').innerHTML = '<div class="flow-summary"><h2>Your Game Plan</h2><div class="flow-chain">' + chain + '</div><table style="width:100%;background:let(--white);border-radius:let(--radius);box-shadow:let(--shadow);padding:16px;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:8px;">Code</th><th style="text-align:left;padding:8px;">Technique</th><th style="text-align:left;padding:8px;">Tier</th><th style="text-align:left;padding:8px;">Notes</th></tr></thead><tbody>' + details + '</tbody></table><div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="saveFlow()">\uD83D\uDCBE Save This Flow</button><button class="btn btn-outlined" onclick="renderRoleSelection()">\uD83D\uDD04 Build Another Flow</button></div></div>';
+  document.getElementById('app').innerHTML = '<div class="flow-summary"><h2>Your Game Plan</h2><div class="flow-chain">' + chain + '</div><table style="width:100%;background:let(--white);border-radius:let(--radius);box-shadow:let(--shadow);padding:16px;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:8px;">Code</th><th style="text-align:left;padding:8px;">Technique</th><th style="text-align:left;padding:8px;">Tier</th><th style="text-align:left;padding:8px;">Notes</th></tr></thead><tbody>' + details + '</tbody></table><div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="saveFlow()">\uD83D\uDCBE Save This Flow</button><button class="btn btn-outlined" onclick="renderRoleSelection()">\uD83D\uDD04 Build Another Flow</button><button class="btn btn-outlined" onclick="shareFlow()">&#x1F4CB; Share This Flow</button></div></div>';
 }
 
 function saveFlow() {
@@ -545,3 +545,45 @@ async function renderTierProgress(email) {
 
 
 initGame();
+
+// #48 Share Flow — copy text summary to clipboard
+function shareFlow() {
+  const validSels = flow.selections.filter(s => s.tag !== 'auto-position' && s.tier);
+  if (validSels.length === 0) return;
+  const role      = flow.role ? flow.role.charAt(0).toUpperCase() + flow.role.slice(1) : 'Unknown';
+  const chain     = validSels.map(s => s.name || s.code).join(' \u2192 ');
+  const greenCount = validSels.filter(s => s.tier === 'GREEN').length;
+  const total     = validSels.length;
+  const text      = `My ROMRxBJJ ${role} Flow: ${chain}. ${greenCount}/${total} GREEN. \nBuilt with ROMRxBJJ\u2122 \u2014 romrxbjj.com`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showShareToast('Flow copied to clipboard!');
+      trackEvent('game_flow_share', { role: flow.role, techs: total, green: greenCount });
+    }).catch(() => showShareToast('Could not copy. Select and copy manually.'));
+  } else {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showShareToast('Flow copied to clipboard!');
+  }
+}
+
+function showShareToast(msg) {
+  let toast = document.getElementById('share-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'share-toast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#36454F;color:#fff;padding:12px 24px;border-radius:8px;font-size:0.9rem;font-family:Inter,sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
+}
+
