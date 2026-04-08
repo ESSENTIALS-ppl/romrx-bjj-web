@@ -490,3 +490,12 @@ a.nav-pill:hover { text-decoration: none; border-color: var(--primary); }
   }
 }
 
+
+/* #25 Refresh My Data button */
+.header-refresh {
+  background: none; border: 1px solid #ddd; color: #888; border-radius: 6px;
+  padding: 5px 11px; font-family: 'Inter', sans-serif; font-size: 0.78rem;
+  font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.header-refresh:hover { border-color: #008080; color: #008080; }
+.header-refresh:active { opacity: 0.7; }

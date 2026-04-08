@@ -16,6 +16,7 @@
       <a href="#" class="header-logo">ROMRxBJJ</a>
       <div class="header-right">
         <span id="user-name" class="header-greeting">Athlete</span>
+        <button id="refresh-btn" class="header-refresh" title="Clear cached data and reload">&#x21BB; Refresh</button>
         <a href="#" id="logout-link" class="header-logout">Log Out</a>
       </div>
     </div>
@@ -104,5 +105,19 @@
   <script src="js/api.js"></script>
   <script src="js/body.js"></script>
 
+  <script>
+    // #25 Refresh My Data
+    (function() {
+      var btn = document.getElementById('refresh-btn');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          btn.textContent = 'Refreshing…';
+          btn.disabled = true;
+          clearCache();
+          setTimeout(function() { window.location.reload(); }, 200);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
