@@ -888,7 +888,7 @@
         @media (max-width: 700px) { .pricing-cards-grid { grid-template-columns: 1fr; } }
         .pricing-dual-card {
             background: rgba(255,255,255,0.06);
-            border: 1.5px solid rgba(255,255,255,0.15);
+            border: 2px solid var(--gold);
             border-radius: 18px;
             padding: 36px 28px;
             text-align: left;
@@ -897,23 +897,8 @@
         .pricing-dual-card:hover { border-color: rgba(0,128,128,0.6); transform: translateY(-2px); }
         .pricing-dual-card.featured {
             border-color: var(--gold);
-            position: relative;
         }
-        .pricing-dual-card.featured::before {
-            content: "Most Popular";
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--gold);
-            color: var(--charcoal);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 4px 14px;
-            border-radius: 20px;
-        }
+
         .pricing-dual-plan { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.1rem; color: #FAF9F6; margin-bottom: 4px; }
         .pricing-dual-sub { font-size: 0.8rem; color: rgba(250,249,246,0.5); margin-bottom: 20px; }
         .pricing-dual-amount { font-family: 'Montserrat', sans-serif; font-size: 3rem; font-weight: 800; color: #FAF9F6; line-height: 1; }
@@ -1238,10 +1223,10 @@
 
                 <div class="faq-item">
                     <button class="faq-question">
-                        What is the Position Readiness Score™?
+                        What is the Position Readiness Profile™?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">Every technique in the ROMRxBJJ™ system is rated GREEN (body-ready now), YELLOW (build toward it), or RED (avoid until ROM improves) based on the joint demands of that technique compared to YOUR measured ROM. It’s a personalized readiness signal, not a generic guide.</div>
+                    <div class="faq-answer">Your Position Readiness Profile™ is your personalized technique map. Every one of the 124 techniques is rated GREEN (body-ready now), YELLOW (build toward it), or RED (avoid until ROM improves) based on your actual joint measurements compared to what that technique demands. It’s generated automatically and emailed to you the moment your assessment is processed.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1254,10 +1239,10 @@
 
                 <div class="faq-item">
                     <button class="faq-question">
-                        What is a promo code?
+                        How do I pay?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">Promo codes are available to early adopters and coaches. Entering a valid promo code at checkout makes your first full year FREE (retail $149/yr). Ask your coach or check your welcome email for a code.</div>
+                    <div class="faq-answer">Simple. When you log in to your dashboard for the first time, you will be taken to a secure payment window. Pay there and you are immediately returned to your dashboard with full access. No separate signup flow, no waiting. $149/year for athletes. If you have a promo code, you can apply it at that screen for your first year free.</div>
                 </div>
 
                 <div class="faq-item">
