@@ -713,6 +713,20 @@
       }
       .coach-note-save:hover { background: #006666; }
       .coach-note-save.saved { background: #27ae60; }
+
+      /* #52 Mobile fixes */
+      @media (max-width: 640px) {
+        .coach-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .nav-pills { flex-wrap: nowrap; white-space: nowrap; }
+        .athlete-card { font-size: 0.82rem; }
+        .coach-header { flex-wrap: wrap; gap: 8px; }
+        .stat-box { min-width: 80px; }
+        .filter-pill, .nav-pill { min-height: 44px; }
+        canvas { max-width: 100% !important; height: auto !important; }
+        .ramp-cards { grid-template-columns: 1fr; }
+      }
+      input, select, textarea { font-size: 16px !important; }
+      button, .nav-pill, .filter-pill { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </style>
 
 

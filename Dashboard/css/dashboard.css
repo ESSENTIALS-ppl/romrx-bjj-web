@@ -522,3 +522,107 @@ a.nav-pill:hover { text-decoration: none; border-color: var(--primary); }
 }
 .cross-nav-cta-btn:hover { background: #ffa52e; transform: translateY(-1px); text-decoration: none; }
 @media (max-width: 480px) { .cross-nav-cta { flex-direction: column; text-align: center; } }
+
+
+/* ====================================================
+   #52 MOBILE UX FIXES — Sprint 8
+   Targets: iOS Safari + Android Chrome
+   ==================================================== */
+
+/* Touch targets — all interactive elements min 44px */
+.nav-pill,
+a.nav-pill,
+.btn,
+.action-btn,
+.header-logout,
+.header-refresh,
+.protocol-toggle,
+.coach-note-save,
+.filter-pill,
+.load-more-btn {
+  min-height: 44px;
+  min-width: 44px;
+}
+.nav-pill, a.nav-pill { display: inline-flex; align-items: center; }
+
+/* Nav pill overflow on small screens */
+.app-nav { -webkit-overflow-scrolling: touch; }
+.nav-inner {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px; /* prevent clip */
+}
+.nav-pill, a.nav-pill { scroll-snap-align: start; white-space: nowrap; }
+
+/* iOS Safari input zoom prevention */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  font-size: 16px !important; /* prevents iOS auto-zoom */
+}
+
+/* Chart.js: force responsive on small screens */
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+  touch-action: none; /* prevent scroll interference */
+}
+.trends-chart-box { overflow: hidden; }
+.trends-chart-wide { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Protocol accordion tap target */
+.protocol-toggle {
+  padding: 12px 16px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent double-tap zoom on buttons */
+.btn, button, a.nav-pill {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Header wrapping on very small screens */
+.header-inner {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Rx card touch improvement */
+.rx-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Athlete card expansion tap target */
+.athlete-card {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0,128,128,0.05);
+}
+
+/* iOS safe area for fixed elements */
+@supports (padding: max(0px)) {
+  .app-footer {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Small screen overrides */
+@media (max-width: 480px) {
+  .header-greeting { font-size: 0.8rem; }
+  .nav-inner { gap: 6px; padding: 8px 12px; }
+  .nav-pill, a.nav-pill { font-size: 0.82rem; padding: 10px 12px; }
+  .app-main { padding: 12px; }
+  .rx-card-header { font-size: 0.9rem; }
+  .rx-steps { padding-left: 16px; }
+  .protocol-hero h1 { font-size: 1.3rem; }
+  .flow-summary h2 { font-size: 1.2rem; }
+  .brief-table td, .brief-table th { font-size: 0.78rem; padding: 6px; }
+}
