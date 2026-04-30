@@ -33,48 +33,65 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ---- Load profile from GAS cache (or fetch) ----
 async function loadGuestContext() {
   try {
-    const profile = await apiGetProfile(session.email);
-    const techniques = await apiGetTechniques(session.email);
-    const protocol = await apiGetProtocol(session.email);
+    // Run profile, techniques, protocol, and belt check in parallel
+    const [profile, techData, protocol, beltData] = await Promise.all([
+      apiGetProfile(session.email),
+      apiGetTechniques(session.email),
+      apiGetProtocol(session.email),
+      apiCheckPromotion(session.email),
+    ]);
 
-    // Build technique summary from G/Y/R arrays
+    // Technique summary: profile.techniques has numeric counts {green, yellow, red}
+    const ts = profile?.techniques || {};
     const techSummary = {
-      green: (techniques?.green || []).length,
-      yellow: (techniques?.yellow || []).length,
-      red: (techniques?.red || []).length,
+      green:  ts.green  || 0,
+      yellow: ts.yellow || 0,
+      red:    ts.red    || 0,
     };
 
-    // Top 5 red techniques with limiting joints
-    const redTechs = (techniques?.red || []).slice(0, 5).map(t => ({
-      name: t.technique || t.name,
-      belt: t.belt || 'white',
-      limiting_joints: Array.isArray(t.limitingJoints) ? t.limitingJoints : []
-    }));
+    // Red techniques: techData.techniques is an array with 'Final Tier', 'ROM Evaluated', Code, Name
+    const techArray = Array.isArray(techData)
+      ? techData
+      : (techData?.techniques || []);
 
-    // Protocol top 3
-    const protocolItems = (protocol?.exercises || []).slice(0, 3).map(ex => ({
-      joint: ex.jointKey || ex.joint,
-      exercise: ex.name || ex.exercise,
-      sets: ex.sets,
-      reps: ex.reps,
-      cue: ex.coachingCue || ex.cue || ''
-    }));
+    const redTechs = techArray
+      .filter(t => (t['Final Tier'] || '').toUpperCase() === 'RED')
+      .slice(0, 5)
+      .map(t => ({
+        name: t['Technique Name'] || t.Name || t.Code || '',
+        belt: t.Belt || t.belt || 'white',
+        limiting_joints: t['ROM Evaluated'] ? [t['ROM Evaluated']] : [],
+      }));
+
+    // Protocol: data.priorities[].joint + .exercises[].name/sets/reps
+    const priorities = protocol?.priorities || [];
+    const protocolItems = priorities.slice(0, 3).map(p => {
+      const ex = (p.exercises || [])[0] || {};
+      return {
+        joint:    p.joint || '',
+        exercise: ex.name || ex.exercise || '',
+        sets:     ex.sets || '',
+        reps:     ex.reps || '',
+        cue:      ex.coachingCue || ex.cue || '',
+      };
+    }).filter(p => p.exercise);
 
     guestContext = {
-      full_name: profile?.name || session.name,
-      belt: profile?.belt || 'white',
-      rom_total: profile?.romTotal || 'N/A',
-      rom_percentile: profile?.romPercentile || 'N/A',
-      worst_joints: profile?.worstJoints || [],
+      full_name:         profile?.name || session.name,
+      belt:              beltData?.currentBelt || profile?.belt || 'white',
+      rom_total:         'N/A',   // not exposed in GAS API — will be N/A until v2 migration
+      rom_percentile:    'N/A',
+      worst_joints:      [],
       technique_summary: techSummary,
-      red_techniques: redTechs,
-      protocol: protocolItems,
+      red_techniques:    redTechs,
+      protocol:          protocolItems,
     };
 
     renderContextBar(guestContext);
   } catch (e) {
     console.warn('Could not load context from GAS:', e);
     guestContext = { full_name: session.name };
+    renderContextBar(guestContext);
   }
 }
 
