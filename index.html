@@ -527,6 +527,32 @@
             min-height: 350px;
             background: transparent;
         }
+        /* Post-submit confirmation box — hidden until form fires */
+        .signup-confirm {
+            display: none;
+            margin-top: 24px;
+            background: rgba(0,128,128,0.18);
+            border: 1px solid var(--teal);
+            border-radius: 10px;
+            padding: 20px 24px;
+            color: var(--warm-white);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .signup-confirm strong { color: var(--gold); }
+        .signup-confirm .confirm-dashboard-link {
+            display: inline-block;
+            margin-top: 14px;
+            background: var(--gold);
+            color: var(--charcoal);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .signup-confirm .confirm-dashboard-link:hover { background: var(--gold-hover); }
         .privacy-note {
             font-size: 0.85rem;
             opacity: 0.7;
@@ -957,14 +983,15 @@
 </head>
 <body>
     <!-- STICKY NAV -->
+    <!-- FIX 1: Dashboard nav link now routes to /dashboard/index.html, not #screenshots -->
     <nav class="sticky-nav">
         <a href="#" class="sticky-nav-logo">ROMRxBJJ&#8482;</a>
         <div class="sticky-nav-links">
-            <a href="#screenshots">Dashboard</a>
+            <a href="/dashboard/index.html">Dashboard</a>
             <a href="#pricing">Pricing</a>
             <a href="#coaches">Coaches</a>
             <a href="#faq">FAQ</a>
-            <a href="#signup" class="sticky-nav-cta">Start Free &rarr;</a>
+            <a href="#signup-form" class="sticky-nav-cta">Start Free &rarr;</a>
         </div>
     </nav>
 
@@ -976,7 +1003,8 @@
                 <h1>Know What Your Body Is Ready For&#8482;</h1>
                 <p class="hero-sub">The only ROM assessment built for Brazilian Jiu-Jitsu. Get your 124 techniques rated GREEN, YELLOW, or RED based on YOUR mobility, not generic standards. Plus a coach dashboard so your instructor knows your readiness before you step on the mat.</p>
                 <div class="hero-ctas">
-                    <a href="#signup" class="btn-hero-primary">Start Your Assessment</a>
+                    <!-- FIX 2: CTA now anchors to #signup-form (on the form container itself) not #signup (section) -->
+                    <a href="#signup-form" class="btn-hero-primary">Start Your Assessment</a>
                     <a href="#screenshots" class="btn-hero-ghost">See the dashboard &darr;</a>
                 </div>
             </div>
@@ -1048,8 +1076,8 @@
     <!-- ===== PROBLEM ===== -->
     <section class="problem">
         <div class="container">
-            <h2 class="section-title">Your Body Isn't Ready for Every Technique</h2>
-            <p class="section-subtitle">And that's putting you at risk.</p>
+            <h2 class="section-title">Your Body Isn&#8217;t Ready for Every Technique</h2>
+            <p class="section-subtitle">And that&#8217;s putting you at risk.</p>
             <div class="stats-grid">
                 <div class="stat-card">
                     <span class="number">68-90%</span>
@@ -1064,14 +1092,14 @@
                     <span class="label">predictor of injury: mobility deficits</span>
                 </div>
             </div>
-            <p class="problem-closing">Most athletes train techniques their bodies can't safely support. <strong>ROMRxBJJ™ changes that.</strong></p>
+            <p class="problem-closing">Most athletes train techniques their bodies can&#8217;t safely support. <strong>ROMRxBJJ&#8482; changes that.</strong></p>
         </div>
     </section>
 
     <!-- ===== HOW IT WORKS ===== -->
     <section class="how-it-works">
         <div class="container">
-            <h2 class="section-title">The Position Readiness Protocol™</h2>
+            <h2 class="section-title">The Position Readiness Protocol&#8482;</h2>
             <p class="section-subtitle">Four steps to training smarter</p>
             <div class="steps-grid">
                 <div class="step">
@@ -1087,7 +1115,7 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <h3>RECEIVE</h3>
-                    <p>Get your personalized Position Readiness Profile™ within 48 hours</p>
+                    <p>Get your personalized Position Readiness Profile&#8482; within 48 hours</p>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
@@ -1121,7 +1149,7 @@
                         <li>Belt progression system</li>
                         <li>ROMBot AI chat &mdash; ask about your data anytime</li>
                     </ul>
-                    <a href="#signup" class="pricing-dual-cta">Start Free</a>
+                    <a href="#signup-form" class="pricing-dual-cta">Start Free</a>
                 </div>
 
                 <div class="pricing-dual-card" id="coaches">
@@ -1185,7 +1213,7 @@
                     <div class="testimonial-stars">
                         <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
                     </div>
-                    <p class="testimonial-quote">"[Coach quote here. What does knowing your athletes' readiness change about how you run class?]"</p>
+                    <p class="testimonial-quote">"[Coach quote here. What does knowing your athletes&#8217; readiness change about how you run class?]"</p>
                     <div class="testimonial-author">
                         <div class="testimonial-avatar">&#x1F4CB;</div>
                         <div>
@@ -1212,7 +1240,7 @@
                         What is Range of Motion (ROM)?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">Range of Motion is how far a joint can move through its full arc of motion. In BJJ, limited ROM at the hip, shoulder, ankle, or spine can prevent you from achieving proper technique positions, and increases injury risk. ROMRxBJJ™ measures 14 joints bilaterally to build a complete picture of your mobility.</div>
+                    <div class="faq-answer">Range of Motion is how far a joint can move through its full arc of motion. In BJJ, limited ROM at the hip, shoulder, ankle, or spine can prevent you from achieving proper technique positions, and increases injury risk. ROMRxBJJ&#8482; measures 14 joints bilaterally to build a complete picture of your mobility.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1220,7 +1248,7 @@
                         How does the self-assessment work?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">You’ll use a free goniometer app on your smartphone to measure joint angles at home. Each measurement takes seconds. The full assessment covers 14 joints, bilateral and midline, and is designed to be done solo, without equipment, in your living room.</div>
+                    <div class="faq-answer">You'll use a free goniometer app on your smartphone to measure joint angles at home. Each measurement takes seconds. The full assessment covers 14 joints, bilateral and midline, and is designed to be done solo, without equipment, in your living room.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1228,15 +1256,15 @@
                         How long does the assessment take?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">The ROM measurement portion takes 15–20 minutes. Entering your data into the submission form takes about 5 minutes. You only need to do it once every 6 weeks, each reassessment shows your progress and unlocks updated technique ratings.</div>
+                    <div class="faq-answer">The ROM measurement portion takes 15&#8211;20 minutes. Entering your data into the submission form takes about 5 minutes. You only need to do it once every 6 weeks, each reassessment shows your progress and unlocks updated technique ratings.</div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-question">
-                        What is the Position Readiness Profile™?
+                        What is the Position Readiness Profile&#8482;?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">Your Position Readiness Profile™ is your personalized technique map. Every one of the 124 techniques is rated GREEN (body-ready now), YELLOW (build toward it), or RED (avoid until ROM improves) based on your actual joint measurements compared to what that technique demands. It’s generated automatically and emailed to you the moment your assessment is processed.</div>
+                    <div class="faq-answer">Your Position Readiness Profile&#8482; is your personalized technique map. Every one of the 124 techniques is rated GREEN (body-ready now), YELLOW (build toward it), or RED (avoid until ROM improves) based on your actual joint measurements compared to what that technique demands. It&#8217;s generated automatically and emailed to you the moment your assessment is processed.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1244,7 +1272,7 @@
                         What happens after I submit?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">Your personalized Position Readiness Profile™ is generated and sent to your inbox automatically, usually within minutes of your submission processing. You’ll also receive your dashboard access code so you can log in and explore My Body, My Game, and My Protocol right away.</div>
+                    <div class="faq-answer">Your personalized Position Readiness Profile&#8482; is generated and sent to your inbox automatically, usually within minutes of your submission processing. You&#8217;ll also receive your dashboard access code so you can log in and explore My Body, My Game, and My Protocol right away.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1260,7 +1288,7 @@
                         How do I access my dashboard?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">After your assessment is processed, you’ll receive an email with your access code. Go to <strong>romrxbjj.com/dashboard</strong>, enter your email and code, and you’re in. No app download required.</div>
+                    <div class="faq-answer">After your assessment is processed, you&#8217;ll receive an email with your access code. Go to <strong>romrxbjj.com/dashboard</strong>, enter your email and code, and you&#8217;re in. No app download required.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1268,7 +1296,7 @@
                         What happens after 6 weeks?
                         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="faq-answer">You reassess. Six weeks of consistent mobility work moves the needle. Your updated ROM measurements generate a new Position Readiness Profile™, with more GREEN techniques unlocked and updated prescriptions for the joints still lagging. It’s a continuous improvement loop tied directly to your training.</div>
+                    <div class="faq-answer">You reassess. Six weeks of consistent mobility work moves the needle. Your updated ROM measurements generate a new Position Readiness Profile&#8482;, with more GREEN techniques unlocked and updated prescriptions for the joints still lagging. It&#8217;s a continuous improvement loop tied directly to your training.</div>
                 </div>
 
             </div>
@@ -1288,26 +1316,76 @@
     </script>
 
     <!-- ===== SIGNUP ===== -->
+    <!-- FIX 3: id="signup-form" placed on form-container for precise anchor targeting -->
     <section class="signup" id="signup">
         <div class="container">
             <h2>Start Your Assessment</h2>
-            <p>Fill out the form below and we’ll send your access code and onboarding instructions directly to your inbox.</p>
-            <div class="form-container">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc6jivxsofp1lKDiF0wte5QBFyphmyCvaDrt2gccu-oVoOJzw/viewform?embedded=true" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            <p>Fill out the form below and we&#8217;ll send your access code and onboarding instructions directly to your inbox.</p>
+            <!-- FIX 3: anchor id moved to this container so CTAs land exactly on the form -->
+            <div class="form-container" id="signup-form">
+                <iframe
+                    id="gform-iframe"
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSc6jivxsofp1lKDiF0wte5QBFyphmyCvaDrt2gccu-oVoOJzw/viewform?embedded=true"
+                    width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0">Loading&#8230;</iframe>
             </div>
-            <p class="privacy-note">We’ll never share your information. After submitting, watch your inbox for your access code.</p>
+            <!-- FIX 4: Post-submit confirmation with direct link to dashboard -->
+            <div class="signup-confirm" id="signup-confirm">
+                <strong>&#10003; You&#8217;re on the list!</strong><br>
+                Check your inbox &mdash; your access code and onboarding instructions are on their way. Once you receive your code, log in to your dashboard to see your results.
+                <br>
+                <a href="/dashboard/index.html" class="confirm-dashboard-link">Go to Dashboard &rarr;</a>
+            </div>
+            <p class="privacy-note">We&#8217;ll never share your information. After submitting, watch your inbox for your access code.</p>
         </div>
     </section>
 
     <!-- ===== FOOTER ===== -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-logo">ROMRxBJJ™</div>
-            <p class="footer-tagline">"Your body. Your game. Your protocol."™</p>
+            <div class="footer-logo">ROMRxBJJ&#8482;</div>
+            <p class="footer-tagline">&#8220;Your body. Your game. Your protocol.&#8221;&#8482;</p>
             <p class="footer-contact"><a href="mailto:ROMRxBJJ@gmail.com">ROMRxBJJ@gmail.com</a></p>
-            <p class="footer-copyright">© 2026 ROMRxBJJ™. All rights reserved. ROMRxBJJ™ is a product of ROMRx™ LLC.</p>
+            <p class="footer-copyright">&copy; 2026 ROMRxBJJ&#8482;. All rights reserved. ROMRxBJJ&#8482; is a product of ROMRx&#8482; LLC.</p>
         </div>
     </footer>
+
+    <!-- FIX 4: Post-submit confirm trigger via iframe message listener -->
+    <script>
+      (function() {
+        // Google Forms fires a postMessage when submitted in some browsers;
+        // fallback: detect iframe URL change to the thank-you page
+        var iframe = document.getElementById('gform-iframe');
+        var confirmBox = document.getElementById('signup-confirm');
+        if (!iframe || !confirmBox) return;
+
+        // Method A: postMessage (works in newer browsers)
+        window.addEventListener('message', function(e) {
+          if (e.data && typeof e.data === 'string' && e.data.indexOf('formResponse') !== -1) {
+            showConfirm();
+          }
+        });
+
+        // Method B: poll iframe src for Google Forms thank-you URL pattern
+        var pollInterval = setInterval(function() {
+          try {
+            var iframeSrc = iframe.contentWindow.location.href;
+            if (iframeSrc && iframeSrc.indexOf('formResponse') !== -1) {
+              showConfirm();
+              clearInterval(pollInterval);
+            }
+          } catch(e) {
+            // cross-origin; ignore
+          }
+        }, 1000);
+
+        function showConfirm() {
+          iframe.style.display = 'none';
+          confirmBox.style.display = 'block';
+          confirmBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          clearInterval(pollInterval);
+        }
+      })();
+    </script>
 
 </body>
 </html>
