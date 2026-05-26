@@ -1,37 +1,8 @@
 [build]
-  publish = "."
+  command   = "npm run build"
+  publish   = "dist"
 
 [[redirects]]
-  from = "/dashboard"
-  to = "/Dashboard/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/dashboard/*"
-  to = "/Dashboard/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/coach"
-  to = "/Coach/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/coach/*"
-  to = "/Coach/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/admin"
-  to = "/Admin/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/admin/*"
-  to = "/Admin/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from   = "/*"
+  to     = "/index.html"
   status = 200
