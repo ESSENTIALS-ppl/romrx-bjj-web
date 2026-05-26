@@ -55,10 +55,10 @@ function pick<T>(arr: T[]): T | null {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
-function greenInCategory(eligibility: TechniqueEligibility[], category: string) {
+function eligibleInCategory(eligibility: TechniqueEligibility[], category: string) {
   return eligibility.filter(e => {
     const tech = e.techniques as { category: string }
-    return e.tier === 'GREEN' && !e.flag &&
+    return (e.tier === 'GREEN' || e.tier === 'YELLOW') && !e.flag &&
       tech.category.toLowerCase() === category.toLowerCase()
   })
 }
@@ -66,7 +66,7 @@ function greenInCategory(eligibility: TechniqueEligibility[], category: string) 
 function limitingJointsForCategory(eligibility: TechniqueEligibility[], category: string): string[] {
   const reds = eligibility.filter(e => {
     const tech = e.techniques as { category: string }
-    return e.tier === 'RED' && tech.category.toLowerCase() === category.toLowerCase()
+    return (e.tier === 'RED' || e.flag === 'DELAY_TECHNIQUE') && tech.category.toLowerCase() === category.toLowerCase()
   })
   const joints = new Set<string>()
   reds.forEach(e => (e.limiting_joints ?? []).forEach(j => joints.add(j)))
@@ -88,8 +88,8 @@ function generateFlow(
 ): FlowStep[] {
   const sequence = mode === 'offense' ? OFFENSE_SEQUENCE : DEFENSE_SEQUENCE
   return sequence.map(cat => {
-    const greens = greenInCategory(eligibility, cat)
-    const chosen = pick(greens)
+    const eligible = eligibleInCategory(eligibility, cat)
+    const chosen = pick(eligible)
     return {
       fromPos: CAT_FROM[cat],
       category: cat,
@@ -360,7 +360,7 @@ export function MyGame() {
             <div className="bg-white rounded-2xl border border-teal-light p-8 text-center space-y-2">
               <p className="text-sm font-semibold text-charcoal">Choose your starting position</p>
               <p className="text-xs text-charcoal-light leading-relaxed max-w-sm mx-auto">
-                ROMRx will generate a personalized flow roll using only your GREEN-rated techniques — the ones your body is actually ready for.
+                ROMRx will generate a personalized flow roll using your GREEN and YELLOW techniques. RED techniques are never included.
               </p>
             </div>
           )}
@@ -375,7 +375,7 @@ export function MyGame() {
                     {mode === 'offense' ? 'Offense' : 'Defense'} Flow
                   </p>
                   <p className="text-xs text-charcoal-light">
-                    GREEN techniques only · based on your ROM
+                    GREEN + YELLOW only · RED excluded · based on your ROM
                   </p>
                 </div>
                 <button
@@ -397,7 +397,7 @@ export function MyGame() {
 
               {/* Context note */}
               <p className="text-center text-xs text-charcoal-light px-4">
-                Tap any technique to expand it. Hit "New Flow" to generate a different GREEN path. Improve your RED techniques to unlock more options.
+                Tap any technique to expand it. Hit "New Flow" for a different path. Improve your RED techniques to add more options.
               </p>
             </div>
           )}
