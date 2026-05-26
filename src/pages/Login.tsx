@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { Link } from 'react-router-dom'
 import { Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react'
 
 export function Login() {
@@ -165,7 +166,11 @@ export function Login() {
           )}
         </div>
 
-        <p className="text-center text-xs text-charcoal-light mt-6">Position Readiness Protocol™ by ROMRx</p>
+        <p className="text-center text-xs text-charcoal-light mt-4">
+          New athlete?{' '}
+          <Link to="/signup" className="text-teal underline">Create an account</Link>
+        </p>
+        <p className="text-center text-xs text-charcoal-light mt-3">Position Readiness Protocol™ by ROMRx</p>
       </div>
     </div>
   )

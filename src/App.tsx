@@ -4,6 +4,8 @@ import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
 import { AuthCallback } from './pages/AuthCallback'
 import { AuthConfirm } from './pages/AuthConfirm'
+import { Signup } from './pages/Signup'
+import { Assessment } from './pages/Assessment'
 import { MyBody } from './pages/MyBody'
 import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'
@@ -15,9 +17,11 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/login"         element={<Login />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/auth/confirm"  element={<AuthConfirm />} />
+        <Route path="/login"          element={<Login />} />
+        <Route path="/signup"          element={<Signup />} />
+        <Route path="/auth/callback"   element={<AuthCallback />} />
+        <Route path="/auth/confirm"    element={<AuthConfirm />} />
+        <Route path="/onboarding/assessment" element={<Assessment />} />
 
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />

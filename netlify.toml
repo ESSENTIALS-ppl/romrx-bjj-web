@@ -16,6 +16,21 @@
   status = 200
 
 [[redirects]]
+  from   = "/signup"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/onboarding"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/onboarding/*"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
   from   = "/auth/*"
   to     = "/index.html"
   status = 200
