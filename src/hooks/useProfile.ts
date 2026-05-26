@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 export interface Profile {
@@ -67,16 +68,31 @@ export function useProfile(userId: string | undefined) {
 
     async function load() {
       setLoading(true)
+
+      // Get the current session to explicitly pass the JWT
+      // (the default supabase client may not auto-attach it in all environments)
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+
+      // Build an authenticated client that explicitly sends the user JWT
+      const db = token
+        ? createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY,
+            { global: { headers: { Authorization: `Bearer ${token}` } } }
+          )
+        : supabase
+
       const [{ data: prof }, { data: assess }, { data: elig }] = await Promise.all([
-        supabase.from('users').select('*').eq('id', userId!).maybeSingle(),
-        supabase
+        db.from('users').select('*').eq('id', userId!).maybeSingle(),
+        db
           .from('assessments')
           .select('*')
           .eq('user_id', userId!)
           .order('assessed_at', { ascending: false })
           .limit(1)
           .maybeSingle(),
-        supabase
+        db
           .from('technique_eligibility')
           .select('id, technique_id, tier, flag, limiting_joints, techniques(code, name, belt, category)')
           .eq('user_id', userId!)
