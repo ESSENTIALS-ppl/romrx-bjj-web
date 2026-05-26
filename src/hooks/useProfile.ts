@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 export interface Profile {
@@ -46,6 +45,7 @@ export interface Assessment {
 export interface TechniqueEligibility {
   id: string
   technique_id: string
+  technique_code: string
   tier: string
   flag: string | null
   limiting_joints: string[] | null
@@ -58,10 +58,10 @@ export interface TechniqueEligibility {
 }
 
 export function useProfile(userId: string | undefined) {
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile]       = useState<Profile | null>(null)
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [eligibility, setEligibility] = useState<TechniqueEligibility[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]       = useState(true)
 
   useEffect(() => {
     if (!userId) return
@@ -69,38 +69,25 @@ export function useProfile(userId: string | undefined) {
     async function load() {
       setLoading(true)
 
-      // Get the current session to explicitly pass the JWT
-      // (the default supabase client may not auto-attach it in all environments)
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      // Use SECURITY DEFINER function — bypasses RLS entirely,
+      // filters by auth.uid() server-side so it's still secure.
+      const { data, error } = await supabase.rpc('get_my_profile')
 
-      // Build an authenticated client that explicitly sends the user JWT
-      const db = token
-        ? createClient(
-            import.meta.env.VITE_SUPABASE_URL,
-            import.meta.env.VITE_SUPABASE_ANON_KEY,
-            { global: { headers: { Authorization: `Bearer ${token}` } } }
-          )
-        : supabase
+      if (error) {
+        console.error('get_my_profile error:', error.message)
+        setLoading(false)
+        return
+      }
 
-      const [{ data: prof }, { data: assess }, { data: elig }] = await Promise.all([
-        db.from('users').select('*').eq('id', userId!).maybeSingle(),
-        db
-          .from('assessments')
-          .select('*')
-          .eq('user_id', userId!)
-          .order('assessed_at', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        db
-          .from('technique_eligibility')
-          .select('id, technique_id, tier, flag, limiting_joints, techniques(code, name, belt, category)')
-          .eq('user_id', userId!)
-          .order('tier'),
-      ])
-      setProfile(prof)
-      setAssessment(assess)
-      setEligibility((elig as unknown as TechniqueEligibility[]) ?? [])
+      const result = data as {
+        profile: Profile | null
+        assessment: Assessment | null
+        eligibility: TechniqueEligibility[]
+      }
+
+      setProfile(result.profile)
+      setAssessment(result.assessment)
+      setEligibility(result.eligibility ?? [])
       setLoading(false)
     }
 
