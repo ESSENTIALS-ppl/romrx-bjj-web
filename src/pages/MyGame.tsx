@@ -189,7 +189,7 @@ function FlowStepCard({ step, index }: { step: FlowStep; index: number }) {
 
 // ── Technique card (library tab) ──────────────────────────────────────────────
 const CATEGORIES = ['All', 'Throws', 'Passes', 'Guards', 'Sweeps', 'Controls', 'Submissions', 'Submission defense']
-const TIERS = ['All', 'GREEN', 'YELLOW', 'RED', 'DELAY'] as const
+const TIERS = ['All', 'GREEN', 'YELLOW', 'RED'] as const
 
 function TechCard({ item }: { item: TechniqueEligibility }) {
   const tech = item.techniques as { code: string; name: string; belt: string; category: string }
@@ -221,8 +221,8 @@ function TechCard({ item }: { item: TechniqueEligibility }) {
         </div>
       )}
       {isDelay && (
-        <div className="pt-2 border-t border-orange-100">
-          <p className="text-[11px] text-delay-tier bg-delay-tier-bg rounded-lg px-2.5 py-1.5 leading-snug">
+        <div className="pt-2 border-t border-red-100">
+          <p className="text-[11px] text-red-tier bg-red-tier-bg rounded-lg px-2.5 py-1.5 leading-snug">
             Build prerequisite mobility before attempting this technique.
           </p>
         </div>
@@ -268,12 +268,13 @@ export function MyGame() {
 
   const g = eligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
   const y = eligibility.filter(e => e.tier === 'YELLOW' && !e.flag).length
-  const r = eligibility.filter(e => e.tier === 'RED' && !e.flag).length
-  const d = eligibility.filter(e => e.flag === 'DELAY_TECHNIQUE').length
+  // DELAY_TECHNIQUE is an internal flag — count as RED in the UI
+  const r = eligibility.filter(e => e.tier === 'RED' || e.flag === 'DELAY_TECHNIQUE').length
 
   const filtered = eligibility.filter(item => {
     const tech = item.techniques as { name: string; category: string }
-    const effectiveTier = item.flag === 'DELAY_TECHNIQUE' ? 'DELAY' : item.tier
+    // DELAY_TECHNIQUE counts as RED in the UI
+    const effectiveTier = item.flag === 'DELAY_TECHNIQUE' ? 'RED' : item.tier
     return (
       (tierFilter === 'All' || effectiveTier === tierFilter) &&
       (catFilter  === 'All' || tech.category.toLowerCase().includes(catFilter.toLowerCase())) &&
@@ -290,7 +291,7 @@ export function MyGame() {
 
       {/* Tier summary strip */}
       <div className="flex gap-2 flex-wrap">
-        {([['GREEN', g, 'tier-green'], ['YELLOW', y, 'tier-yellow'], ['RED', r, 'tier-red'], ['DELAY', d, 'tier-delay']] as const).map(([label, count, cls]) => (
+        {([['GREEN', g, 'tier-green'], ['YELLOW', y, 'tier-yellow'], ['RED', r, 'tier-red']] as const).map(([label, count, cls]) => (
           <span key={label} className={`text-xs font-semibold px-3 py-1.5 rounded-full ${cls}`}>
             {count} {label}
           </span>

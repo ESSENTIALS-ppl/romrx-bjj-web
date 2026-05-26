@@ -10,13 +10,13 @@ export function tierColor(tier: string | null): string {
     case 'GREEN':  return 'tier-green'
     case 'YELLOW': return 'tier-yellow'
     case 'RED':    return 'tier-red'
-    case 'DELAY_TECHNIQUE': return 'tier-delay'
     default: return 'bg-gray-100 text-gray-600'
   }
 }
 
+// DELAY_TECHNIQUE is an internal flag — always surfaces as RED in the UI
 export function tierLabel(tier: string | null, flag: string | null): string {
-  if (flag === 'DELAY_TECHNIQUE') return 'DELAY'
+  if (flag === 'DELAY_TECHNIQUE') return 'RED'
   return tier ?? '—'
 }
 
