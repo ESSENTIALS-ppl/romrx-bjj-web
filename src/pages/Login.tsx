@@ -26,13 +26,17 @@ export function Login() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: false, // Only allow existing users
       },
     })
 
     setLoading(false)
     if (err) {
-      setError('No account found for that email. Contact your coach or ROMRx support.')
+      // Show specific error for debugging; common cause: SMTP not configured or rate limit
+      if (err.message.toLowerCase().includes('rate')) {
+        setError('Too many sign-in attempts. Wait a minute and try again.')
+      } else {
+        setError(`Sign-in failed: ${err.message}`)
+      }
     } else {
       setSent(true)
     }

@@ -1,25 +1,21 @@
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import type { Assessment } from '../hooks/useProfile'
+import { PageHeader } from '../components/PageHeader'
+import { SectionCard } from '../components/SectionCard'
+import { EmptyState } from '../components/EmptyState'
+import { Spinner } from '../components/Spinner'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
 import { cn, beltColor, formatJoint } from '../lib/utils'
-import { AlertTriangle, CheckCircle2, TrendingDown } from 'lucide-react'
+import { AlertTriangle, Activity } from 'lucide-react'
 
-// Reference ranges per joint for "optimal" shading
 const OPTIMAL: Record<string, number> = {
-  'Hip ER':       55,
-  'Hip IR':       40,
-  'Hip Abd':      50,
-  'Hip Flex':    110,
-  'Shoulder ER':  80,
-  'Shoulder Flex':165,
-  'Ankle DF':     15,
-  'Lumbar Flex':  50,
-  'Lumbar Ext':   25,
-  'Cerv Rot':     70,
+  'Hip ER': 55, 'Hip IR': 40, 'Hip Abd': 50, 'Hip Flex': 110,
+  'Shoulder ER': 80, 'Shoulder Flex': 165, 'Ankle DF': 15,
+  'Lumbar Flex': 50, 'Lumbar Ext': 25, 'Cervical Rot': 70,
 }
 
-function buildRadarData(a: Assessment) {
+function buildRadar(a: Assessment) {
   return [
     { joint: 'Hip ER',       value: Math.max(a.hip_er_l ?? 0, a.hip_er_r ?? 0) },
     { joint: 'Hip IR',       value: Math.max(a.hip_ir_l ?? 0, a.hip_ir_r ?? 0) },
@@ -30,51 +26,42 @@ function buildRadarData(a: Assessment) {
     { joint: 'Ankle DF',     value: Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0) },
     { joint: 'Lumbar Flex',  value: a.lumbar_flex ?? 0 },
     { joint: 'Lumbar Ext',   value: a.lumbar_ext ?? 0 },
-    { joint: 'Cerv Rot',     value: Math.max(a.cervical_rot_l ?? 0, a.cervical_rot_r ?? 0) },
+    { joint: 'Cervical Rot', value: Math.max(a.cervical_rot_l ?? 0, a.cervical_rot_r ?? 0) },
   ]
 }
 
-interface JointRowProps {
-  label: string
-  left?: number | null
-  right?: number | null
-  midline?: number | null
-  optimal: number
-}
-
-function JointRow({ label, left, right, midline, optimal }: JointRowProps) {
+function JointBar({ label, left, right, midline, optimal }: {
+  label: string; left?: number | null; right?: number | null
+  midline?: number | null; optimal: number
+}) {
   const best = midline ?? Math.max(left ?? 0, right ?? 0)
-  const pct = Math.min(100, Math.round((best / optimal) * 100))
-  const asymmetry = left != null && right != null ? Math.abs(left - right) : 0
-  const isFlag = pct < 75
+  const pct  = Math.min(100, Math.round((best / optimal) * 100))
+  const asym = left != null && right != null ? Math.abs(left - right) : 0
+  const isBad = pct < 75
 
   return (
-    <div className={cn('flex items-center gap-3 py-2.5 px-3 rounded-xl', isFlag ? 'bg-red-50' : 'bg-white border border-teal-light')}>
-      <div className="w-28 shrink-0">
-        <p className={cn('text-xs font-semibold', isFlag ? 'text-red-tier' : 'text-charcoal')}>{label}</p>
-        {asymmetry > 10 && (
-          <p className="text-xs text-yellow-tier flex items-center gap-0.5 mt-0.5">
-            <AlertTriangle size={10} /> {asymmetry}° asymmetry
+    <div className="flex items-center gap-3 py-2">
+      <div className="w-32 shrink-0">
+        <p className={cn('text-xs font-medium', isBad ? 'text-red-tier' : 'text-charcoal')}>{label}</p>
+        {asym > 10 && (
+          <p className="text-xs text-gold flex items-center gap-0.5 mt-0.5">
+            <AlertTriangle size={9} /> {asym}° gap
           </p>
         )}
       </div>
-      <div className="flex-1">
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className={cn('h-full rounded-full transition-all', pct >= 100 ? 'bg-teal' : pct >= 75 ? 'bg-gold' : 'bg-red-400')}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={cn('h-full rounded-full transition-all duration-500',
+            pct >= 100 ? 'bg-teal' : pct >= 75 ? 'bg-gold' : 'bg-red-400')}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <div className="w-24 text-right shrink-0">
-        {midline != null ? (
-          <span className="text-xs text-charcoal-light">{midline}°</span>
-        ) : (
-          <span className="text-xs text-charcoal-light">{left}° / {right}°</span>
-        )}
+      <div className="w-20 text-right shrink-0 text-xs text-charcoal-light">
+        {midline != null ? `${midline}°` : `${left ?? 0}° / ${right ?? 0}°`}
       </div>
-      <div className="w-12 text-right shrink-0">
-        <span className={cn('text-xs font-bold', pct >= 100 ? 'text-teal' : pct >= 75 ? 'text-gold' : 'text-red-tier')}>
+      <div className="w-8 text-right shrink-0">
+        <span className={cn('text-xs font-bold',
+          pct >= 100 ? 'text-teal' : pct >= 75 ? 'text-yellow-600' : 'text-red-tier')}>
           {pct}%
         </span>
       </div>
@@ -86,126 +73,100 @@ export function MyBody() {
   const { user } = useAuth()
   const { profile, assessment, loading } = useProfile(user?.id)
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-teal border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
+  if (loading) return <Spinner />
 
-  if (!assessment) {
-    return (
-      <div className="card text-center py-12">
-        <TrendingDown size={40} className="text-charcoal-light mx-auto mb-3" />
-        <h2 className="font-display font-bold text-lg text-charcoal mb-2">No assessment yet</h2>
-        <p className="text-sm text-charcoal-light mb-4">Complete your initial ROM assessment to see your body map.</p>
-        <a href="/onboarding/assessment" className="btn-primary inline-block">Start assessment</a>
-      </div>
-    )
-  }
+  if (!assessment) return (
+    <EmptyState
+      icon={Activity}
+      title="No assessment on file"
+      description="Complete your ROM self-assessment to see your body map, joint breakdown, and technique readiness."
+      action={<a href="/dashboard/settings" className="btn-primary text-sm">Get started</a>}
+    />
+  )
 
-  const radarData = buildRadarData(assessment)
+  const radarData = buildRadar(assessment)
+  const belt = profile?.belt ?? 'white'
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display font-bold text-2xl text-charcoal">My Body</h1>
-          <p className="text-sm text-charcoal-light mt-0.5">
-            Assessed {new Date(assessment.assessed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          </p>
-        </div>
-        <span className={cn('px-3 py-1 rounded-full text-xs font-bold uppercase', beltColor(profile?.belt ?? 'white'))}>
-          {profile?.belt ?? 'white'} belt
-        </span>
-      </div>
+    <div className="space-y-5">
+      <PageHeader
+        title="My Body"
+        subtitle={`Assessed ${new Date(assessment.assessed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
+        badge={`${belt} belt`}
+        badgeColor={beltColor(belt)}
+      />
 
-      {/* Red flag banner */}
       {assessment.red_flag_triggered && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
-          <AlertTriangle size={20} className="text-red-tier mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 bg-red-tier-bg border border-red-200 rounded-2xl p-4">
+          <AlertTriangle size={18} className="text-red-tier mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-semibold text-red-tier">Movement red flags detected</p>
-            <p className="text-xs text-red-tier mt-0.5">{assessment.red_flag_reasons?.join(' · ')}</p>
+            <p className="text-xs text-red-tier/80 mt-0.5 leading-relaxed">
+              {assessment.red_flag_reasons?.join(' · ')}
+            </p>
           </div>
         </div>
       )}
 
-      {/* Radar + stats row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card">
-          <h3 className="text-sm font-semibold text-charcoal mb-3">ROM Profile</h3>
-          <ResponsiveContainer width="100%" height={280}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="#e0ecec" />
-              <PolarAngleAxis dataKey="joint" tick={{ fontSize: 11, fill: '#5a7070' }} />
-              <Radar
-                dataKey="value"
-                stroke="#008080"
-                fill="#008080"
-                fillOpacity={0.25}
-                dot={{ fill: '#008080', r: 3 }}
-              />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <SectionCard title="ROM Profile">
+          <ResponsiveContainer width="100%" height={260}>
+            <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
+              <PolarGrid stroke="#cde0e0" />
+              <PolarAngleAxis dataKey="joint" tick={{ fontSize: 10, fill: '#5a7070', fontFamily: 'Inter' }} />
+              <Radar dataKey="value" stroke="#008080" fill="#008080" fillOpacity={0.2} dot={{ fill: '#008080', r: 3 }} />
               <Tooltip
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e0ecec' }}
+                contentStyle={{ fontSize: 12, borderRadius: 10, border: '1px solid #e0ecec', fontFamily: 'Inter' }}
                 formatter={(v) => [`${v}°`, 'ROM']}
               />
             </RadarChart>
           </ResponsiveContainer>
-        </div>
+        </SectionCard>
 
-        <div className="card flex flex-col justify-between">
-          <h3 className="text-sm font-semibold text-charcoal mb-4">Quick stats</h3>
-          <div className="space-y-3">
-            {assessment.rom_total != null && (
-              <StatRow label="ROM Total Score" value={`${assessment.rom_total}`} icon={<CheckCircle2 size={16} className="text-teal" />} />
-            )}
-            {assessment.rom_percentile != null && (
-              <StatRow label="Percentile" value={`${assessment.rom_percentile}th`} />
-            )}
+        <SectionCard title="Summary">
+          <div className="space-y-3 mt-2">
             {assessment.worst_joints && assessment.worst_joints.length > 0 && (
               <div>
-                <p className="text-xs text-charcoal-light font-semibold uppercase tracking-wide mb-1">Priority joints</p>
+                <p className="text-xs font-semibold text-charcoal-light uppercase tracking-wide mb-2">Priority joints</p>
                 <div className="flex flex-wrap gap-1.5">
                   {assessment.worst_joints.map(j => (
-                    <span key={j} className="text-xs bg-red-tier-bg text-red-tier px-2 py-0.5 rounded-full font-medium">
+                    <span key={j} className="text-xs bg-red-tier-bg text-red-tier px-2.5 py-1 rounded-full font-medium">
                       {formatJoint(j)}
                     </span>
                   ))}
                 </div>
               </div>
             )}
+            {assessment.rom_total != null && (
+              <div className="flex justify-between items-center py-2.5 border-t border-teal-light">
+                <span className="text-sm text-charcoal-light">ROM Total Score</span>
+                <span className="text-sm font-bold text-charcoal">{assessment.rom_total}</span>
+              </div>
+            )}
+            {assessment.rom_percentile != null && (
+              <div className="flex justify-between items-center py-2.5 border-t border-teal-light">
+                <span className="text-sm text-charcoal-light">Percentile</span>
+                <span className="text-sm font-bold text-charcoal">{assessment.rom_percentile}th</span>
+              </div>
+            )}
           </div>
-        </div>
+        </SectionCard>
       </div>
 
-      {/* Joint breakdown */}
-      <div className="card">
-        <h3 className="text-sm font-semibold text-charcoal mb-3">Joint breakdown</h3>
-        <div className="space-y-1.5">
-          <JointRow label="Hip ER"        left={assessment.hip_er_l}       right={assessment.hip_er_r}       optimal={OPTIMAL['Hip ER']} />
-          <JointRow label="Hip IR"        left={assessment.hip_ir_l}       right={assessment.hip_ir_r}       optimal={OPTIMAL['Hip IR']} />
-          <JointRow label="Hip Abduction" left={assessment.hip_abd_l}      right={assessment.hip_abd_r}      optimal={OPTIMAL['Hip Abd']} />
-          <JointRow label="Hip Flexion"   left={assessment.hip_flex_l}     right={assessment.hip_flex_r}     optimal={OPTIMAL['Hip Flex']} />
-          <JointRow label="Shoulder ER"   left={assessment.shoulder_er_l}  right={assessment.shoulder_er_r}  optimal={OPTIMAL['Shoulder ER']} />
-          <JointRow label="Shoulder Flex" left={assessment.shoulder_flex_l} right={assessment.shoulder_flex_r} optimal={OPTIMAL['Shoulder Flex']} />
-          <JointRow label="Ankle DF"      left={assessment.ankle_df_l}     right={assessment.ankle_df_r}     optimal={OPTIMAL['Ankle DF']} />
-          <JointRow label="Lumbar Flex"   midline={assessment.lumbar_flex}  optimal={OPTIMAL['Lumbar Flex']} />
-          <JointRow label="Lumbar Ext"    midline={assessment.lumbar_ext}   optimal={OPTIMAL['Lumbar Ext']} />
-          <JointRow label="Cervical Rot"  left={assessment.cervical_rot_l} right={assessment.cervical_rot_r} optimal={OPTIMAL['Cerv Rot']} />
+      <SectionCard title="Joint Breakdown" subtitle="Best side shown · % of optimal range">
+        <div className="divide-y divide-teal-light/60">
+          <JointBar label="Hip ER"         left={assessment.hip_er_l}        right={assessment.hip_er_r}        optimal={OPTIMAL['Hip ER']} />
+          <JointBar label="Hip IR"         left={assessment.hip_ir_l}        right={assessment.hip_ir_r}        optimal={OPTIMAL['Hip IR']} />
+          <JointBar label="Hip Abduction"  left={assessment.hip_abd_l}       right={assessment.hip_abd_r}       optimal={OPTIMAL['Hip Abd']} />
+          <JointBar label="Hip Flexion"    left={assessment.hip_flex_l}      right={assessment.hip_flex_r}      optimal={OPTIMAL['Hip Flex']} />
+          <JointBar label="Shoulder ER"    left={assessment.shoulder_er_l}   right={assessment.shoulder_er_r}   optimal={OPTIMAL['Shoulder ER']} />
+          <JointBar label="Shoulder Flex"  left={assessment.shoulder_flex_l} right={assessment.shoulder_flex_r} optimal={OPTIMAL['Shoulder Flex']} />
+          <JointBar label="Ankle DF"       left={assessment.ankle_df_l}      right={assessment.ankle_df_r}      optimal={OPTIMAL['Ankle DF']} />
+          <JointBar label="Lumbar Flex"    midline={assessment.lumbar_flex}   optimal={OPTIMAL['Lumbar Flex']} />
+          <JointBar label="Lumbar Ext"     midline={assessment.lumbar_ext}    optimal={OPTIMAL['Lumbar Ext']} />
+          <JointBar label="Cervical Rot"   left={assessment.cervical_rot_l}  right={assessment.cervical_rot_r}  optimal={OPTIMAL['Cervical Rot']} />
         </div>
-      </div>
-    </div>
-  )
-}
-
-function StatRow({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-teal-light last:border-0">
-      <span className="text-sm text-charcoal-light flex items-center gap-1.5">{icon}{label}</span>
-      <span className="text-sm font-semibold text-charcoal">{value}</span>
+      </SectionCard>
     </div>
   )
 }
