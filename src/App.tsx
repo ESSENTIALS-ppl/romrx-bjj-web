@@ -3,6 +3,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
 import { AuthCallback } from './pages/AuthCallback'
+import { AuthConfirm } from './pages/AuthConfirm'
 import { MyBody } from './pages/MyBody'
 import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'
@@ -16,6 +17,7 @@ export default function App() {
         {/* Public routes */}
         <Route path="/login"         element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/confirm"  element={<AuthConfirm />} />
 
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />
