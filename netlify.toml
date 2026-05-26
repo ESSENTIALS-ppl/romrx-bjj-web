@@ -2,7 +2,52 @@
   command   = "npm run build"
   publish   = "dist"
 
+# React app handles /login, /auth/*, /dashboard/*
 [[redirects]]
-  from   = "/*"
+  from   = "/login"
   to     = "/index.html"
   status = 200
+
+[[redirects]]
+  from   = "/auth/*"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/dashboard"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/dashboard/*"
+  to     = "/index.html"
+  status = 200
+
+# Legacy /my-body, /my-game etc. handled by React Router redirects inside the app
+[[redirects]]
+  from   = "/my-body"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/my-game"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/my-protocol"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/chat"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/settings"
+  to     = "/index.html"
+  status = 200
+
+# marketing.html is served as a static file at /marketing.html
+# / is served by the React app which redirects to /marketing.html

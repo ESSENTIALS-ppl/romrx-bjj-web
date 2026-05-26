@@ -4,11 +4,11 @@ import { cn } from '../lib/utils'
 import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut } from 'lucide-react'
 
 const NAV = [
-  { to: '/my-body',     icon: Dumbbell,       label: 'My Body' },
-  { to: '/my-game',     icon: Layers,          label: 'My Game' },
-  { to: '/my-protocol', icon: ClipboardList,   label: 'My Protocol' },
-  { to: '/chat',        icon: MessageSquare,   label: 'ROMBot' },
-  { to: '/settings',    icon: Settings,        label: 'Settings' },
+  { to: '/dashboard/my-body',     icon: Dumbbell,       label: 'My Body' },
+  { to: '/dashboard/my-game',     icon: Layers,          label: 'My Game' },
+  { to: '/dashboard/my-protocol', icon: ClipboardList,   label: 'My Protocol' },
+  { to: '/dashboard/chat',        icon: MessageSquare,   label: 'ROMBot' },
+  { to: '/dashboard/settings',    icon: Settings,        label: 'Settings' },
 ]
 
 export function Layout() {
@@ -17,7 +17,7 @@ export function Layout() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/login')
+    navigate('/')
   }
 
   return (

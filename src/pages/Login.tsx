@@ -13,7 +13,7 @@ export function Login() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (session) navigate('/my-body', { replace: true })
+    if (session) navigate('/dashboard/my-body', { replace: true })
   }, [session, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +25,7 @@ export function Login() {
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/my-body`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         shouldCreateUser: false, // Only allow existing users
       },
     })

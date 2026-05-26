@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
+import { AuthCallback } from './pages/AuthCallback'
 import { MyBody } from './pages/MyBody'
 import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'
@@ -12,21 +13,30 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        {/* Public routes */}
+        <Route path="/login"         element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Protected routes — require auth */}
+        {/* Redirect / to marketing page */}
+        <Route path="/" element={<Navigate to="/marketing.html" replace />} />
+
+        {/* Protected dashboard routes under /dashboard/* */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            <Route path="/my-body"     element={<MyBody />} />
-            <Route path="/my-game"     element={<MyGame />} />
-            <Route path="/my-protocol" element={<MyProtocol />} />
-            <Route path="/chat"        element={<Chat />} />
-            <Route path="/settings"    element={<Settings />} />
+            <Route path="/dashboard/my-body"     element={<MyBody />} />
+            <Route path="/dashboard/my-game"     element={<MyGame />} />
+            <Route path="/dashboard/my-protocol" element={<MyProtocol />} />
+            <Route path="/dashboard/chat"        element={<Chat />} />
+            <Route path="/dashboard/settings"    element={<Settings />} />
           </Route>
         </Route>
 
-        {/* Default redirect */}
-        <Route path="*" element={<Navigate to="/my-body" replace />} />
+        {/* Legacy redirects — old /my-body etc. -> /dashboard/my-body */}
+        <Route path="/my-body"     element={<Navigate to="/dashboard/my-body"     replace />} />
+        <Route path="/my-game"     element={<Navigate to="/dashboard/my-game"     replace />} />
+        <Route path="/my-protocol" element={<Navigate to="/dashboard/my-protocol" replace />} />
+        <Route path="/chat"        element={<Navigate to="/dashboard/chat"        replace />} />
+        <Route path="/settings"    element={<Navigate to="/dashboard/settings"    replace />} />
       </Routes>
     </BrowserRouter>
   )

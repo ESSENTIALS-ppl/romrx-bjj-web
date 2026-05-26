@@ -12,5 +12,10 @@ export function ProtectedRoute() {
     )
   }
 
+  // Don't redirect if URL contains Supabase auth tokens — let AuthCallback handle it
+  const hasAuthToken = window.location.hash.includes('access_token') ||
+                       window.location.search.includes('code=')
+  if (hasAuthToken) return null
+
   return session ? <Outlet /> : <Navigate to="/login" replace />
 }
