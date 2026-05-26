@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Loader2, UserPlus } from 'lucide-react'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
+const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
 
 export function Signup() {
-  const navigate = useNavigate()
   const [email, setEmail]         = useState('')
   const [password, setPassword]   = useState('')
   const [confirm, setConfirm]     = useState('')
@@ -36,33 +36,62 @@ export function Signup() {
       return
     }
 
-    // Update public.users with belt + full_name (trigger may have created the row)
     if (data.user) {
+      // Upsert user profile row
       await supabase.from('users').upsert({
         id: data.user.id,
         email,
         full_name: fullName,
         belt,
         portal_role: 'athlete',
-        subscription_status: 'active',
+        subscription_status: 'pending',
         subscription_tier: 'athlete',
         platforms: ['bjj'],
       }, { onConflict: 'id' })
 
+      // Create athlete row so assessment can link to it later
       await supabase.from('athletes').upsert({
         user_id: data.user.id,
         email,
         full_name: fullName,
         belt,
         dominant_side: 'right',
-        injury_flags: {},
-        onboarding_status: 'active',
-        is_active: true,
+        injury_flags: [],
+        onboarding_status: 'pending_payment',
+        is_active: false,
       }, { onConflict: 'user_id' })
+
+      // Get a fresh session so we can call the edge function
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+
+      if (token) {
+        // Call create-checkout-session edge function
+        const res = await fetch(CHECKOUT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, full_name: fullName }),
+        })
+        const { url, error: checkoutErr } = await res.json()
+        if (url) {
+          // Redirect to Stripe Checkout
+          window.location.href = url
+          return
+        }
+        if (checkoutErr) {
+          setError(`Payment setup failed: ${checkoutErr}`)
+          setLoading(false)
+          return
+        }
+      }
     }
 
     setLoading(false)
-    navigate('/onboarding/assessment', { replace: true })
+    setError('Something went wrong. Please try again.')
   }
 
   return (
