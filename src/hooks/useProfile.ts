@@ -68,14 +68,14 @@ export function useProfile(userId: string | undefined) {
     async function load() {
       setLoading(true)
       const [{ data: prof }, { data: assess }, { data: elig }] = await Promise.all([
-        supabase.from('users').select('*').eq('id', userId!).single(),
+        supabase.from('users').select('*').eq('id', userId!).maybeSingle(),
         supabase
           .from('assessments')
           .select('*')
           .eq('user_id', userId!)
           .order('assessed_at', { ascending: false })
           .limit(1)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('technique_eligibility')
           .select('id, technique_id, tier, flag, limiting_joints, techniques(code, name, belt, category)')
