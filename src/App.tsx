@@ -17,8 +17,8 @@ export default function App() {
         <Route path="/login"         element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Redirect / to marketing page */}
-        <Route path="/" element={<Navigate to="/marketing.html" replace />} />
+        {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
+        <Route path="/" element={null} />
 
         {/* Protected dashboard routes under /dashboard/* */}
         <Route element={<ProtectedRoute />}>

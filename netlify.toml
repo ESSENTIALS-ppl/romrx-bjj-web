@@ -2,7 +2,14 @@
   command   = "npm run build"
   publish   = "dist"
 
-# React app handles /login, /auth/*, /dashboard/*
+# Serve marketing page at / via Netlify rewrite (before the SPA catch-all)
+[[redirects]]
+  from   = "/"
+  to     = "/marketing.html"
+  status = 200
+  force  = true
+
+# React SPA routes
 [[redirects]]
   from   = "/login"
   to     = "/index.html"
@@ -23,7 +30,7 @@
   to     = "/index.html"
   status = 200
 
-# Legacy /my-body, /my-game etc. handled by React Router redirects inside the app
+# Legacy short paths — React app handles the redirect internally to /dashboard/*
 [[redirects]]
   from   = "/my-body"
   to     = "/index.html"
@@ -48,6 +55,3 @@
   from   = "/settings"
   to     = "/index.html"
   status = 200
-
-# marketing.html is served as a static file at /marketing.html
-# / is served by the React app which redirects to /marketing.html
