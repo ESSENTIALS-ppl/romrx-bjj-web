@@ -397,7 +397,7 @@ export function Assessment() {
     setLoading(false)
     if (!data.ok) { setError(data.error ?? 'Submission failed. Please try again.'); return }
     setPhase('done')
-    setTimeout(() => navigate('/dashboard/my-body', { replace: true }), 2000)
+    setTimeout(() => navigate('/onboarding/results', { replace: true }), 2000)
   }
 
   // ── Setup screen ─────────────────────────────────────────────────────────

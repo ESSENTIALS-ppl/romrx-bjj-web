@@ -13,6 +13,7 @@ import { Chat } from './pages/Chat'
 import { Settings } from './pages/Settings'
 import { CoachDashboard } from './pages/CoachDashboard'
 import { CoachSignup } from './pages/CoachSignup'
+import { ResultsPreview } from './pages/ResultsPreview'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/confirm"    element={<AuthConfirm />} />
         <Route path="/onboarding/assessment" element={<Assessment />} />
+        <Route path="/onboarding/results"    element={<ResultsPreview />} />
 
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />

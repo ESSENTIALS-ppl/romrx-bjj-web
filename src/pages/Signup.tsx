@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Loader2, UserPlus } from 'lucide-react'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
-const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
 
 export function Signup() {
+  const navigate = useNavigate()
   const [email, setEmail]         = useState('')
   const [password, setPassword]   = useState('')
   const [confirm, setConfirm]     = useState('')
@@ -61,33 +61,8 @@ export function Signup() {
         is_active: false,
       }, { onConflict: 'user_id' })
 
-      // Get a fresh session so we can call the edge function
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-
-      if (token) {
-        // Call create-checkout-session edge function
-        const res = await fetch(CHECKOUT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({ email, full_name: fullName }),
-        })
-        const { url, error: checkoutErr } = await res.json()
-        if (url) {
-          // Redirect to Stripe Checkout
-          window.location.href = url
-          return
-        }
-        if (checkoutErr) {
-          setError(`Payment setup failed: ${checkoutErr}`)
-          setLoading(false)
-          return
-        }
-      }
+      navigate('/onboarding/assessment', { replace: true })
+      return
     }
 
     setLoading(false)
