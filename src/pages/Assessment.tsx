@@ -294,6 +294,7 @@ const SETUP_STEPS = [
   { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps (free, Play Store)' },
   { icon: '⚖️', label: 'Calibrate', detail: 'Place phone on a flat surface — confirm it reads 0°. Tap to zero if not.' },
   { icon: '🏃', label: 'Warm up', detail: '8–10 min light movement first. Wear shorts and a t-shirt.' },
+  { icon: '📸', label: 'Hands-free screenshot', detail: 'When the phone is on your body, you can\'t tap the screen. Just say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Then read the number after.' },
 ]
 
 // ── Live scoring helper ───────────────────────────────────────────────────────
@@ -542,6 +543,11 @@ export function Assessment() {
                 <MeasureInput key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} />
               ))}
             </div>
+
+            {/* Hands-free screenshot tip */}
+            <p className="text-center text-xs text-charcoal-light">
+              📸 Can't tap the screen? Say <span className="font-semibold">&ldquo;Hey Siri, take a screenshot&rdquo;</span> (iPhone) or <span className="font-semibold">&ldquo;Hey Google, take a screenshot&rdquo;</span> (Android).
+            </p>
 
             {error && <p className="text-xs text-red-tier bg-red-tier-bg rounded-lg px-3 py-2">{error}</p>}
 
