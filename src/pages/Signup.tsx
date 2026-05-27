@@ -44,7 +44,7 @@ export function Signup() {
         full_name: fullName,
         belt,
         portal_role: 'athlete',
-        subscription_status: 'pending',
+        subscription_status: 'trialing',
         subscription_tier: 'athlete',
         platforms: ['bjj'],
       }, { onConflict: 'id' })
