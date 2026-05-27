@@ -3,1598 +3,263 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ROMRxBJJ™ — The Position Readiness Protocol™ built for BJJ athletes. Take a 10-minute self-assessment, get your personal ROM profile, technique readiness map, and injury-prevention Rx. $149/yr.">
-  <meta property="og:title" content="ROMRxBJJ™ | Your Body Is Blocking Techniques You Don't Know About">
-  <meta property="og:description" content="10-minute self-assessment. Your complete ROM profile, 132 technique ratings (GREEN/YELLOW/RED), asymmetry flags, and a personal injury-prevention Rx. No doctor needed.">
+  <title>ROMRxBJJ&#8482; | Performance Intelligence for Brazilian Jiu-Jitsu</title>
+  <meta name="description" content="The only ROM-to-technique mapping system for BJJ. For athletes, coaches, and academies.">
+  <meta property="og:title" content="ROMRxBJJ&#8482; | Performance Intelligence for BJJ">
+  <meta property="og:description" content="Know what your body is ready for. Know what your athletes need. ROM assessment built for Brazilian Jiu-Jitsu.">
   <meta property="og:url" content="https://romrxbjj.com">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://romrxbjj.com/og-image.jpg">
-  <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://romrxbjj.com">
-  <title>ROMRxBJJ™ | Your Body Is Blocking Techniques You Don't Know About</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23008080' width='100' height='100' rx='12'/><text x='50' y='72' font-size='60' font-weight='bold' fill='%23FFB347' text-anchor='middle'>R</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- GA4 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23008080' width='100' height='100' rx='12'/><text x='50' y='72' font-size='60' font-weight='bold' fill='%23FFB347' text-anchor='middle'>R</text></svg>">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6GXJWW0F1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-G6GXJWW0F1');
-  </script>
-
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G6GXJWW0F1');</script>
   <style>
-    /* ===== CSS VARIABLES ===== */
-    :root {
-      --teal: #008080;
-      --teal-dark: #006666;
-      --gold: #FFB347;
-      --gold-hover: #FFA733;
-      --charcoal: #36454F;
-      --charcoal-dark: #2a363d;
-      --warm-white: #FAF9F6;
-      --red-tier: #DC3545;
-      --yellow-tier: #f59e0b;
-      --green-tier: #16a34a;
-      --white: #ffffff;
-      --nav-height: 64px;
-    }
-
-    /* ===== RESET ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      color: var(--charcoal);
-      background: var(--warm-white);
-      padding-top: var(--nav-height);
+      background: #2a363d;
+      color: #FAF9F6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    img { display: block; max-width: 100%; }
-    a { text-decoration: none; color: inherit; }
-    ul { list-style: none; }
 
-    /* ===== NAV ===== */
+    /* Nav */
     .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-height);
-      z-index: 1000;
-      background: rgba(42, 54, 61, 0.92);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(42,54,61,0.95);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
       border-bottom: 1px solid rgba(0,128,128,0.2);
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
     }
-    .nav-inner {
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-    }
-    .nav-logo {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--teal);
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-links a {
-      color: rgba(255,255,255,0.75);
-      font-size: 0.875rem;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--white); }
-    .nav-cta {
-      background: var(--gold);
-      color: var(--charcoal-dark) !important;
-      font-weight: 600 !important;
-      border-radius: 8px !important;
-      padding: 8px 18px !important;
-      transition: background 0.2s !important;
-    }
-    .nav-cta:hover { background: var(--gold-hover) !important; color: var(--charcoal-dark) !important; }
-    .nav-hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 4px;
-      background: none;
-      border: none;
-    }
-    .nav-hamburger span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 2px;
-      transition: 0.3s;
-    }
-    .nav-mobile {
-      display: none;
-      position: fixed;
-      top: var(--nav-height);
-      left: 0; right: 0;
-      background: var(--charcoal-dark);
-      border-bottom: 1px solid rgba(0,128,128,0.2);
-      padding: 16px 24px 24px;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 999;
-    }
-    .nav-mobile.open { display: flex; }
-    .nav-mobile a {
-      color: rgba(255,255,255,0.8);
-      font-size: 1rem;
-      font-weight: 500;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .nav-mobile a:last-child { border-bottom: none; }
-    .nav-mobile .nav-cta {
-      margin-top: 8px;
-      background: var(--gold);
-      color: var(--charcoal-dark) !important;
-      text-align: center;
-      border-radius: 8px;
-      padding: 12px !important;
-      border-bottom: none !important;
-    }
+    .nav-logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.1rem; color: #008080; text-decoration: none; }
+    .nav-sign-in { font-size: 0.85rem; color: rgba(250,249,246,0.65); text-decoration: none; transition: color 0.2s; }
+    .nav-sign-in:hover { color: #FAF9F6; }
 
-    /* ===== BUTTONS ===== */
-    .btn-gold {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--gold);
-      color: var(--charcoal-dark);
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 14px 28px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      line-height: 1;
-    }
-    .btn-gold:hover { background: var(--gold-hover); transform: translateY(-1px); }
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: transparent;
-      color: rgba(255,255,255,0.65);
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 1rem;
-      padding: 14px 4px;
-      border: none;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .btn-ghost:hover { color: rgba(255,255,255,0.9); }
-
-    /* ===== SECTION UTILITIES ===== */
-    .section { padding: 80px 24px; }
-    .section-inner { max-width: 1200px; margin: 0 auto; }
-    .section-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--teal);
-    }
-    .section-h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1.75rem, 4vw, 2.75rem);
-      line-height: 1.15;
-    }
-    .section-sub {
-      font-size: 1.0625rem;
-      line-height: 1.65;
-    }
-    .text-center { text-align: center; }
-
-    /* ===== HERO ===== */
+    /* Hero */
     .hero {
-      background: var(--charcoal);
-      padding: 72px 24px 80px;
-    }
-    .hero-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      padding: 100px 24px 80px;
+      text-align: center;
     }
     .hero-eyebrow {
-      font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
+      font-weight: 700;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: var(--gold);
+      color: #FFB347;
       margin-bottom: 20px;
     }
-    .hero-h1 {
+    .hero h1 {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
-      font-size: clamp(2rem, 4.5vw, 3.25rem);
-      line-height: 1.1;
-      color: var(--white);
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.08;
       margin-bottom: 20px;
-      letter-spacing: -0.02em;
+      max-width: 700px;
     }
+    .hero h1 span { color: #008080; }
     .hero-sub {
-      font-size: 1.0625rem;
-      line-height: 1.7;
-      color: rgba(250,249,246,0.6);
-      margin-bottom: 36px;
-      max-width: 520px;
+      font-size: 1.1rem;
+      opacity: 0.7;
+      max-width: 540px;
+      line-height: 1.65;
+      margin-bottom: 60px;
     }
-    .hero-ctas {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 24px;
+
+    /* Path cards */
+    .paths {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
     }
-    .hero-social-proof {
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.45);
-      letter-spacing: 0.03em;
-    }
-    .hero-visuals {
+    .path-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(0,128,128,0.3);
+      border-radius: 20px;
+      padding: 36px 28px 32px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      position: relative;
+      overflow: hidden;
     }
-    .visual-card {
-      background: #1e2a32;
-      border: 1px solid rgba(0,128,128,0.4);
-      border-radius: 16px;
-      padding: 20px;
+    .path-card:hover {
+      border-color: rgba(0,128,128,0.7);
+      background: rgba(0,128,128,0.08);
+      transform: translateY(-3px);
     }
-    .visual-card-title {
-      font-family: 'Inter', sans-serif;
+    .path-card.featured {
+      border-color: #008080;
+      background: rgba(0,128,128,0.1);
+    }
+    .path-card.coming-soon {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .path-card.coming-soon:hover {
+      transform: none;
+      border-color: rgba(0,128,128,0.3);
+      background: rgba(255,255,255,0.04);
+    }
+    .path-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+    .path-badge {
+      display: inline-block;
+      background: #008080;
+      color: white;
       font-size: 0.65rem;
       font-weight: 700;
-      letter-spacing: 0.14em;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 14px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      width: fit-content;
+      margin-bottom: 4px;
     }
-
-    /* ===== SVG RADAR ===== */
-    .radar-svg { display: block; margin: 0 auto; }
-
-    /* ===== RX CARD ===== */
-    .rx-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .rx-issue-name {
+    .path-badge.coming { background: rgba(255,179,71,0.2); color: #FFB347; border: 1px solid rgba(255,179,71,0.4); }
+    .path-title {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
       font-size: 1.4rem;
-      color: var(--white);
-      margin-bottom: 10px;
+      color: #FAF9F6;
+      line-height: 1.2;
     }
-    .rx-stats-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .rx-stat {
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: var(--white);
-    }
-    .rx-badge {
-      font-size: 0.6875rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 4px;
-    }
-    .rx-badge-red { background: rgba(220,53,69,0.15); color: var(--red-tier); border: 1px solid rgba(220,53,69,0.4); }
-    .rx-badge-gold { background: rgba(255,179,71,0.15); color: var(--gold); border: 1px solid rgba(255,179,71,0.4); }
-    .rx-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 12px 0; }
-    .rx-symbol {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: var(--teal);
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-    .rx-list { display: flex; flex-direction: column; gap: 5px; }
-    .rx-list li {
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.8);
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .rx-list li::before {
-      content: '—';
-      color: rgba(0,128,128,0.7);
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .rx-personalized {
-      font-size: 0.75rem;
-      font-style: italic;
-      color: var(--gold);
-      margin-top: 14px;
-    }
-    .rx-section-label {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-      margin-top: 10px;
-      margin-bottom: 4px;
-    }
-
-    /* ===== TRUST BAR ===== */
-    .trust-bar {
-      background: var(--teal);
-      padding: 28px 24px;
-    }
-    .trust-bar-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-    }
-    .trust-stat {
+    .path-desc {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: rgba(250,249,246,0.65);
       flex: 1;
-      text-align: center;
-      padding: 8px 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: rgba(255,255,255,0.92);
-      line-height: 1.4;
     }
-    .trust-divider {
-      width: 1px;
-      height: 40px;
-      background: rgba(255,255,255,0.3);
-      flex-shrink: 0;
-    }
-
-    /* ===== PAIN HOOK ===== */
-    .pain-hook { background: var(--warm-white); }
-    .pain-hook-sub { color: rgba(54,69,79,0.75); max-width: 680px; }
-    .stat-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin: 40px 0 36px;
-    }
-    .stat-card {
-      background: var(--white);
-      border: 1px solid rgba(0,128,128,0.15);
-      border-radius: 14px;
-      padding: 28px 24px;
-      text-align: center;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    }
-    .stat-card-number {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 2.25rem;
-      color: var(--teal);
-      line-height: 1;
-      margin-bottom: 10px;
-    }
-    .stat-card-desc {
-      font-size: 0.875rem;
-      color: rgba(54,69,79,0.75);
-      line-height: 1.4;
-    }
-    .pain-statement {
-      font-size: 1.0625rem;
-      line-height: 1.7;
-      color: var(--charcoal);
-      max-width: 760px;
-      margin: 0 auto 32px;
-      text-align: center;
-    }
-    .pain-statement strong {
-      color: var(--charcoal-dark);
-      font-weight: 700;
-    }
-
-    /* ===== ASYMMETRY SECTION ===== */
-    .asymmetry-section { background: var(--charcoal); }
-    .asymmetry-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-    }
-    .asym-text .section-h2 { color: var(--white); margin-bottom: 24px; }
-    .asym-text-body {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.7);
-      line-height: 1.7;
-      margin-bottom: 16px;
-    }
-    .asym-highlight {
-      font-size: 1.0625rem;
-      font-weight: 700;
-      color: var(--white);
-      margin-top: 20px;
-    }
-    .asym-visual {
-      background: #1e2a32;
-      border: 1px solid rgba(0,128,128,0.35);
-      border-radius: 16px;
-      padding: 28px 24px;
-    }
-    .asym-visual-title {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 6px;
-    }
-    .asym-visual-joint {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 1rem;
-      color: var(--white);
-      margin-bottom: 24px;
-    }
-    .asym-bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 20px;
-      margin-bottom: 20px;
-      min-height: 180px;
-    }
-    .asym-bar-group {
+    .path-features {
+      list-style: none;
       display: flex;
       flex-direction: column;
+      gap: 8px;
+    }
+    .path-features li {
+      font-size: 0.82rem;
+      color: rgba(250,249,246,0.7);
+      display: flex;
       align-items: center;
       gap: 8px;
-      flex: 1;
     }
-    .asym-bar-wrap {
-      width: 100%;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      height: 160px;
-    }
-    .asym-bar {
-      width: 56px;
-      border-radius: 6px 6px 0 0;
-      position: relative;
-      display: flex;
-      justify-content: center;
-    }
-    .asym-bar-left {
-      height: 100px;
-      background: linear-gradient(180deg, var(--yellow-tier), rgba(245,158,11,0.6));
-    }
-    .asym-bar-right {
-      height: 160px;
-      background: linear-gradient(180deg, var(--green-tier), rgba(22,163,74,0.6));
-    }
-    .asym-bar-value {
-      position: absolute;
-      top: -26px;
-      font-size: 0.9375rem;
-      font-weight: 700;
-      color: var(--white);
-      white-space: nowrap;
-    }
-    .asym-bar-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-    }
-    .asym-badge-row { display: flex; justify-content: center; }
-    .asym-badge-low {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: rgba(245,158,11,0.12);
-      color: var(--yellow-tier);
-      border: 1px solid rgba(245,158,11,0.35);
-      padding: 3px 8px;
-      border-radius: 4px;
-    }
-    .asym-badge-ok {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: rgba(22,163,74,0.12);
-      color: var(--green-tier);
-      border: 1px solid rgba(22,163,74,0.35);
-      padding: 3px 8px;
-      border-radius: 4px;
-    }
-    .asym-gap-annotation {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 4px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--gold);
-    }
-    .asym-warning-icon { font-size: 1rem; }
-
-    /* ===== HOW IT WORKS ===== */
-    .how-it-works { background: var(--white); }
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
-      margin-top: 48px;
-      position: relative;
-    }
-    .steps-grid::before {
+    .path-features li::before {
       content: '';
-      position: absolute;
-      top: 36px;
-      left: calc(16.666% + 16px);
-      right: calc(16.666% + 16px);
-      height: 2px;
-      background: linear-gradient(90deg, var(--teal) 0%, rgba(0,128,128,0.2) 100%);
-    }
-    .step {
-      text-align: center;
-      padding: 0 16px;
-    }
-    .step-num {
-      width: 72px;
-      height: 72px;
-      background: var(--teal);
+      width: 6px; height: 6px;
+      background: #008080;
       border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .path-cta {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      position: relative;
-      z-index: 1;
-    }
-    .step-num-inner {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 1.5rem;
-      color: var(--white);
-    }
-    .step-title {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 0.95rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 10px;
-    }
-    .step-desc {
-      font-size: 0.9375rem;
-      color: rgba(54,69,79,0.8);
-      line-height: 1.6;
-    }
-
-    /* ===== WHAT YOU GET ===== */
-    .what-you-get { background: var(--warm-white); }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-top: 48px;
-    }
-    .feature-card {
-      background: var(--white);
-      border-radius: 14px;
-      border-left: 4px solid var(--teal);
-      padding: 28px 24px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-    }
-    .feature-card-title {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 1.0625rem;
-      color: var(--teal);
-      margin-bottom: 10px;
-    }
-    .feature-card-desc {
-      font-size: 0.9375rem;
-      color: var(--charcoal);
-      line-height: 1.6;
-    }
-
-    /* ===== PRICING ===== */
-    .pricing-section { background: var(--charcoal-dark); }
-    .pricing-section .section-h2 { color: var(--white); }
-    .pricing-section .section-sub { color: rgba(255,255,255,0.65); }
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      margin-top: 48px;
-    }
-    .pricing-card {
-      border-radius: 18px;
-      padding: 36px 32px;
-      position: relative;
-    }
-    .pricing-card-athlete {
-      background: #1e2a32;
-      border: 2px solid var(--gold);
-    }
-    .pricing-card-coach {
-      background: #1e2a32;
-      border: 2px solid var(--teal);
-    }
-    .pricing-plan {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 4px;
-    }
-    .pricing-card-coach .pricing-plan { color: var(--teal); }
-    .pricing-plan-sub {
-      font-size: 0.875rem;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 24px;
-    }
-    .pricing-price {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 3rem;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .pricing-period {
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 16px;
-    }
-    .pricing-promo-badge {
-      display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255,179,71,0.12);
-      border: 1px solid rgba(255,179,71,0.35);
-      color: var(--gold);
-      font-size: 0.78125rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
-      margin-bottom: 24px;
-    }
-    .pricing-features { display: flex; flex-direction: column; gap: 9px; margin-bottom: 28px; }
-    .pricing-feature {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.8);
-      line-height: 1.4;
-    }
-    .pricing-check { font-weight: 700; flex-shrink: 0; margin-top: 1px; font-size: 0.85rem; }
-    .pricing-check-gold { color: var(--gold); }
-    .pricing-check-teal { color: var(--teal); }
-    .btn-pricing-gold {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: var(--gold);
-      color: var(--charcoal-dark);
-      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
       font-weight: 700;
-      font-size: 1rem;
-      padding: 14px;
-      border-radius: 10px;
-      transition: background 0.2s;
+      color: #FFB347;
+      margin-top: 4px;
     }
-    .btn-pricing-gold:hover { background: var(--gold-hover); }
-    .btn-pricing-ghost {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: transparent;
-      color: rgba(255,255,255,0.8);
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 13px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,128,128,0.5);
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .btn-pricing-ghost:hover { border-color: var(--teal); color: var(--white); }
-    .pricing-note {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.35);
-    }
+    .path-card.coming-soon .path-cta { color: rgba(250,249,246,0.35); }
 
-    /* ===== TESTIMONIALS ===== */
-    .testimonials { background: var(--warm-white); }
-    .testimonials .section-h2 { color: var(--charcoal-dark); }
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 44px;
-    }
-    .testimonial-card {
-      background: var(--white);
-      border-radius: 14px;
-      padding: 28px 24px;
-      border: 1px solid rgba(0,128,128,0.12);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .testimonial-quote {
-      font-size: 0.9375rem;
-      line-height: 1.65;
-      color: var(--charcoal);
-      font-style: italic;
-      flex: 1;
-    }
-    .testimonial-quote::before { content: '\201C'; }
-    .testimonial-quote::after { content: '\201D'; }
-    .testimonial-author {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--teal);
-    }
-    .testimonial-placeholder {
-      text-align: center;
-      font-size: 0.8125rem;
-      color: rgba(54,69,79,0.45);
-      margin-top: 28px;
-      font-style: italic;
-    }
-
-    /* ===== FAQ ===== */
-    .faq-section { background: var(--white); }
-    .faq-list {
-      max-width: 820px;
-      margin: 48px auto 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .faq-item {
-      border: 1px solid rgba(0,128,128,0.15);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .faq-question {
-      width: 100%;
-      text-align: left;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 18px 20px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 1rem;
-      color: var(--charcoal-dark);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.2s;
-    }
-    .faq-question:hover { background: rgba(0,128,128,0.04); }
-    .faq-icon {
-      font-size: 1.25rem;
-      color: var(--teal);
-      transition: transform 0.25s;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-    }
-    .faq-answer-inner {
-      padding: 0 20px 18px;
-      font-size: 0.9375rem;
-      color: rgba(54,69,79,0.8);
-      line-height: 1.7;
-    }
-    .faq-item.open .faq-answer { max-height: 400px; }
-    .faq-item.open .faq-icon { transform: rotate(45deg); }
-    .faq-item.open .faq-question { background: rgba(0,128,128,0.04); }
-
-    /* ===== FINAL CTA ===== */
-    .final-cta {
-      background: linear-gradient(135deg, var(--charcoal) 0%, var(--teal-dark) 100%);
-      padding: 100px 24px;
-      text-align: center;
-    }
-    .final-cta-h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1.875rem, 4.5vw, 3rem);
-      color: var(--white);
-      line-height: 1.15;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-    .final-cta-sub {
-      font-size: 1.125rem;
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 36px;
-    }
-    .final-cta-note {
-      margin-top: 20px;
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.5);
-    }
-
-    /* ===== FOOTER ===== */
+    /* Footer */
     .footer {
-      background: var(--charcoal-dark);
-      padding: 36px 24px;
-    }
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
       text-align: center;
-    }
-    .footer-logo {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--teal);
-      letter-spacing: -0.01em;
-    }
-    .footer-tagline {
-      font-style: italic;
-      font-size: 0.875rem;
-      color: rgba(255,255,255,0.4);
-    }
-    .footer-links {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .footer-links a {
-      font-size: 0.875rem;
-      color: rgba(255,255,255,0.5);
-      transition: color 0.2s;
-    }
-    .footer-links a:hover { color: rgba(255,255,255,0.85); }
-    .footer-copy {
+      padding: 32px 24px;
       font-size: 0.8rem;
-      color: rgba(255,255,255,0.3);
+      opacity: 0.35;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .section { padding: 60px 20px; }
-
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-
-      .hero { padding: 48px 20px 60px; }
-      .hero-inner {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-      .hero-h1 { font-size: 2rem; }
-      .hero-sub { max-width: 100%; }
-      .hero-visuals { order: -1; }
-
-      .trust-bar-inner {
-        flex-direction: column;
-        gap: 12px;
-      }
-      .trust-divider { width: 60px; height: 1px; }
-      .trust-stat { padding: 4px 0; }
-
-      .stat-cards { grid-template-columns: 1fr; }
-
-      .asymmetry-inner {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      .steps-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-      .steps-grid::before { display: none; }
-
-      .features-grid { grid-template-columns: 1fr; }
-
-      .pricing-grid { grid-template-columns: 1fr; }
-      .pricing-card { padding: 28px 24px; }
-
-      .testimonials-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero-h1 { font-size: 1.75rem; }
-      .section-h2 { font-size: 1.625rem; }
-      .pricing-price { font-size: 2.5rem; }
+    @media (max-width: 700px) {
+      .paths { grid-template-columns: 1fr; max-width: 420px; }
+      .nav { padding: 0 20px; }
+      .hero { padding: 80px 20px 60px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ===== STICKY NAV ===== -->
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo" aria-label="ROMRxBJJ home">ROMRxBJJ™</a>
-    <div class="nav-links">
-      <a href="#how-it-works">How It Works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
-      <a href="/login">Sign In</a>
-      <a href="/signup" class="nav-cta">Get My Assessment →</a>
-    </div>
-    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </div>
-</nav>
-<div class="nav-mobile" id="navMobile" role="navigation" aria-label="Mobile navigation">
-  <a href="#how-it-works">How It Works</a>
-  <a href="#pricing">Pricing</a>
-  <a href="#faq">FAQ</a>
-  <a href="/login">Sign In</a>
-  <a href="/signup" class="nav-cta">Get My Assessment →</a>
-</div>
+  <nav class="nav">
+    <a href="/" class="nav-logo">ROMRxBJJ&#8482;</a>
+    <a href="/login" class="nav-sign-in">Sign In &rarr;</a>
+  </nav>
 
-<!-- ===== HERO ===== -->
-<section class="hero" aria-labelledby="hero-heading">
-  <div class="hero-inner">
-    <!-- LEFT: Copy -->
-    <div class="hero-copy">
-      <p class="hero-eyebrow">The Position Readiness Protocol™ · Built for BJJ Athletes</p>
-      <h1 class="hero-h1" id="hero-heading">Your body is blocking techniques you don't even know about.</h1>
-      <p class="hero-sub">Take a 10-minute self-assessment. Get your personal ROM profile, technique readiness map, and an injury-prevention Rx — designed to keep you in the gym and out of the ER.</p>
-      <div class="hero-ctas">
-        <a href="/signup" class="btn-gold">Take My Free Assessment →</a>
-        <a href="#how-it-works" class="btn-ghost">See how it works ↓</a>
-      </div>
-      <p class="hero-social-proof">No doctor needed · No equipment · Just your phone</p>
-    </div>
+  <main class="hero">
+    <p class="hero-eyebrow">The Position Readiness Protocol&#8482;</p>
+    <h1>Performance Intelligence<br>for <span>Brazilian Jiu-Jitsu</span></h1>
+    <p class="hero-sub">The only ROM-to-technique mapping system for BJJ. Built for athletes who want to train smarter — and coaches who want to protect their team.</p>
 
-    <!-- RIGHT: Visuals -->
-    <div class="hero-visuals">
+    <div class="paths">
 
-      <!-- Panel 1: ROM Web SVG -->
-      <div class="visual-card">
-        <p class="visual-card-title">MY BODY — ROM Profile</p>
-        <svg class="radar-svg" viewBox="0 0 400 400" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="BJJ athlete ROM profile radar chart" role="img">
-          <!-- Grid polygons at 25%, 50%, 75%, 100% of radius 150 -->
-          <!-- 100% polygon: axes at angles -90,-54,-18,18,54,90,126,162,198,234 deg, r=150 -->
-          <polygon
-            points="200,50 321.3,62.0 347.9,159.9 278.5,270.5 149.8,307.5 62.1,307.5 -7.9,219.9 26.7,92.0 200,50"
-            fill="rgba(255,255,255,0.04)"
-            stroke="rgba(255,255,255,0.08)"
-            stroke-width="1"
-          />
-          <!-- 75%: r=112.5 -->
-          <polygon
-            points="200,87.5 290.8,96.5 310.9,169.9 228.9,227.9 149.8,255.6 96.6,255.6 46.1,194.9 50.0,119.0 200,87.5"
-            fill="rgba(255,255,255,0.04)"
-            stroke="rgba(255,255,255,0.08)"
-            stroke-width="1"
-          />
-          <!-- 50%: r=75 -->
-          <polygon
-            points="200,125 260.5,131.0 273.9,179.9 239.2,235.2 174.9,253.7 131.0,253.7 100.0,219.9 125.0,146.0 200,125"
-            fill="rgba(255,255,255,0.04)"
-            stroke="rgba(255,255,255,0.08)"
-            stroke-width="1"
-          />
-          <!-- 25%: r=37.5 -->
-          <polygon
-            points="200,162.5 230.2,165.5 236.9,189.9 219.6,217.6 199.9,226.8 165.5,226.8 153.1,219.9 162.5,173.0 200,162.5"
-            fill="rgba(255,255,255,0.04)"
-            stroke="rgba(255,255,255,0.08)"
-            stroke-width="1"
-          />
-
-          <!-- Radial axis lines (center to outer ring) -->
-          <!-- Computed from: cx=200,cy=200, angle in radians, r=150 -->
-          <!-- Hip ER: -90° → (200, 50) -->
-          <line x1="200" y1="200" x2="200" y2="50" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Hip IR: -54° → (200+150cos(-54°), 200+150sin(-54°)) = (200+88.2, 200-121.4) = (288.2,78.6) -->
-          <line x1="200" y1="200" x2="288" y2="79" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Hip Abd: -18° → (200+150cos(-18°), 200+150sin(-18°)) = (200+142.6, 200-46.4) = (342.6,153.6) -->
-          <line x1="200" y1="200" x2="343" y2="154" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Hip Flex: 18° → (200+142.6, 200+46.4) = (342.6,246.4) -->
-          <line x1="200" y1="200" x2="343" y2="246" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Shoulder ER: 54° → (200+88.2, 200+121.4) = (288.2,321.4) -->
-          <line x1="200" y1="200" x2="288" y2="321" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Shoulder Flex: 90° → (200+0, 200+150) = (200,350) -->
-          <line x1="200" y1="200" x2="200" y2="350" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Ankle DF: 126° → (200+150cos(126°), 200+150sin(126°)) = (200-88.2, 200+121.4) = (111.8,321.4) -->
-          <line x1="200" y1="200" x2="112" y2="321" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Lumbar Flex: 162° → (200+150cos(162°), 200+150sin(162°)) = (200-142.6, 200+46.4) = (57.4,246.4) -->
-          <line x1="200" y1="200" x2="57" y2="246" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Cervical Rot: 198° → (200+150cos(198°), 200+150sin(198°)) = (200-142.6, 200-46.4) = (57.4,153.6) -->
-          <line x1="200" y1="200" x2="57" y2="154" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-          <!-- Thoracic Rot: 234° → (200+88.2, 200-121.4) = (288.2,78.6) — wait, 234° = (200+150cos(234°), 200+150sin(234°)) = (200-88.2,200-121.4) = (111.8,78.6) -->
-          <line x1="200" y1="200" x2="112" y2="79" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-
-          <!--
-            Data polygon:
-            Hip ER (0.67): 200 + 150*0.67*cos(-90°), 200 + 150*0.67*sin(-90°) = 200, 200-100.5 = (200, 99.5)
-            Hip IR (0.82): 200 + 150*0.82*cos(-54°), 200 + 150*0.82*sin(-54°)
-              cos(-54)=0.5878, sin(-54)=-0.8090 → 200+72.3, 200-99.5 = (272.3, 100.5)
-            Hip Abd (0.90): 200 + 150*0.90*cos(-18°), 200 + 150*0.90*sin(-18°)
-              cos(-18)=0.9511, sin(-18)=-0.3090 → 200+128.4, 200-41.7 = (328.4, 158.3)
-            Hip Flex (0.98): 200 + 150*0.98*cos(18°), 200 + 150*0.98*sin(18°)
-              cos(18)=0.9511, sin(18)=0.3090 → 200+139.7, 200+45.4 = (339.7, 245.4)
-            Shoulder ER (0.73): 200 + 150*0.73*cos(54°), 200 + 150*0.73*sin(54°)
-              cos(54)=0.5878, sin(54)=0.8090 → 200+64.4, 200+88.6 = (264.4, 288.6)
-            Shoulder Flex (0.67): 200 + 150*0.67*cos(90°), 200 + 150*0.67*sin(90°)
-              cos(90)=0, sin(90)=1 → 200+0, 200+100.5 = (200, 300.5)
-            Ankle DF (0.60): 200 + 150*0.60*cos(126°), 200 + 150*0.60*sin(126°)
-              cos(126)=-0.5878, sin(126)=0.8090 → 200-52.9, 200+72.8 = (147.1, 272.8)
-            Lumbar Flex (0.56): 200 + 150*0.56*cos(162°), 200 + 150*0.56*sin(162°)
-              cos(162)=-0.9511, sin(162)=0.3090 → 200-80.0, 200+26.0 = (120.0, 226.0)
-            Cervical Rot (0.79): 200 + 150*0.79*cos(198°), 200 + 150*0.79*sin(198°)
-              cos(198)=-0.9511, sin(198)=-0.3090 → 200-112.8, 200-36.6 = (87.2, 163.4)
-            Thoracic Rot (0.60): 200 + 150*0.60*cos(234°), 200 + 150*0.60*sin(234°)
-              cos(234)=-0.5878, sin(234)=-0.8090 → 200-52.9, 200-72.8 = (147.1, 127.2)
-          -->
-          <polygon
-            points="200,99.5 272.3,100.5 328.4,158.3 339.7,245.4 264.4,288.6 200,300.5 147.1,272.8 120.0,226.0 87.2,163.4 147.1,127.2"
-            fill="rgba(0,128,128,0.28)"
-            stroke="#008080"
-            stroke-width="2.5"
-            stroke-linejoin="round"
-          />
-
-          <!-- Data point dots with color coding -->
-          <!-- Hip ER (67%) → yellow -->
-          <circle cx="200" cy="99.5" r="5" fill="#f59e0b" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Hip IR (82%) → green -->
-          <circle cx="272.3" cy="100.5" r="5" fill="#16a34a" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Hip Abd (90%) → green -->
-          <circle cx="328.4" cy="158.3" r="5" fill="#16a34a" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Hip Flex (98%) → green -->
-          <circle cx="339.7" cy="245.4" r="5" fill="#16a34a" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Shoulder ER (73%) → yellow -->
-          <circle cx="264.4" cy="288.6" r="5" fill="#f59e0b" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Shoulder Flex (67%) → yellow -->
-          <circle cx="200" cy="300.5" r="5" fill="#f59e0b" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Ankle DF (60%) → yellow -->
-          <circle cx="147.1" cy="272.8" r="5" fill="#f59e0b" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Lumbar Flex (56%) → red -->
-          <circle cx="120.0" cy="226.0" r="5" fill="#dc3545" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Cervical Rot (79%) → green -->
-          <circle cx="87.2" cy="163.4" r="5" fill="#16a34a" stroke="#1e2a32" stroke-width="2"/>
-          <!-- Thoracic Rot (60%) → yellow -->
-          <circle cx="147.1" cy="127.2" r="5" fill="#f59e0b" stroke="#1e2a32" stroke-width="2"/>
-
-          <!-- Axis labels at outer ring -->
-          <!-- Hip ER: 12 o'clock → text above -->
-          <text x="200" y="36" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Hip ER</text>
-          <!-- Hip IR: top-right -->
-          <text x="296" y="65" text-anchor="start" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Hip IR</text>
-          <!-- Hip Abd: right-top -->
-          <text x="352" y="150" text-anchor="start" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Hip Abd</text>
-          <!-- Hip Flex: right-bottom -->
-          <text x="352" y="252" text-anchor="start" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Hip Flex</text>
-          <!-- Shoulder ER: bottom-right -->
-          <text x="295" y="334" text-anchor="start" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Shldr ER</text>
-          <!-- Shoulder Flex: 6 o'clock -->
-          <text x="200" y="368" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Shldr Flex</text>
-          <!-- Ankle DF: bottom-left -->
-          <text x="105" y="334" text-anchor="end" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Ankle</text>
-          <!-- Lumbar Flex: left-bottom -->
-          <text x="50" y="252" text-anchor="end" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Lumbar</text>
-          <!-- Cervical Rot: left-top -->
-          <text x="50" y="150" text-anchor="end" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Cerv Rot</text>
-          <!-- Thoracic Rot: top-left -->
-          <text x="105" y="65" text-anchor="end" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9" font-weight="500">Thoracic</text>
-
-          <!-- Legend -->
-          <circle cx="24" cy="388" r="4" fill="#16a34a"/>
-          <text x="32" y="392" fill="rgba(255,255,255,0.5)" font-family="Inter,sans-serif" font-size="8">≥80%</text>
-          <circle cx="72" cy="388" r="4" fill="#f59e0b"/>
-          <text x="80" y="392" fill="rgba(255,255,255,0.5)" font-family="Inter,sans-serif" font-size="8">60–79%</text>
-          <circle cx="126" cy="388" r="4" fill="#dc3545"/>
-          <text x="134" y="392" fill="rgba(255,255,255,0.5)" font-family="Inter,sans-serif" font-size="8">&lt;60%</text>
-        </svg>
-      </div>
-
-      <!-- Panel 2: Rx Card -->
-      <div class="visual-card">
-        <div class="rx-header">
-          <p class="visual-card-title">MY PROTOCOL — #1 Priority</p>
-        </div>
-        <p class="rx-issue-name">Shoulder Flexion</p>
-        <div class="rx-stats-row">
-          <span class="rx-stat">L 120°</span>
-          <span class="rx-badge rx-badge-red">AT RISK</span>
-          <span style="color: rgba(255,255,255,0.3); font-size:0.875rem;">/</span>
-          <span class="rx-stat">R 155°</span>
-          <span class="rx-badge rx-badge-gold">35° asymmetry gap</span>
-        </div>
-        <hr class="rx-divider">
-        <p class="rx-symbol">℞</p>
-        <p class="rx-section-label">Exercises</p>
-        <ul class="rx-list">
-          <li>Wall Slide · 3×12</li>
-          <li>Prone Y Raise · 3×10 hold 7s</li>
-          <li>Kettlebell Arm Bar · 3×20s</li>
+      <!-- Athletes -->
+      <a href="/athletes" class="path-card featured">
+        <span class="path-icon">&#x1F94B;</span>
+        <span class="path-badge">Most Popular</span>
+        <div class="path-title">For Athletes</div>
+        <p class="path-desc">Know exactly which techniques your body is ready for — and which ones are setting you up for injury.</p>
+        <ul class="path-features">
+          <li>10-min self-assessment, no doctor needed</li>
+          <li>132 techniques rated GREEN, YELLOW, or RED</li>
+          <li>Personalized injury-prevention protocol</li>
+          <li>ROMBot AI — knows your exact scores</li>
         </ul>
-        <p class="rx-section-label">Stretches</p>
-        <ul class="rx-list">
-          <li>Child's Pose Lat Stretch · 45s</li>
-          <li>Overhead Band Distraction · 30s</li>
+        <div class="path-cta">Start Free Assessment &rarr;</div>
+      </a>
+
+      <!-- Coaches -->
+      <a href="/coaches" class="path-card">
+        <span class="path-icon">&#x1F4CB;</span>
+        <span class="path-badge">Now Available</span>
+        <div class="path-title">For Coaches</div>
+        <p class="path-desc">See every athlete's ROM profile, asymmetry flags, and technique readiness — before they walk on the mat.</p>
+        <ul class="path-features">
+          <li>Full roster with G/Y/R technique counts</li>
+          <li>Asymmetry alerts by athlete</li>
+          <li>RAMP warmup generator per technique</li>
+          <li>Coach notes + belt progression</li>
         </ul>
-        <p class="rx-section-label">Foam Roll</p>
-        <ul class="rx-list">
-          <li>Thoracic Spine Roll · 90s</li>
+        <div class="path-cta">Request Coach Access &rarr;</div>
+      </a>
+
+      <!-- Gyms -->
+      <div class="path-card coming-soon">
+        <span class="path-icon">&#x1F3E2;</span>
+        <span class="path-badge coming">Coming Soon</span>
+        <div class="path-title">For Gyms</div>
+        <p class="path-desc">Academy-level dashboards, multi-coach management, and gym-wide injury analytics for your entire school.</p>
+        <ul class="path-features">
+          <li>Full academy ROM roster</li>
+          <li>Multi-coach management</li>
+          <li>Gym-wide asymmetry analytics</li>
+          <li>School branding + athlete portal</li>
         </ul>
-        <p class="rx-personalized">Personalized to your exact measurements</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TRUST BAR ===== -->
-<div class="trust-bar" role="region" aria-label="Key statistics">
-  <div class="trust-bar-inner">
-    <div class="trust-stat">132 techniques rated <strong>GREEN, YELLOW, or RED</strong></div>
-    <div class="trust-divider" aria-hidden="true"></div>
-    <div class="trust-stat">Asymmetry is the <strong>#1 predictor of injury</strong></div>
-    <div class="trust-divider" aria-hidden="true"></div>
-    <div class="trust-stat"><strong>10-minute self-assessment</strong> · No doctor needed</div>
-  </div>
-</div>
-
-<!-- ===== PAIN HOOK ===== -->
-<section class="section pain-hook" id="pain" aria-labelledby="pain-heading">
-  <div class="section-inner">
-    <div style="text-align:center; margin-bottom: 8px;">
-      <h2 class="section-h2" id="pain-heading">Which techniques is your body blocking?</h2>
-    </div>
-    <p class="section-sub pain-hook-sub" style="text-align:center; margin: 16px auto 0;">
-      Most BJJ athletes train techniques their ROM can't safely support. That mismatch is why 68–90% of grapplers get injured within 3 years.
-    </p>
-    <div class="stat-cards">
-      <div class="stat-card">
-        <div class="stat-card-number">68–90%</div>
-        <div class="stat-card-desc">of BJJ practitioners get injured within 3 years</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-number">42.5%</div>
-        <div class="stat-card-desc">of all injuries happen to white belts</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-number">#1 predictor</div>
-        <div class="stat-card-desc">Left-right asymmetry, not overall weakness</div>
-      </div>
-    </div>
-    <p class="pain-statement">
-      The worst part? You don't know which techniques are putting you at risk — until it's too late. <strong>ROMRxBJJ™ shows you exactly which movements your body is and isn't ready for.</strong>
-    </p>
-    <div style="text-align:center;">
-      <a href="/signup" class="btn-gold">Find Out What Your Body Is Blocking →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ===== ASYMMETRY SECTION ===== -->
-<section class="section asymmetry-section" id="asymmetry" aria-labelledby="asym-heading">
-  <div class="section-inner asymmetry-inner">
-    <div class="asym-text">
-      <h2 class="section-h2" id="asym-heading">Asymmetry Is the #1 Predictor of Injury</h2>
-      <p class="asym-text-body" style="margin-top: 8px; color: rgba(255,255,255,0.55); font-size: 0.875rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 20px;">Not weakness. Not overtraining. The difference between your left side and your right side.</p>
-      <p class="asym-text-body">
-        A 35° asymmetry in shoulder flexion. A 9° gap in hip internal rotation. These aren't numbers most athletes know — but they determine whether De La Riva opens you up for a knee reap injury or whether your guard game stays intact.
-      </p>
-      <p class="asym-text-body">
-        ROMRxBJJ™ flags every asymmetry in your assessment, ranks them by injury risk, and prescribes exercises to close the gap.
-      </p>
-      <p class="asym-highlight">Your protocol doesn't target weakness. It targets imbalance.</p>
-    </div>
-    <div class="asym-visual">
-      <p class="asym-visual-title">Asymmetry Visualization</p>
-      <p class="asym-visual-joint">Shoulder Flexion</p>
-      <div class="asym-bars">
-        <div class="asym-bar-group">
-          <div class="asym-bar-wrap">
-            <div class="asym-bar asym-bar-left">
-              <span class="asym-bar-value">120°</span>
-            </div>
-          </div>
-          <div class="asym-badge-row"><span class="asym-badge-low">LOW</span></div>
-          <span class="asym-bar-label" style="margin-top:6px;">LEFT</span>
-        </div>
-        <div style="display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:36px;">
-          <div class="asym-gap-annotation">
-            <span class="asym-warning-icon">⚠</span>
-            <span>35° gap</span>
-          </div>
-        </div>
-        <div class="asym-bar-group">
-          <div class="asym-bar-wrap">
-            <div class="asym-bar asym-bar-right">
-              <span class="asym-bar-value">155°</span>
-            </div>
-          </div>
-          <div class="asym-badge-row"><span class="asym-badge-ok">FUNCTIONAL</span></div>
-          <span class="asym-bar-label" style="margin-top:6px;">RIGHT</span>
-        </div>
-      </div>
-      <p style="font-size: 0.78125rem; color: rgba(255,255,255,0.35); text-align:center; margin-top:4px;">
-        A 10°+ left-right difference is a meaningful injury risk flag
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ===== HOW IT WORKS ===== -->
-<section class="section how-it-works" id="how-it-works" aria-labelledby="hiw-heading">
-  <div class="section-inner">
-    <div class="text-center" style="margin-bottom: 8px;">
-      <span class="section-label">The Process</span>
-    </div>
-    <h2 class="section-h2 text-center" id="hiw-heading" style="margin-top: 10px;">From phone to protocol in 10 minutes</h2>
-    <div class="steps-grid">
-      <div class="step">
-        <div class="step-num" aria-hidden="true">
-          <span class="step-num-inner">1</span>
-        </div>
-        <p class="step-title">Measure</p>
-        <p class="step-desc">Use the free Measure app on your iPhone (or Simple Inclinometer on Android) to measure 10 joint groups. Takes ~10 minutes. No equipment. Just your body and your phone.</p>
-      </div>
-      <div class="step">
-        <div class="step-num" aria-hidden="true">
-          <span class="step-num-inner">2</span>
-        </div>
-        <p class="step-title">Discover</p>
-        <p class="step-desc">See your complete ROM Profile — your technique eligibility map (which techniques are GREEN, YELLOW, or RED), your asymmetry flags, and your BJJ Mobility Score.</p>
-      </div>
-      <div class="step">
-        <div class="step-num" aria-hidden="true">
-          <span class="step-num-inner">3</span>
-        </div>
-        <p class="step-title">Train</p>
-        <p class="step-desc">Follow your personal Rx: 3 exercises, 2 stretches, and 1 foam rolling activity per priority joint. Retest every 6 weeks to unlock new techniques as your ROM improves.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== WHAT YOU GET ===== -->
-<section class="section what-you-get" id="features" aria-labelledby="wyg-heading">
-  <div class="section-inner">
-    <div class="text-center" style="margin-bottom: 8px;">
-      <span class="section-label">What's Included</span>
-    </div>
-    <h2 class="section-h2 text-center" id="wyg-heading" style="margin-top: 10px;">Your complete BJJ mobility intelligence system</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <p class="feature-card-title">My Body</p>
-        <p class="feature-card-desc">Radar chart of your full ROM profile across 10 joints. Asymmetry flags shown at a glance. The most honest picture of what your body is actually ready for.</p>
-      </div>
-      <div class="feature-card">
-        <p class="feature-card-title">My Game</p>
-        <p class="feature-card-desc">Your 132 techniques rated GREEN, YELLOW, or RED based on YOUR exact measurements. Build offense and defense flows with only body-ready techniques.</p>
-      </div>
-      <div class="feature-card">
-        <p class="feature-card-title">My Protocol</p>
-        <p class="feature-card-desc">Your top 3 injury risks, ranked by asymmetry. 3 exercises + 2 stretches + 1 foam roll per issue, sourced from evidence-based mobility literature.</p>
-      </div>
-      <div class="feature-card">
-        <p class="feature-card-title">ROMBot</p>
-        <p class="feature-card-desc">AI mobility intelligence that knows your exact scores. Ask why a technique is RED. Ask what you need to unlock De La Riva. It reads your profile, not generic advice.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== PRICING ===== -->
-<section class="section pricing-section" id="pricing" aria-labelledby="pricing-heading">
-  <div class="section-inner">
-    <div class="text-center">
-      <span class="section-label" style="color: rgba(255,255,255,0.5);">Pricing</span>
-    </div>
-    <h2 class="section-h2 text-center" id="pricing-heading" style="margin-top: 10px;">Simple Pricing. Serious Results.</h2>
-    <p class="section-sub text-center" style="color: rgba(255,255,255,0.65); margin-top: 14px;">Less than the cost of one private lesson.</p>
-    <div class="pricing-grid">
-
-      <!-- Athlete Card -->
-      <div class="pricing-card pricing-card-athlete">
-        <p class="pricing-plan">Athlete</p>
-        <p class="pricing-plan-sub">Individual BJJ practitioners</p>
-        <p class="pricing-price">$149</p>
-        <p class="pricing-period">per year · less than $13/month</p>
-        <ul class="pricing-features">
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> Full ROM assessment (10 joints)</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> 132 technique ratings (White + Blue Belt)</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> My Body radar chart + asymmetry tracking</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> My Game personalized flow builder</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> My Protocol injury-prevention Rx</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> ROMBot AI</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> Quarterly reassessments</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-gold">✓</span> Belt progression system</li>
-        </ul>
-        <a href="/signup" class="btn-pricing-gold">Start My Assessment →</a>
-      </div>
-
-      <!-- Coach Card -->
-      <div class="pricing-card pricing-card-coach">
-        <p class="pricing-plan" style="color: var(--teal);">Coach Starter</p>
-        <p class="pricing-plan-sub">Individual coaches + academies</p>
-        <p class="pricing-price">$349</p>
-        <p class="pricing-period">per year</p>
-        <ul class="pricing-features" style="margin-top: 8px;">
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Full athlete roster ROM dashboard</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> GREEN/YELLOW/RED status per athlete</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Asymmetry alerts and trend tracking</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Auto-generated class warmup protocols</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Belt promotion workflow</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Unlimited athletes</li>
-        </ul>
-        <a href="mailto:romrxbjj@gmail.com" class="btn-pricing-ghost">Get Coach Access →</a>
-      </div>
-    </div>
-    <p class="pricing-note">All prices in USD. Annual subscription. Cancel anytime.</p>
-  </div>
-</section>
-
-<!-- ===== TESTIMONIALS ===== -->
-<section class="section testimonials" id="testimonials" aria-labelledby="test-heading">
-  <div class="section-inner">
-    <div class="text-center">
-      <span class="section-label">Athletes</span>
-    </div>
-    <h2 class="section-h2 text-center" id="test-heading" style="margin-top: 10px; color: var(--charcoal-dark);">What athletes are saying</h2>
-    <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <p class="testimonial-quote">I didn't realize my hip IR deficit was why my guard kept getting passed. Two months of the protocol and I'm finally keeping people in guard.</p>
-        <p class="testimonial-author">White Belt · Columbus, OH</p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">The asymmetry report was the most useful thing I've seen in BJJ. Found a 16° shoulder gap I had no idea about.</p>
-        <p class="testimonial-author">Blue Belt · Dallas, TX</p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">Now I know exactly which techniques to drill and which ones to avoid until my mobility catches up.</p>
-        <p class="testimonial-author">Purple Belt · Nashville, TN</p>
-      </div>
-    </div>
-    <p class="testimonial-placeholder">Real quotes from your athletes will go here — ask them after their first assessment.</p>
-  </div>
-</section>
-
-<!-- ===== FAQ ===== -->
-<section class="section faq-section" id="faq" aria-labelledby="faq-heading">
-  <div class="section-inner">
-    <div class="text-center">
-      <span class="section-label">Common Questions</span>
-    </div>
-    <h2 class="section-h2 text-center" id="faq-heading" style="margin-top: 10px;">Frequently Asked Questions</h2>
-    <div class="faq-list" role="list">
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          Do I need to see a doctor first?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">No. ROMRxBJJ™ is a self-administered measurement protocol using a free smartphone app. No medical background required.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          How long does the assessment take?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">About 10 minutes for the measurements, 5 minutes to enter your data. You'll see your full profile immediately.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          What app do I use to measure?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">iPhone: the free built-in Measure app (use the Level function). Android: Simple Inclinometer (free). Both measure joint angles in degrees.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          What is a ROM asymmetry?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">When one side of your body moves differently than the other. A 10°+ difference is a meaningful injury risk flag. Most athletes have asymmetries they don't know about.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          Why are some techniques RED?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">RED means your current ROM puts that technique's required positions beyond your safe range. It's not forever — with your prescribed Rx, RED techniques can become YELLOW and eventually GREEN.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          How often do I reassess?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">Every 6–8 weeks. Each reassessment updates your technique ratings, recalculates asymmetries, and regenerates your Rx. Progress is tracked over time.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          Do I need any equipment?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">No. Just your smartphone and a flat floor surface.</div>
-        </div>
-      </div>
-
-      <div class="faq-item" role="listitem">
-        <button class="faq-question" aria-expanded="false">
-          What belt levels are covered?
-          <span class="faq-icon" aria-hidden="true">+</span>
-        </button>
-        <div class="faq-answer" role="region">
-          <div class="faq-answer-inner">Currently White Belt and Blue Belt (132 techniques). Purple, Brown, and Black Belt content is in development.</div>
-        </div>
+        <div class="path-cta"><a href="/gyms" style="color:rgba(250,249,246,0.45);text-decoration:none;font-size:0.85rem;">Join Early Access List</a></div>
       </div>
 
     </div>
-  </div>
-</section>
+  </main>
 
-<!-- ===== FINAL CTA ===== -->
-<section class="final-cta" aria-labelledby="final-cta-heading">
-  <h2 class="final-cta-h2" id="final-cta-heading">Stop guessing what your body is ready for.</h2>
-  <p class="final-cta-sub">10 minutes. Your phone. Complete ROM picture.</p>
-  <a href="/signup" class="btn-gold" style="font-size: 1.125rem; padding: 16px 36px;">Take My Free Assessment →</a>
-  <p class="final-cta-note">No doctor needed. No equipment. See your results immediately.</p>
-</section>
-
-<!-- ===== FOOTER ===== -->
-<footer class="footer" role="contentinfo">
-  <div class="footer-inner">
-    <p class="footer-logo">ROMRxBJJ™</p>
-    <p class="footer-tagline">Your body. Your game. Your protocol.™</p>
-    <nav class="footer-links" aria-label="Footer navigation">
-      <a href="mailto:ROMRxBJJ@gmail.com">ROMRxBJJ@gmail.com</a>
-      <a href="/login">Sign In</a>
-      <a href="/privacy">Privacy</a>
-    </nav>
-    <p class="footer-copy">© 2026 ROMRxBJJ™. A product of ROMRx™ LLC.</p>
-  </div>
-</footer>
-
-<!-- ===== JS ===== -->
-<script>
-  // --- Mobile nav toggle ---
-  const hamburger = document.getElementById('navHamburger');
-  const mobileNav = document.getElementById('navMobile');
-  hamburger.addEventListener('click', () => {
-    const isOpen = mobileNav.classList.toggle('open');
-    hamburger.setAttribute('aria-expanded', isOpen);
-  });
-  // Close mobile nav on link click
-  mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileNav.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-    });
-  });
-
-  // --- FAQ accordion ---
-  document.querySelectorAll('.faq-question').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.closest('.faq-item');
-      const isOpen = item.classList.contains('open');
-      // Close all
-      document.querySelectorAll('.faq-item').forEach(el => {
-        el.classList.remove('open');
-        el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-      });
-      // Open clicked if it was closed
-      if (!isOpen) {
-        item.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
-
-  // --- Smooth scroll for anchor links ---
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', e => {
-      const target = document.querySelector(anchor.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        const offset = 80;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
-    });
-  });
-</script>
+  <footer class="footer">
+    &copy; 2026 ROMRxBJJ&#8482; &middot; A product of ROMRx&#8482; LLC &middot;
+    <a href="mailto:ROMRxBJJ@gmail.com" style="color:inherit;">ROMRxBJJ@gmail.com</a>
+  </footer>
 
 </body>
 </html>

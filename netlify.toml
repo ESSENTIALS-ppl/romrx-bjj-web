@@ -9,6 +9,25 @@
   status = 200
   force  = true
 
+# Marketing sub-pages
+[[redirects]]
+  from   = "/athletes"
+  to     = "/athletes.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/coaches"
+  to     = "/coaches.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/gyms"
+  to     = "/gyms.html"
+  status = 200
+  force  = true
+
 # React SPA routes
 [[redirects]]
   from   = "/login"

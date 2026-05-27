@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROMRxBJJ™ For Gyms | Coming Soon</title>
+  <meta name="description" content="ROMRxBJJ academy-level analytics and team dashboards — coming soon for BJJ gyms and academies.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23008080' width='100' height='100' rx='12'/><text x='50' y='72' font-size='60' font-weight='bold' fill='%23FFB347' text-anchor='middle'>R</text></svg>">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6GXJWW0F1"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G6GXJWW0F1');</script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #36454F;
+      color: #FAF9F6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.5rem; color: #008080; margin-bottom: 48px; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,179,71,0.15);
+      border: 1px solid rgba(255,179,71,0.4);
+      color: #FFB347;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      margin-bottom: 20px;
+      max-width: 640px;
+    }
+    h1 span { color: #008080; }
+    p {
+      font-size: 1.1rem;
+      opacity: 0.75;
+      max-width: 540px;
+      line-height: 1.65;
+      margin-bottom: 40px;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 48px;
+      max-width: 600px;
+    }
+    .feature-chip {
+      background: rgba(0,128,128,0.15);
+      border: 1px solid rgba(0,128,128,0.3);
+      color: rgba(250,249,246,0.85);
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .email-form { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+    .email-input {
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,128,128,0.4);
+      background: rgba(255,255,255,0.06);
+      color: #FAF9F6;
+      font-size: 0.95rem;
+      width: 280px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-input::placeholder { color: rgba(250,249,246,0.35); }
+    .email-input:focus { border-color: #008080; }
+    .btn-gold {
+      padding: 14px 28px;
+      background: #FFB347;
+      color: #36454F;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .btn-gold:hover { background: #FFA733; transform: translateY(-1px); }
+    .success { display: none; color: #008080; font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
+    .back-link { margin-top: 40px; font-size: 0.85rem; opacity: 0.5; }
+    .back-link a { color: #008080; text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <a href="/" class="logo">ROMRxBJJ&#8482;</a>
+
+  <div class="badge">Coming Soon</div>
+
+  <h1>Performance Intelligence<br>for <span>Entire Academies</span></h1>
+
+  <p>Academy-level dashboards, multi-coach management, team analytics, and gym-wide injury prevention protocols are in development. Be the first gym to get early access.</p>
+
+  <div class="features">
+    <span class="feature-chip">Full academy ROM roster</span>
+    <span class="feature-chip">Multi-coach management</span>
+    <span class="feature-chip">Gym-wide asymmetry analytics</span>
+    <span class="feature-chip">Class-level warmup planning</span>
+    <span class="feature-chip">Belt promotion workflow</span>
+    <span class="feature-chip">Injury rate tracking</span>
+    <span class="feature-chip">School branding + athlete portal</span>
+  </div>
+
+  <div class="email-form">
+    <input class="email-input" id="gym-email" type="email" placeholder="Your gym email address" />
+    <button class="btn-gold" onclick="notifyMe()">Notify Me When Ready</button>
+  </div>
+  <div class="success" id="success-msg">You are on the early access list. We will reach out when Gym plans launch.</div>
+
+  <div class="back-link">
+    <a href="/">&larr; Back to ROMRxBJJ.com</a> &nbsp;&middot;&nbsp;
+    <a href="/coaches">For Coaches</a> &nbsp;&middot;&nbsp;
+    <a href="/athletes">For Athletes</a>
+  </div>
+
+  <script>
+    function notifyMe() {
+      const email = document.getElementById('gym-email').value.trim();
+      if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+      document.getElementById('success-msg').style.display = 'block';
+      document.querySelector('.email-form').style.opacity = '0.4';
+      document.querySelector('.email-form').style.pointerEvents = 'none';
+      // TODO: wire to email capture edge function or Mailchimp
+    }
+  </script>
+</body>
+</html>
