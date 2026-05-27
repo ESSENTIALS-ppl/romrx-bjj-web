@@ -40,6 +40,11 @@
   status = 200
 
 [[redirects]]
+  from   = "/signup/coach"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
   from   = "/onboarding"
   to     = "/index.html"
   status = 200

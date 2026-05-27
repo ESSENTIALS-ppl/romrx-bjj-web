@@ -12,6 +12,7 @@ import { MyProtocol } from './pages/MyProtocol'
 import { Chat } from './pages/Chat'
 import { Settings } from './pages/Settings'
 import { CoachDashboard } from './pages/CoachDashboard'
+import { CoachSignup } from './pages/CoachSignup'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         {/* Public routes */}
         <Route path="/login"          element={<Login />} />
         <Route path="/signup"          element={<Signup />} />
+        <Route path="/signup/coach"     element={<CoachSignup />} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/confirm"    element={<AuthConfirm />} />
         <Route path="/onboarding/assessment" element={<Assessment />} />
