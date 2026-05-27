@@ -48,7 +48,7 @@ export function Chat() {
       const name = (profile?.full_name ?? 'there').split(' ')[0]
       const belt = profile?.belt ?? 'white'
       setMessages([{ role: 'assistant',
-        content: `Hey ${name} — I'm ROMBot, your mobility intelligence assistant.\n\nI can see your ${belt} belt profile, ROM scores, technique tiers, and protocol. Ask me anything:\n• "Why is my Triangle Choke RED?"\n• "What exercises unlock De La Riva?"\n• "Which techniques am I closest to unlocking?"`
+        content: `Hey ${name} \u2014 I'm ROMBot, your mobility intelligence assistant.\n\nI can see your ${belt} belt profile, ROM scores, technique tiers, and protocol. Ask me anything:\n\u2022 "Why is my Triangle Choke RED?"\n\u2022 "What exercises unlock De La Riva?"\n\u2022 "Which techniques am I closest to unlocking?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       }])
     }
   }, [user, profile, profileLoading, messages.length])
@@ -128,6 +128,13 @@ export function Chat() {
           </div>
         </SectionCard>
       )}
+
+      {/* Disclaimer banner */}
+      <div className="flex items-start gap-2 bg-surface border border-teal-light rounded-xl px-3 py-2 mb-2">
+        <span className="text-xs text-charcoal-light leading-relaxed">
+          <span className="font-semibold text-charcoal">Educational use only.</span> ROMBot is not medical advice. Consult a healthcare professional for pain or injury.
+        </span>
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-3 pb-3 min-h-0">
