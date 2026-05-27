@@ -5,10 +5,77 @@ import { Spinner } from '../components/Spinner'
 import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { cn } from '../lib/utils'
+import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, ChevronDown, ChevronUp, CheckCircle2, Circle,
   ClipboardList, Dumbbell, Flame, PersonStanding, ExternalLink,
+  RefreshCw, CheckCircle, Clock,
 } from 'lucide-react'
+
+// ── Retest status banner ──────────────────────────────────────────────────────
+function RetestBanner({ assessedAt }: { assessedAt: string }) {
+  const navigate = useNavigate()
+  const now = new Date()
+  const assessed = new Date(assessedAt)
+  const daysSince = Math.floor((now.getTime() - assessed.getTime()) / (1000 * 60 * 60 * 24))
+  const weeksSince = daysSince / 7
+
+  // Retest target = 42 days (6 weeks) from assessment
+  const retestDate = new Date(assessed.getTime() + 42 * 24 * 60 * 60 * 1000)
+  const daysUntilRetest = Math.ceil((retestDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const retestDateStr = retestDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const assessedDateStr = assessed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+  let status: 'green' | 'yellow' | 'red'
+  let Icon: React.ElementType
+  let message: string
+  let subtext: string
+
+  if (weeksSince < 4) {
+    status = 'green'
+    Icon = CheckCircle
+    message = `Assessed ${assessedDateStr}`
+    subtext = `Next retest in ${daysUntilRetest} days · ${retestDateStr}`
+  } else if (weeksSince < 6) {
+    status = 'yellow'
+    Icon = Clock
+    message = `Reassessment due ${retestDateStr}`
+    subtext = 'Your ROM may have shifted — retest to update your protocol and unlock new techniques'
+  } else {
+    status = 'red'
+    Icon = RefreshCw
+    message = `Retest overdue by ${Math.abs(daysUntilRetest)} days`
+    subtext = 'Retake now to see how much you\'ve improved and update your technique ratings'
+  }
+
+  const styles = {
+    green: 'bg-green-50 border-green-200 text-green-700',
+    yellow: 'bg-yellow-tier-bg border-yellow-200 text-yellow-tier',
+    red: 'bg-red-tier-bg border-red-tier/30 text-red-tier',
+  }
+  const iconStyles = {
+    green: 'text-green-600',
+    yellow: 'text-yellow-tier',
+    red: 'text-red-tier',
+  }
+
+  return (
+    <button
+      onClick={() => navigate('/onboarding/assessment')}
+      className={cn(
+        'w-full flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition-opacity hover:opacity-80',
+        styles[status]
+      )}
+    >
+      <Icon className={cn('shrink-0 mt-0.5', iconStyles[status])} size={16} />
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-snug">{message}</p>
+        <p className="text-xs mt-0.5 opacity-80 leading-relaxed">{subtext}</p>
+      </div>
+      <span className="ml-auto shrink-0 text-xs font-semibold underline underline-offset-2 opacity-70 mt-0.5">Retest</span>
+    </button>
+  )
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Rx {
@@ -797,6 +864,9 @@ export function MyProtocol() {
   return (
     <div className="space-y-5">
       <PageHeader title="My Protocol" subtitle={`Based on assessment · ${dateStr}`} />
+
+      {/* Retest status banner */}
+      {assessedAt && <RetestBanner assessedAt={assessedAt} />}
 
       {/* Asymmetry context card */}
       <div className="bg-yellow-tier-bg border border-yellow-200 rounded-2xl p-4 flex gap-3">
