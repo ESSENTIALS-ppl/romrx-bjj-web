@@ -7,7 +7,56 @@ import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
 import { cn, beltColor, formatJoint } from '../lib/utils'
-import { AlertTriangle, Activity } from 'lucide-react'
+import { AlertTriangle, Activity, TrendingUp } from 'lucide-react'
+
+// ── Position Readiness Score ──────────────────────────────────────────────────
+const PRS_BILATERAL = [
+  { l: 'hip_er_l',       r: 'hip_er_r',        riskBelow: 40,  normalMin: 40  },
+  { l: 'hip_ir_l',       r: 'hip_ir_r',        riskBelow: 30,  normalMin: 30  },
+  { l: 'hip_abd_l',      r: 'hip_abd_r',       riskBelow: 30,  normalMin: 40  },
+  { l: 'hip_flex_l',     r: 'hip_flex_r',      riskBelow: 100, normalMin: 100 },
+  { l: 'shoulder_er_l',  r: 'shoulder_er_r',   riskBelow: 60,  normalMin: 60  },
+  { l: 'shoulder_flex_l',r: 'shoulder_flex_r', riskBelow: 120, normalMin: 140 },
+  { l: 'ankle_df_l',     r: 'ankle_df_r',      riskBelow: 10,  normalMin: 10  },
+  { l: 'cervical_rot_l', r: 'cervical_rot_r',  riskBelow: 60,  normalMin: 70  },
+]
+const PRS_UNILATERAL = [
+  { key: 'lumbar_flex', riskBelow: 40, normalMin: 40 },
+  { key: 'lumbar_ext',  riskBelow: 15, normalMin: 20 },
+  { key: 'thoracic_rot',riskBelow: 30, normalMin: 40 },
+]
+
+function computePRS(a: Assessment): number {
+  let score = 100
+  for (const j of PRS_BILATERAL) {
+    const l = (a as Record<string, number | null>)[j.l]
+    const r = (a as Record<string, number | null>)[j.r]
+    if (l != null && r != null) {
+      const minVal = Math.min(l, r)
+      const gap    = Math.abs(l - r)
+      if (minVal < j.riskBelow) score -= 8
+      else if (minVal < j.normalMin) score -= 4
+      if (gap >= 15) score -= 6
+      else if (gap >= 8) score -= 3
+    }
+  }
+  for (const j of PRS_UNILATERAL) {
+    const v = (a as Record<string, number | null>)[j.key]
+    if (v != null) {
+      if (v < j.riskBelow) score -= 6
+      else if (v < j.normalMin) score -= 3
+    }
+  }
+  return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+function getPRSTier(s: number) {
+  if (s >= 85) return { label: 'ELITE',      color: 'text-teal',       bg: 'bg-teal-light',      ring: 'border-teal/40' }
+  if (s >= 70) return { label: 'STRONG',     color: 'text-teal',       bg: 'bg-teal-light',      ring: 'border-teal/40' }
+  if (s >= 55) return { label: 'DEVELOPING', color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  ring: 'border-yellow-tier/40' }
+  if (s >= 40) return { label: 'RESTRICTED', color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  ring: 'border-yellow-tier/40' }
+  return              { label: 'AT RISK',    color: 'text-red-tier',   bg: 'bg-red-tier-bg',     ring: 'border-red-tier/40' }
+}
 
 const OPTIMAL: Record<string, number> = {
   'Hip ER': 55, 'Hip IR': 40, 'Hip Abd': 50, 'Hip Flex': 110,
@@ -86,6 +135,8 @@ export function MyBody() {
 
   const radarData = buildRadar(assessment)
   const belt = profile?.belt ?? 'white'
+  const prs = computePRS(assessment)
+  const tier = getPRSTier(prs)
 
   return (
     <div className="space-y-5">
@@ -95,6 +146,22 @@ export function MyBody() {
         badge={`${belt} belt`}
         badgeColor={beltColor(belt)}
       />
+
+      {/* Position Readiness Score */}
+      <div className={cn('flex items-center gap-4 rounded-2xl border p-4', tier.bg, tier.ring.replace('border-', 'border ').replace('/40', ''))}>
+        <div className={cn('w-16 h-16 rounded-full border-2 flex flex-col items-center justify-center shrink-0', tier.ring)}>
+          <span className={cn('font-display font-bold text-2xl leading-none', tier.color)}>{prs}</span>
+          <span className={cn('text-[10px] font-bold', tier.color)}>/100</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <TrendingUp size={13} className={tier.color} />
+            <span className={cn('text-xs font-bold uppercase tracking-wider', tier.color)}>Position Readiness Score</span>
+          </div>
+          <p className={cn('text-lg font-bold leading-tight', tier.color)}>{tier.label}</p>
+          <p className="text-xs text-charcoal-light mt-0.5">Retest every 6 weeks to track progress</p>
+        </div>
+      </div>
 
       {assessment.red_flag_triggered && (
         <div className="flex items-start gap-3 bg-red-tier-bg border border-red-200 rounded-2xl p-4">
