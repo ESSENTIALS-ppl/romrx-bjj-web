@@ -11,6 +11,7 @@ import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'
 import { Chat } from './pages/Chat'
 import { Settings } from './pages/Settings'
+import { CoachDashboard } from './pages/CoachDashboard'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/dashboard/my-protocol" element={<MyProtocol />} />
             <Route path="/dashboard/chat"        element={<Chat />} />
             <Route path="/dashboard/settings"    element={<Settings />} />
+            <Route path="/dashboard/coach"        element={<CoachDashboard />} />
           </Route>
         </Route>
 
