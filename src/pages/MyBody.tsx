@@ -29,8 +29,8 @@ const PRS_UNILATERAL = [
 function computePRS(a: Assessment): number {
   let score = 100
   for (const j of PRS_BILATERAL) {
-    const l = (a as Record<string, number | null>)[j.l]
-    const r = (a as Record<string, number | null>)[j.r]
+    const l = (a as unknown as Record<string, number | null>)[j.l]
+    const r = (a as unknown as Record<string, number | null>)[j.r]
     if (l != null && r != null) {
       const minVal = Math.min(l, r)
       const gap    = Math.abs(l - r)
@@ -41,7 +41,7 @@ function computePRS(a: Assessment): number {
     }
   }
   for (const j of PRS_UNILATERAL) {
-    const v = (a as Record<string, number | null>)[j.key]
+    const v = (a as unknown as Record<string, number | null>)[j.key]
     if (v != null) {
       if (v < j.riskBelow) score -= 6
       else if (v < j.normalMin) score -= 3
