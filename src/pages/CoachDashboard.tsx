@@ -5,10 +5,11 @@ import { SectionCard } from '../components/SectionCard'
 import { Spinner } from '../components/Spinner'
 import { EmptyState } from '../components/EmptyState'
 import { cn, beltColor } from '../lib/utils'
+import { supabase } from '../lib/supabase'
 import {
   Users, Flame, FileText, Search, X, Printer,
   ChevronDown, Save, AlertTriangle, ClipboardList,
-  Zap, RotateCcw,
+  Zap, RotateCcw, BookOpen, ChevronRight,
 } from 'lucide-react'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -32,8 +33,17 @@ const RAMP_STEPS = [
 ] as const
 
 // ── Types ──────────────────────────────────────────────────────────────────────
+interface AthleteGamePlan {
+  id: string
+  name: string
+  path_mode: string
+  techniques: Array<{ name: string; category: string }>
+  created_at: string
+}
+
 interface AthleteRosterItem {
   id: string
+  user_id?: string
   email: string
   name: string
   belt: string
@@ -212,6 +222,84 @@ function InlineNoteEditor({
   )
 }
 
+// ── Athlete Game Plans ────────────────────────────────────────────────────────
+// athleteId here is the athletes.id (PK), not auth user_id
+function AthleteGamePlans({ athleteId }: { athleteId: string }) {
+  const [plans, setPlans] = useState<AthleteGamePlan[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    if (!expanded) return
+    setLoading(true)
+    // Resolve user_id from athletes table, then query game_plans
+    supabase
+      .from('athletes')
+      .select('user_id')
+      .eq('id', athleteId)
+      .maybeSingle()
+      .then(({ data: athleteRow }) => {
+        const userId = athleteRow?.user_id
+        if (!userId) {
+          setPlans([])
+          setLoading(false)
+          return
+        }
+        return supabase
+          .from('game_plans')
+          .select('id, name, path_mode, techniques, created_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(3)
+          .then(({ data }) => {
+            setPlans((data as AthleteGamePlan[]) ?? [])
+            setLoading(false)
+          })
+      })
+  }, [athleteId, expanded])
+
+  return (
+    <div className="border-t border-teal-light pt-3">
+      <button
+        onClick={() => setExpanded(o => !o)}
+        className="flex items-center justify-between w-full text-xs font-semibold text-charcoal-light hover:text-charcoal transition-colors"
+      >
+        <span className="flex items-center gap-1.5">
+          <BookOpen size={12} className="text-teal" />
+          Game Plans
+        </span>
+        <ChevronRight size={12} className={cn('transition-transform', expanded && 'rotate-90')} />
+      </button>
+
+      {expanded && (
+        <div className="mt-2 space-y-2">
+          {loading ? (
+            <p className="text-xs text-charcoal-light py-2">Loading...</p>
+          ) : plans.length === 0 ? (
+            <p className="text-xs text-charcoal-light py-1">No game plans saved yet.</p>
+          ) : (
+            plans.map(plan => (
+              <div key={plan.id} className="bg-surface rounded-xl px-3 py-2 space-y-1">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xs font-semibold text-charcoal leading-snug">{plan.name}</p>
+                  <span className="text-[10px] text-charcoal-light shrink-0">
+                    {new Date(plan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </div>
+                {plan.techniques && plan.techniques.length > 0 && (
+                  <p className="text-[10px] text-charcoal-light leading-relaxed">
+                    {plan.techniques.map((t) => t.name).join(' \u2192 ')}
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Athlete Card ───────────────────────────────────────────────────────────────
 function AthleteCard({
   athlete,
@@ -297,6 +385,9 @@ function AthleteCard({
           />
         )}
       </div>
+
+      {/* Game Plans */}
+      <AthleteGamePlans athleteId={athlete.id} />
     </div>
   )
 }

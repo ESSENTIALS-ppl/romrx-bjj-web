@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -9,13 +9,14 @@ import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
 import { TierBadge } from '../components/ui/TierBadge'
 import { formatJoint, beltColor, cn } from '../lib/utils'
+import { supabase } from '../lib/supabase'
 import {
   Search, Layers, AlertTriangle, Swords, Shield,
   RefreshCw, ChevronDown, MapPin, Trophy, ArrowDown,
   Wand2, PenLine, CheckCircle2,
   Flame, Brain, Zap, Footprints, CircleDot,
   Bookmark, Share2, Trash2, Check, Lock,
-  ChevronLeft, Star,
+  ChevronLeft, Star, Dumbbell, X,
 } from 'lucide-react'
 
 // ── Position labels ───────────────────────────────────────────────────────────
@@ -80,6 +81,39 @@ interface SavedPlan {
   createdAt: string
   pathMode: string
   techniques: FlowTech[]
+}
+
+// DB row shape from game_plans table
+interface GamePlanRow {
+  id: string
+  user_id: string
+  name: string
+  description: string
+  path_mode: string
+  techniques: FlowTech[]
+  created_at: string
+  updated_at: string
+}
+
+// Drill session row
+interface DrillSession {
+  id: string
+  game_plan_id: string
+  technique_name: string
+  category: string
+  notes: string | null
+  drilled_at: string
+}
+
+function rowToSavedPlan(row: GamePlanRow): SavedPlan {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    createdAt: row.created_at,
+    pathMode: row.path_mode,
+    techniques: row.techniques,
+  }
 }
 
 // ── Game plan name map ────────────────────────────────────────────────────────
@@ -161,20 +195,6 @@ function eligToFlowTech(e: TechniqueEligibility): FlowTech {
     belt:            t.belt,
     limiting_joints: e.limiting_joints ?? [],
   }
-}
-
-// ── Save helper ───────────────────────────────────────────────────────────────
-function savePlan(name: string, description: string, pathMode: string, techniques: FlowTech[]) {
-  const plans: SavedPlan[] = JSON.parse(localStorage.getItem('romrx_game_plans') || '[]')
-  const newPlan: SavedPlan = {
-    id: Date.now().toString(),
-    name,
-    description,
-    createdAt: new Date().toISOString(),
-    pathMode,
-    techniques,
-  }
-  localStorage.setItem('romrx_game_plans', JSON.stringify([newPlan, ...plans]))
 }
 
 // ── VisualFlow component ──────────────────────────────────────────────────────
@@ -456,18 +476,130 @@ function TechCard({ item }: { item: TechniqueEligibility }) {
   )
 }
 
+// ── Log Drill Form ────────────────────────────────────────────────────────────
+function LogDrillForm({
+  plan,
+  userId,
+  onClose,
+  onLogged,
+}: {
+  plan: SavedPlan
+  userId: string
+  onClose: () => void
+  onLogged: () => void
+}) {
+  const techOptions = plan.techniques.map(t => ({ name: t.name, category: t.category }))
+  const [selectedTech, setSelectedTech] = useState(techOptions[0]?.name ?? '')
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit() {
+    if (!selectedTech) return
+    setSaving(true)
+    try {
+      const chosen = plan.techniques.find(t => t.name === selectedTech)
+      await supabase.from('drill_sessions').insert({
+        user_id: userId,
+        game_plan_id: plan.id,
+        technique_name: selectedTech,
+        category: chosen?.category ?? '',
+        notes: notes.trim() || null,
+      })
+      onLogged()
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="mt-3 pt-3 border-t border-teal-light space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-charcoal uppercase tracking-wide">Log a Drill</p>
+        <button onClick={onClose} className="text-charcoal-light hover:text-charcoal transition-colors">
+          <X size={14} />
+        </button>
+      </div>
+      <div className="space-y-2">
+        <select
+          value={selectedTech}
+          onChange={e => setSelectedTech(e.target.value)}
+          className="w-full px-3 py-2 text-sm rounded-xl border border-teal-light bg-white focus:outline-none focus:border-teal transition-colors"
+        >
+          {techOptions.map(t => (
+            <option key={t.name} value={t.name}>{t.name}</option>
+          ))}
+        </select>
+        <textarea
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          rows={2}
+          placeholder="Optional notes..."
+          className="w-full px-3 py-2 text-sm rounded-xl border border-teal-light bg-white focus:outline-none focus:border-teal transition-colors resize-none"
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !selectedTech}
+          className="w-full py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors disabled:opacity-60"
+        >
+          {saving ? 'Logging...' : 'Log Drill'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Saved Plan Card ───────────────────────────────────────────────────────────
 function SavedPlanCard({
   plan,
+  userId,
   onLoad,
   onDelete,
 }: {
   plan: SavedPlan
+  userId: string
   onLoad: (plan: SavedPlan) => void
   onDelete: (id: string) => void
 }) {
   const [copied, setCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showLogForm, setShowLogForm] = useState(false)
+  const [drillSessions, setDrillSessions] = useState<DrillSession[]>([])
+  const [drillCount, setDrillCount] = useState(0)
+  const [sessionsLoaded, setSessionsLoaded] = useState(false)
+
+  const loadDrillSessions = useCallback(async () => {
+    const { data: countData } = await supabase
+      .from('drill_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('game_plan_id', plan.id)
+    setDrillCount(countData?.length ?? 0)
+
+    const { data } = await supabase
+      .from('drill_sessions')
+      .select('*')
+      .eq('game_plan_id', plan.id)
+      .order('drilled_at', { ascending: false })
+      .limit(3)
+    setDrillSessions((data as DrillSession[]) ?? [])
+    setSessionsLoaded(true)
+  }, [plan.id])
+
+  useEffect(() => {
+    loadDrillSessions()
+  }, [loadDrillSessions])
+
+  // Re-fetch actual count
+  useEffect(() => {
+    async function fetchCount() {
+      const { count } = await supabase
+        .from('drill_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('game_plan_id', plan.id)
+      setDrillCount(count ?? 0)
+    }
+    fetchCount()
+  }, [plan.id])
 
   const g = plan.techniques.filter(t => t.tier === 'GREEN' && !t.flag).length
   const y = plan.techniques.filter(t => t.tier === 'YELLOW' && !t.flag).length
@@ -488,8 +620,15 @@ function SavedPlanCard({
   return (
     <div className="bg-white rounded-2xl border border-teal-light p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-bold text-charcoal text-sm">{plan.name}</p>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-bold text-charcoal text-sm">{plan.name}</p>
+            {drillCount > 0 && (
+              <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-semibold shrink-0">
+                {drillCount} {drillCount === 1 ? 'session' : 'sessions'}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-charcoal-light mt-0.5">{dateStr}</p>
         </div>
         <div className="flex gap-1 shrink-0">
@@ -529,7 +668,7 @@ function SavedPlanCard({
 
       {/* Technique chain */}
       <p className="text-xs text-charcoal-light leading-relaxed">
-        {plan.techniques.map(t => t.name).join(' → ')}
+        {plan.techniques.map(t => t.name).join(' \u2192 ')}
       </p>
 
       {/* Tier strip */}
@@ -539,12 +678,58 @@ function SavedPlanCard({
         {r > 0 && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full tier-red">{r} RED</span>}
       </div>
 
-      <button
-        onClick={() => onLoad(plan)}
-        className="w-full py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors"
-      >
-        Load Plan
-      </button>
+      {/* Drill sessions */}
+      {sessionsLoaded && drillSessions.length > 0 && (
+        <div className="space-y-1.5 pt-1 border-t border-teal-light/60">
+          <p className="text-[10px] font-semibold text-charcoal-light uppercase tracking-wide flex items-center gap-1">
+            <Dumbbell size={10} className="text-teal" /> Recent Drills
+          </p>
+          {drillSessions.map(ds => (
+            <div key={ds.id} className="flex items-start justify-between gap-2 text-xs bg-surface rounded-xl px-3 py-1.5">
+              <div className="min-w-0">
+                <p className="font-medium text-charcoal truncate">{ds.technique_name}</p>
+                {ds.notes && (
+                  <p className="text-charcoal-light truncate mt-0.5">{ds.notes}</p>
+                )}
+              </div>
+              <span className="text-charcoal-light shrink-0">
+                {new Date(ds.drilled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          onClick={() => onLoad(plan)}
+          className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors"
+        >
+          Load Plan
+        </button>
+        <button
+          onClick={() => setShowLogForm(o => !o)}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors border',
+            showLogForm
+              ? 'bg-teal text-white border-teal'
+              : 'border-teal-light text-charcoal hover:bg-surface'
+          )}
+          title="Log a drill session"
+        >
+          <Dumbbell size={14} />
+          Log Drill
+        </button>
+      </div>
+
+      {showLogForm && (
+        <LogDrillForm
+          plan={plan}
+          userId={userId}
+          onClose={() => setShowLogForm(false)}
+          onLogged={loadDrillSessions}
+        />
+      )}
     </div>
   )
 }
@@ -578,23 +763,65 @@ export function MyGame() {
   const [savingPlanName, setSavingPlanName]   = useState<string>('')
   const [showSaveInput, setShowSaveInput]     = useState(false)
   const [savedConfirm, setSavedConfirm]       = useState(false)
+  const [savingToDb, setSavingToDb]           = useState(false)
 
   // Loaded plan from My Flows
   const [loadedPlan, setLoadedPlan] = useState<SavedPlan | null>(null)
 
-  // My Flows state
-  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('romrx_game_plans') || '[]')
-    } catch {
-      return []
-    }
-  })
+  // My Flows state (Supabase-backed)
+  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(false)
 
   // Library filters
   const [search, setSearch]         = useState('')
   const [catFilter, setCatFilter]   = useState('All')
   const [tierFilter, setTierFilter] = useState<typeof TIERS[number]>('All')
+
+  // ── Load plans from Supabase (with localStorage migration) ─────────────────
+  const loadPlans = useCallback(async () => {
+    if (!user?.id) return
+    setPlansLoading(true)
+    try {
+      // Check for legacy localStorage plans and migrate them
+      const lsKey = 'romrx_game_plans'
+      const lsRaw = localStorage.getItem(lsKey)
+      if (lsRaw) {
+        try {
+          const lsPlans: SavedPlan[] = JSON.parse(lsRaw)
+          if (lsPlans.length > 0) {
+            const rows = lsPlans.map(p => ({
+              user_id: user.id,
+              name: p.name,
+              description: p.description ?? '',
+              path_mode: p.pathMode ?? 'offense',
+              techniques: p.techniques,
+              created_at: p.createdAt,
+            }))
+            await supabase.from('game_plans').insert(rows)
+            localStorage.removeItem(lsKey)
+          }
+        } catch {
+          // ignore migration errors
+        }
+      }
+
+      const { data } = await supabase
+        .from('game_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      setSavedPlans((data as GamePlanRow[] ?? []).map(rowToSavedPlan))
+    } finally {
+      setPlansLoading(false)
+    }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (tab === 'myflows') {
+      loadPlans()
+    }
+  }, [tab, loadPlans])
 
   const sequence = useCallback((p: PathMode) =>
     p === 'offense' ? [...OFFENSE_SEQ] : [...DEFENSE_SEQ], [])
@@ -689,20 +916,38 @@ export function MyGame() {
     setSavedConfirm(false)
   }
 
-  // Handle save
-  const handleSavePlan = (name: string, description: string, pathModeStr: string, techniques: FlowTech[]) => {
-    savePlan(name, description, pathModeStr, techniques)
-    const updated: SavedPlan[] = JSON.parse(localStorage.getItem('romrx_game_plans') || '[]')
-    setSavedPlans(updated)
-    setSavedConfirm(true)
-    setShowSaveInput(false)
-    setTimeout(() => setSavedConfirm(false), 3000)
+  // Handle save to Supabase
+  const handleSavePlan = async (name: string, description: string, pathModeStr: string, techniques: FlowTech[]) => {
+    if (!user?.id) return
+    setSavingToDb(true)
+    try {
+      const { data } = await supabase
+        .from('game_plans')
+        .insert({
+          user_id: user.id,
+          name,
+          description,
+          path_mode: pathModeStr,
+          techniques,
+        })
+        .select()
+        .single()
+
+      if (data) {
+        const newPlan = rowToSavedPlan(data as GamePlanRow)
+        setSavedPlans(prev => [newPlan, ...prev])
+      }
+      setSavedConfirm(true)
+      setShowSaveInput(false)
+      setTimeout(() => setSavedConfirm(false), 3000)
+    } finally {
+      setSavingToDb(false)
+    }
   }
 
-  const handleDeletePlan = (id: string) => {
-    const updated = savedPlans.filter(p => p.id !== id)
-    localStorage.setItem('romrx_game_plans', JSON.stringify(updated))
-    setSavedPlans(updated)
+  const handleDeletePlan = async (id: string) => {
+    await supabase.from('game_plans').delete().eq('id', id)
+    setSavedPlans(prev => prev.filter(p => p.id !== id))
   }
 
   const handleLoadPlan = (plan: SavedPlan) => {
@@ -1068,9 +1313,10 @@ export function MyGame() {
                                 onClick={() => {
                                   handleSavePlan(savingPlanName || aiPlanName, aiDescription, 'ai', aiFlow)
                                 }}
-                                className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90"
+                                disabled={savingToDb}
+                                className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
                               >
-                                Confirm Save
+                                {savingToDb ? 'Saving...' : 'Confirm Save'}
                               </button>
                               <button
                                 onClick={() => setShowSaveInput(false)}
@@ -1185,9 +1431,10 @@ export function MyGame() {
                                   .map(s => s.tech!)
                                 handleSavePlan(savingPlanName, '', pathMode ?? 'offense', techs)
                               }}
-                              className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90"
+                              disabled={savingToDb}
+                              className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
                             >
-                              Confirm Save
+                              {savingToDb ? 'Saving...' : 'Confirm Save'}
                             </button>
                             <button
                               onClick={() => setShowSaveInput(false)}
@@ -1316,9 +1563,10 @@ export function MyGame() {
                                       .map(s => s.tech!)
                                     handleSavePlan(savingPlanName, '', pathMode ?? 'offense', techs)
                                   }}
-                                  className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90"
+                                  disabled={savingToDb}
+                                  className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
                                 >
-                                  Confirm Save
+                                  {savingToDb ? 'Saving...' : 'Confirm Save'}
                                 </button>
                                 <button
                                   onClick={() => setShowSaveInput(false)}
@@ -1348,7 +1596,9 @@ export function MyGame() {
       {/* ── MY FLOWS ── */}
       {tab === 'myflows' && (
         <div className="space-y-4">
-          {savedPlans.length === 0 ? (
+          {plansLoading ? (
+            <Spinner />
+          ) : savedPlans.length === 0 ? (
             <EmptyState
               icon={Bookmark}
               title="No saved game plans yet"
@@ -1356,10 +1606,11 @@ export function MyGame() {
             />
           ) : (
             <div className="space-y-3">
-              {savedPlans.map(plan => (
+              {user && savedPlans.map(plan => (
                 <SavedPlanCard
                   key={plan.id}
                   plan={plan}
+                  userId={user.id}
                   onLoad={handleLoadPlan}
                   onDelete={handleDeletePlan}
                 />
