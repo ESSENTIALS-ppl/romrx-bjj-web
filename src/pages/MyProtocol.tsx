@@ -789,7 +789,7 @@ function WhyStatement() {
         WHY YOUR Rx IS BUILT THIS WAY
       </p>
       <p className="text-sm text-white/90 leading-relaxed">
-        9 out of 10 BJJ practitioners get injured, most during training, not competition. The athletes who stay on the mat longest share one trait: symmetrical mobility, not the biggest strength numbers. A 10% increase in movement restriction raises injury risk by 15%, and a 20% asymmetry predicts a 30% spike in unilateral injuries. Most people train until their body stops letting them. We built this so you become someone who never has to quit.
+        9 out of 10 BJJ athletes get hurt, and most of those injuries happen in practice, not competition. The people who keep showing up for decades all share the same thing: both sides of their body move the same way. When one side is tighter than the other, your injury risk jumps by up to 30%. Most people train until their body stops letting them. We built this so you become someone who never has to quit.
       </p>
       <p className="mt-3 text-[10px] text-teal leading-relaxed">
         Research:{' '}
