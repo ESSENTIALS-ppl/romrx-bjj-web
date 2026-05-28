@@ -101,7 +101,7 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Quadruped Band-Assisted Hip IR Mobilization',
         dose: '3 sets x 10 reps each side',
-        cue: 'Get on all fours. Wrap a band around your ankle. Let the band pull your foot to the side as you relax into the stretch for 2 seconds. Then push your foot back against the band resistance for 5 seconds. This teaches your hip to control the full range, not just sit in it.',
+        cue: 'Get on all fours with your hands directly under your shoulders and your knees directly under your hips. Loop a band around one ankle and anchor it to something to the side of you. Start with your knee on the floor and your foot pointing straight up. Slowly let your foot fall outward away from your body as far as it will comfortably go. Hold that position for 2 seconds. Then push your foot back inward toward center, pressing against the band for 5 seconds as if trying to fight it back. Release and let the foot fall out again. Repeat on the same side for all reps, then switch legs.',
         equipment: 'Resistance band',
       },
       {
@@ -244,20 +244,20 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Doorway Pec Stretch',
         dose: '3-5 sets, hold 30 sec each time (aim for 150 total seconds)',
-        cue: 'Elbows at shoulder height on door frame. Lean chest through. Research shows 150 seconds adds up to 6 degrees of ER.',
+        cue: 'Stand in a doorway. Place your right forearm against the right side of the door frame with your elbow bent to 90 degrees and your upper arm at shoulder height, making an L shape with your arm. Step your right foot slightly forward. Lean your whole body through the doorway until you feel a stretch across the front of your right shoulder and chest. Hold and breathe. Move your arm slightly higher or lower on the door frame to find different parts of the stretch. Switch sides. Research shows that 150 total seconds of this stretch can add up to 6 degrees of improved shoulder rotation.',
         equipment: 'Doorway',
       },
       {
         name: 'Sleeper Stretch',
         dose: '2-3 sets x hold 30-45 sec each side',
-        cue: 'Lie on side, top hand gently presses bottom forearm toward floor. Keep shoulder flat -- do not roll forward.',
+        cue: 'Lie on your right side. Stretch your right arm out in front of you at shoulder height, bent to 90 degrees so your forearm points up toward the ceiling. This is the arm being stretched. Use your left hand to gently press your right forearm downward toward the floor in front of you. You should feel a mild stretch in the back of your right shoulder. Keep your right shoulder from rolling forward off the floor. If your shoulder comes off the floor, you are pressing too hard. Hold and breathe. Switch to the other side.',
         equipment: 'Bodyweight',
       },
     ],
     foam: {
       name: 'Posterior Shoulder Release (Lacrosse Ball)',
       dose: '60-90 sec per side',
-      cue: 'Ball between spine of scapula and arm. Make small arm circles while on tender spots. Hold 30-45 sec each point.',
+      cue: 'Lie on your back. Place a lacrosse ball or firm massage ball on the floor. Position it on the back of your shoulder, in the meaty area between your shoulder blade and the back of your shoulder joint. Slowly roll your body weight onto the ball so it presses into that area. Make small arm circles or slowly move your arm up and down while pressing into the ball. When you find a spot that is especially sore, stop moving and just hold on that spot for 30-45 seconds. Then move the ball to a new spot. Do the full time on one side, then switch.',
       equipment: 'Lacrosse ball or firm ball',
     },
   },
@@ -273,13 +273,13 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Prone Y Raise',
         dose: '3 sets x 10-12 reps, hold 5-7 sec at top',
-        cue: 'Arms in Y at 130-140 degrees. Lift by moving shoulder blades first, then arms. Lower trapezius is the target.',
+        cue: 'Lie face down with your forehead resting on the floor or a folded towel. Stretch both arms out above your head so your body makes a Y shape. Turn your thumbs toward the ceiling. Lift both arms off the floor at the same time by squeezing your shoulder blades toward each other and toward your lower back. Lift only as high as you can without your shoulders creeping up toward your ears. Hold 5-7 seconds at the top, then lower slowly. This is a small movement, not a big lift.',
         equipment: 'Bodyweight',
       },
       {
         name: 'Kettlebell Arm Bar',
         dose: '3 sets x hold 20-30 sec each side',
-        cue: 'Light kettlebell pressed to ceiling. Roll to side while keeping arm vertical. Shoulder stays packed throughout.',
+        cue: 'Lie on your back holding a light kettlebell in one hand with your arm pointing straight up toward the ceiling. Bend the same knee so that foot is flat on the floor. Slowly roll toward the side of the kettlebell by letting that bent knee cross over your body toward the floor. Keep your arm completely straight and the kettlebell pointing at the ceiling the whole time. Your shoulder should stay pressed down and away from your ear at all times. Hold the stretched position and breathe slowly. Return your knee to starting position, then switch sides.',
         equipment: 'Light kettlebell',
       },
     ],
