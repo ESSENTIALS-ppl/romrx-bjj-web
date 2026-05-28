@@ -199,7 +199,7 @@ export function Chat() {
       {/* Disclaimer banner */}
       <div className="flex items-start gap-2 bg-surface border border-teal-light rounded-xl px-3 py-2 mb-2">
         <span className="text-xs text-charcoal-light leading-relaxed">
-          <span className="font-semibold text-charcoal">Educational use only.</span> ROMBot is not medical advice. Consult a healthcare professional for pain or injury.
+          <span className="font-semibold text-charcoal">Educational use only.</span> ROMBot is not medical advice — consult a healthcare professional for pain or injury. ROMBot is also not a black belt — consult your coach before attempting new techniques.
         </span>
       </div>
 
