@@ -15,10 +15,27 @@ export function Login() {
   const [error, setError]         = useState('')
   const [magicSent, setMagicSent] = useState(false)
   const [mode, setMode]           = useState<'password' | 'magic'>('password')
+  const [cooldown, setCooldown]   = useState(0) // seconds remaining
 
   useEffect(() => {
     if (session) navigate('/dashboard/my-body', { replace: true })
   }, [session, navigate])
+
+  // Restore cooldown from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('romrx_magic_sent_at')
+    if (stored) {
+      const secondsLeft = 60 - Math.floor((Date.now() - Number(stored)) / 1000)
+      if (secondsLeft > 0) setCooldown(secondsLeft)
+    }
+  }, [])
+
+  // Count down the cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [cooldown])
 
   // ---- Email + password sign-in ----
   const handlePassword = async (e: React.FormEvent) => {
@@ -39,7 +56,7 @@ export function Login() {
   // ---- Magic link fallback ----
   const handleMagic = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
+    if (!email || cooldown > 0) return
     setLoading(true); setError('')
 
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -49,10 +66,13 @@ export function Login() {
     setLoading(false)
     if (err) {
       setError(err.message.includes('rate') || err.message.includes('many')
-        ? 'Too many attempts — wait a minute and try again, or use a password instead.'
+        ? 'Too many attempts. Wait a minute and try again, or use your password instead.'
         : err.message)
     } else {
       setMagicSent(true)
+      // Set 60-second cooldown, persisted in localStorage so page refresh doesn't bypass it
+      localStorage.setItem('romrx_magic_sent_at', String(Date.now()))
+      setCooldown(60)
     }
   }
 
@@ -158,9 +178,9 @@ export function Login() {
 
               {error && <p className="text-xs text-red-tier bg-red-tier-bg rounded-lg px-3 py-2">{error}</p>}
 
-              <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
+              <button type="submit" disabled={loading || cooldown > 0} className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-60">
                 {loading ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />}
-                Send magic link
+                {cooldown > 0 ? `Resend in ${cooldown}s` : 'Send magic link'}
               </button>
             </form>
           )}
