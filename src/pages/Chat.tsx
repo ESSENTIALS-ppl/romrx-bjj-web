@@ -90,7 +90,6 @@ export function Chat() {
     const startLabel  = START_LABELS[start]  ?? start
     const finishLabel = FINISH_LABELS[finish] ?? finish
     const styleLabel  = STYLE_LABELS[style]  ?? style
-    const planName = `${start}-${finish}-${style}` // for banner
     setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
     const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}. Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
     // Auto-send after brief delay so welcome message shows first
