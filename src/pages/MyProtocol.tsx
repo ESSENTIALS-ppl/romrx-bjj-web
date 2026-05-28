@@ -9,7 +9,7 @@ import { cn } from '../lib/utils'
 import {
   AlertTriangle, ChevronDown, ChevronUp, CheckCircle2, Circle,
   ClipboardList, Dumbbell, Flame, PersonStanding,
-  RefreshCw, CheckCircle, Clock, TrendingUp, Play, BookOpen
+  RefreshCw, CheckCircle, Clock, TrendingUp, BookOpen
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -52,53 +52,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Clamshell with Band',
         dose: '3 sets x 15-20 reps each side',
-        cue: 'Keep feet stacked and hips completely still -- only the top knee opens. Squeeze glute at top for 2 seconds.',
+        cue: 'Lie on your side with a band just above your knees. Stack your feet on top of each other. Lift your top knee up like a clamshell opening. Keep your hips from rolling back. Squeeze your butt at the top for 2 seconds, then lower slowly.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=EdxiU8vM_F4',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Seated Banded Hip External Rotation',
         dose: '3 sets x 10-12 reps each side',
-        cue: 'Yoga block between knees, rotate foot inward (thigh externally rotates). Hold 2 seconds at end range.',
+        cue: 'Sit in a chair. Place a block or rolled towel between your knees. Keep your knees together and swing your foot inward. Your thigh will rotate outward. Hold 2 seconds at the end, then return slowly.',
         equipment: 'Resistance band, yoga block',
-        videoUrl: 'https://www.youtube.com/watch?v=HKYVJHnrReU',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Standing Hip CARs (Controlled Articular Rotations)',
         dose: '3-5 reps each direction per side, daily',
-        cue: 'Draw the largest possible circle with your knee. Slow and controlled -- this is neurological training.',
+        cue: 'Stand on one foot. Lift your other knee and draw the biggest, slowest circle you can in the air. Go all the way around, both directions. Move slowly. Switch legs when done.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=jFBD1wZvXIc',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Supine Figure-4 Stretch (Piriformis)',
         dose: '2-3 sets x hold 30-60 sec each side',
-        cue: 'Cross ankle over opposite thigh. Pull bottom thigh toward chest. Head and shoulders stay relaxed on floor.',
+        cue: 'Lie on your back. Cross one ankle over your opposite knee in a figure-4 shape. Grab the back of your bottom thigh and pull it toward your chest. Keep your head on the floor. Hold and breathe.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=EdxiU8vM_F4',
-        videoLabel: 'Watch demo',
       },
       {
         name: '90/90 Hip External Rotation Stretch',
         dose: '1-2 sets x hold 60-90 sec each side',
-        cue: 'Front shin parallel to body. Lean chest forward over shin with a flat back. Deep stretch in the posterior hip.',
+        cue: 'Sit with your front shin pointing straight across, and your back shin pointing straight back. Sit up tall, then lean your chest forward over your front leg with a straight back. You should feel a deep stretch in your back hip. Hold and breathe slowly.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=jFBD1wZvXIc',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Piriformis / Glute Foam Roll',
       dose: '60-90 sec per side',
-      cue: 'Sit in figure-4 on roller, tilt toward the crossed leg. Hold on tender spots 15-20 seconds until release.',
+      cue: 'Sit on the foam roller with your right ankle crossed over your left knee. Lean toward the right side so the roller hits your right glute. Roll slowly. When you find a sore spot, stop and hold there for 15-20 seconds. Then move to the next spot.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=EdxiU8vM_F4',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -107,53 +95,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Seated Banded Hip Internal Rotation',
         dose: '3 sets x 8-12 reps each side',
-        cue: 'Block between knees, rotate foot outward (thigh internally rotates). Hold contraction 5-7 seconds.',
+        cue: 'Sit in a chair. Put a block or folded towel between your knees. Keep your knees together and swing your foot outward. Your thigh will rotate inward. Hold for 5-7 seconds, then relax and repeat.',
         equipment: 'Resistance band, yoga block',
-        videoUrl: 'https://www.youtube.com/watch?v=-EyAIpwhBWA',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Quadruped Band-Assisted Hip IR Mobilization',
         dose: '3 sets x 10 reps each side',
-        cue: 'Band assists the stretch on the way out, resist on the way in (PAILS/RAILS). This builds active end-range control.',
+        cue: 'Get on all fours. Wrap a band around your ankle. Let the band pull your foot to the side as you relax into the stretch for 2 seconds. Then push your foot back against the band resistance for 5 seconds. This teaches your hip to control the full range, not just sit in it.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=-EyAIpwhBWA',
-        videoLabel: 'Watch demo',
       },
       {
         name: '90/90 Hip Switches',
         dose: '8-10 transitions, daily warm-up',
-        cue: 'Lift both knees slightly and rotate hips smoothly side to side. Control the landing -- do not collapse.',
+        cue: 'Sit on the floor in a 90/90 position, both knees bent. Lift both knees slightly off the floor and rotate your hips to one side, lowering both knees to the floor. Then lift again and rotate to the other side. Keep the movement controlled, not sloppy.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=jFBD1wZvXIc',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: '90/90 Internal Rotation Stretch',
         dose: '2-3 sets x hold 30-60 sec each side',
-        cue: 'Lean back toward trail leg, push trail knee gently toward floor. Rotation comes from hip, not torso.',
+        cue: 'Sit in a 90/90 position. Lean your weight toward your back leg. Gently press your back knee toward the floor. The stretch comes from your hip, not your back. Hold and breathe. Switch sides.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=jFBD1wZvXIc',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Prone Hip IR Gravity Stretch',
         dose: '1-2 sets x hold 60 sec',
-        cue: 'Face down, knees bent 90 degrees, feet fall outward. Keep hip bones pressed into floor. Let gravity do the work.',
+        cue: 'Lie face down. Bend both knees to 90 degrees so your feet point up. Let your feet fall outward toward the floor. Press your hip bones into the mat. Do not force it. Just breathe and let gravity pull your feet down over time.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=-EyAIpwhBWA',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'TFL / Lateral Hip Foam Roll',
       dose: '60-90 sec per side',
-      cue: 'Roller under lateral hip between hip bone and greater trochanter. Rotate slightly forward/back to find different fibers.',
+      cue: 'Lie on your side with the roller under the side of your hip, between your hip bone and the top of your thigh. Slowly rock forward and back a little to find the tender spots. When you find one, stop and hold there.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -162,53 +138,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Side-Lying Hip Abduction with Band',
         dose: '3 sets x 15 reps each side',
-        cue: 'Lead with the heel, foot flexed. Hips stacked -- do not roll backward. This is a small, controlled movement.',
+        cue: 'Lie on your side. Keep your foot flexed and lead with your heel as you lift your top leg straight up. Your hips should not roll backward at all. If they do, you went too high. Lower slowly.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Lateral Band Walks',
         dose: '3 sets x 10-15 steps each direction',
-        cue: 'Quarter squat position. Step with heel first, keep band taut. Do not let knees cave inward.',
+        cue: 'Put a band just above your knees and stand with your feet hip-width apart. Bend your knees slightly like you are starting to sit down. Step sideways one foot at a time, keeping the band tight. Do not let your knees cave toward each other.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Goblet Squat Wide Stance (Pause at Bottom)',
         dose: '3 sets x 8 reps with 3-sec pause',
-        cue: 'Elbows push knees out at the bottom. Heels down, chest up. This is both a strength and mobility drill.',
+        cue: 'Hold a weight at your chest and stand with feet wide. Squat down as deep as you can with your heels flat. At the bottom, use your elbows to push your knees apart. Hold 3 seconds, then stand back up.',
         equipment: 'Kettlebell',
-        videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Frog Stretch',
         dose: '2-3 sets x hold 45-60 sec',
-        cue: 'Slowly widen knees, inner arches flat. Lower to elbows and rock hips slowly backward to deepen.',
+        cue: 'Get on all fours and spread your knees wide apart. Keep your feet flat on the floor behind your knees. Lower down to your elbows. Slowly push your hips backward to deepen the stretch. Hold and breathe.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Standing Side Lunge Adductor Stretch',
         dose: '2-3 sets x hold 30 sec each side',
-        cue: 'Feet very wide, shift weight to one side with bent knee. Keep opposite leg fully straight, foot flat.',
+        cue: 'Stand with your feet very wide apart. Bend one knee and shift your weight to that side. Keep your other leg straight with its foot flat on the floor. You should feel a stretch along the inside of your straight leg. Hold and switch.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Adductor (Inner Thigh) Foam Roll',
       dose: '60-90 sec per side',
-      cue: 'Face down, one leg in frog position. Roll slow from near groin toward knee. Hold tender spots 30-60 sec.',
+      cue: 'Lie face down. Bend one leg out to the side so your knee is wide and your inner thigh is on the roller. Roll slowly from your groin area down toward your knee. When you find a sore spot, stop and hold there for 30 seconds.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -217,53 +181,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Goblet Squat with Pause at Bottom',
         dose: '3 sets x 8 reps, 3-5 sec pause',
-        cue: 'Counterbalance allows deeper range. At the bottom, stay relaxed and breathe. Do not bounce out.',
+        cue: 'Hold a weight at your chest. Squat down as deep as you can with your heels flat. At the bottom, stay there and take 3-5 slow breaths. Then stand back up. Do not bounce out of the bottom.',
         equipment: 'Kettlebell',
-        videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-        videoLabel: 'Watch demo',
       },
       {
         name: '90/90 Front Leg Hip Flexor Hold',
         dose: '3 sets x 8-10 reps each side',
-        cue: 'In 90/90 position, lift front foot 1-2 inches using only hip flexor. No hands. Hold 5 seconds.',
+        cue: 'Sit on the floor in a 90/90 position. Without using your hands, lift your front foot 1-2 inches off the floor by tightening the muscle at the front of your hip. Hold for 5 seconds. Lower slowly. If this is hard, that is normal. Keep trying.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Standing Knee Drive with Band',
         dose: '3 sets x 12-15 reps each side',
-        cue: 'Band anchored behind you. Drive knee as high as possible. Psoas training -- not just a warm-up drill.',
+        cue: 'Tie or anchor a band behind you and loop it around your ankle. Stand up straight and drive your knee upward as high as you can. Hold briefly at the top, then lower slowly. The muscle working is deep in your hip and stomach area.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Kneeling Hip Flexor Lunge Stretch',
         dose: '2-3 sets x hold 30-60 sec each side',
-        cue: 'Back knee on pad, tuck pelvis under (posterior tilt). Shift hips forward while maintaining the tuck -- no arch.',
+        cue: 'Kneel on one knee with your other foot forward. Squeeze your back glute and tuck your hips under to flatten your low back. Then slowly shift your hips forward without letting your low back arch. Hold. You should feel a stretch at the front of your back hip.',
         equipment: 'Pad / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Supine Knee-to-Chest Stretch',
         dose: '2 sets x hold 30-60 sec each side',
-        cue: 'Low back stays flat on floor. Gently pull knee toward same-side shoulder. Breathe and relax into it.',
+        cue: 'Lie on your back. Pull one knee toward your chest with both hands. Keep your lower back flat on the floor. The other leg stays straight. Breathe slowly and let the stretch deepen with each exhale.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Quadriceps / Rectus Femoris Foam Roll',
       dose: '60-90 sec per leg',
-      cue: 'Face down, roller under front of thighs. Roll hip crease to above knee. Bend knee on tender spots to enhance release.',
+      cue: 'Lie face down with the roller under the front of one thigh. Use your arms to slowly roll from your hip crease down to just above your knee. When you find a sore spot, stop there and slowly bend and straighten your knee a few times.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -272,44 +224,34 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Side-Lying Shoulder External Rotation',
         dose: '3 sets x 12-15 reps each side',
-        cue: 'Elbow pinned to side, roll of towel under arm for neutral position. Rotate forearm upward. Small, precise movement.',
+        cue: 'Lie on your side. Place a rolled towel under your top arm to keep it level. Keep your elbow touching your side and bend your elbow to 90 degrees. Rotate your forearm upward as far as it will go. Lower slowly. Keep the movement small and controlled.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Band Face Pull with External Rotation',
         dose: '3 sets x 12-15 reps',
-        cue: 'Pull band to face while rotating thumbs back. Finish with hands beside ears. Squeeze shoulder blades at the end.',
+        cue: 'Hold a band in front of you at eye level. Pull it toward your face while rotating your hands so your thumbs point behind you. Finish with your hands beside your ears. Squeeze your shoulder blades together at the end. Hold 1 second, then return.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Prone Y Raise',
         dose: '3 sets x 10-12 reps, hold 5-7 sec at top',
-        cue: 'Arms at 130-140 degrees (Y shape), thumbs toward ceiling. This is scapular training, not just a lift. Squeeze blades.',
+        cue: 'Lie face down with your arms out in a Y shape above your head, thumbs pointing up. Lift your arms off the floor by squeezing your shoulder blades together and down. Hold 5-7 seconds at the top. Lower slowly.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Doorway Pec Stretch',
-        dose: '3-5 sets x hold 30 sec (total 90-150 sec)',
+        dose: '3-5 sets, hold 30 sec each time (aim for 150 total seconds)',
         cue: 'Elbows at shoulder height on door frame. Lean chest through. Research shows 150 seconds adds up to 6 degrees of ER.',
         equipment: 'Doorway',
-        videoUrl: 'https://www.youtube.com/watch?v=0eWUi8sWjvY',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Sleeper Stretch',
         dose: '2-3 sets x hold 30-45 sec each side',
         cue: 'Lie on side, top hand gently presses bottom forearm toward floor. Keep shoulder flat -- do not roll forward.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=0eWUi8sWjvY',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
@@ -317,8 +259,6 @@ const RX: Record<string, Prescription> = {
       dose: '60-90 sec per side',
       cue: 'Ball between spine of scapula and arm. Make small arm circles while on tender spots. Hold 30-45 sec each point.',
       equipment: 'Lacrosse ball or firm ball',
-      videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -329,51 +269,39 @@ const RX: Record<string, Prescription> = {
         dose: '3 sets x 10-12 reps',
         cue: 'Back against wall, forearms slide up. Keep shoulder blades down -- do not shrug. This trains scapular upward rotation.',
         equipment: 'Bodyweight / wall',
-        videoUrl: 'https://www.youtube.com/watch?v=fnc01OxSh-s',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Prone Y Raise',
         dose: '3 sets x 10-12 reps, hold 5-7 sec at top',
         cue: 'Arms in Y at 130-140 degrees. Lift by moving shoulder blades first, then arms. Lower trapezius is the target.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Kettlebell Arm Bar',
         dose: '3 sets x hold 20-30 sec each side',
         cue: 'Light kettlebell pressed to ceiling. Roll to side while keeping arm vertical. Shoulder stays packed throughout.',
         equipment: 'Light kettlebell',
-        videoUrl: 'https://www.youtube.com/watch?v=fnc01OxSh-s',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: "Child's Pose Lat Stretch",
         dose: '2-3 sets x hold 45-60 sec',
-        cue: 'Arms extended overhead on floor, sit back toward heels. Walk hands to one side for unilateral lat stretch.',
+        cue: 'Get on all fours, then sit your hips back toward your heels while keeping your arms stretched out on the floor. Walk both hands to one side to feel the stretch more in that side of your back. Hold and breathe.',
         equipment: 'Bodyweight / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=fnc01OxSh-s',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Overhead Band Distraction Stretch',
         dose: '2-3 sets x hold 30-45 sec each side',
-        cue: 'Anchor band overhead. Loop around wrist and step away until shoulder is distracted upward. Breathe and relax.',
+        cue: 'Hook a band high on a door or rack. Loop it around your wrist and step away until you feel your shoulder being gently pulled upward. Let your arm hang, breathe, and relax into the stretch.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=fnc01OxSh-s',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Thoracic Spine Foam Roll with Arms Overhead',
       dose: '60-90 sec, segment by segment',
-      cue: 'Roller across mid/upper back, arms crossed or overhead. Roll 1 inch at a time, pausing at stiff segments.',
+      cue: 'Sit on the floor and place the foam roller across your mid-upper back. Cross your arms over your chest or put your hands behind your head. Lean back over the roller slowly, moving just 1 inch at a time. Pause at any spot that feels stiff or sore.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -382,53 +310,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Banded Ankle Dorsiflexion Mobilization',
         dose: '3 sets x 10-15 reps each side',
-        cue: 'Band around ankle anchored behind. Lunge forward until knee tracks over pinky toe. Band distracts joint posteriorly.',
+        cue: 'Tie a band around your ankle and anchor it behind you. Get into a lunge position with your front foot close to a wall. Drive your front knee forward toward the wall while keeping your heel flat on the floor. The band helps open up the ankle joint.',
         equipment: 'Resistance band',
-        videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Eccentric Calf Raises (Off Step)',
         dose: '3 sets x 12-15 reps each side',
-        cue: 'Rise on both feet, lower on one. Control the descent fully. Heel drops below step level for full range.',
+        cue: 'Stand on the edge of a step with the balls of your feet. Rise up on both feet together. Then lower back down slowly on just one foot. Let your heel drop below the step level at the bottom. The slow lowering is the important part.',
         equipment: 'Step / stairs',
-        videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Deep Squat Hold (Heel Elevated if Needed)',
         dose: '3 x 60 sec daily',
-        cue: 'Weight through heels, knees out, chest up. Progressively lower your heel elevation over weeks.',
+        cue: 'Squat all the way down with your feet flat or slightly elevated if needed. Hold the bottom position with your chest up and knees pushed out. Each week, try to lower the heel elevation a little until you can do it with flat feet.',
         equipment: 'Bodyweight (small plate under heels if needed)',
-        videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Wall Ankle DF Stretch (Knee Over Toe)',
         dose: '2-3 sets x hold 30-45 sec each side',
-        cue: 'Foot close to wall, knee touches wall while heel stays flat. Move foot further as flexibility improves.',
+        cue: 'Stand facing a wall. Place your toes close to the wall and try to touch your knee to the wall without letting your heel lift. If it is easy, move your foot back a bit. Keep moving it back until you find where it is just barely possible with your heel flat.',
         equipment: 'Bodyweight / wall',
-        videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-        videoLabel: 'Watch demo',
       },
       {
         name: "Runner's Calf Stretch (Straight + Bent Knee)",
         dose: '2 sets each variation x hold 30 sec each side',
-        cue: 'Straight knee hits gastrocnemius, bent knee hits soleus. Both must be addressed for true ankle DF gain.',
+        cue: 'Stand facing a wall with one foot back. Press your heel flat and lean toward the wall. Do this first with a straight back leg, then with a slightly bent back leg. Both positions stretch different muscles in your calf. Do both versions.',
         equipment: 'Bodyweight / wall',
-        videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Calf / Gastrocnemius Foam Roll',
       dose: '60-90 sec per leg',
-      cue: 'Roller under calf, cross opposite leg on top to increase pressure. Roll slowly, hold on tender spots.',
+      cue: 'Sit on the floor and place the roller under one calf. Cross your other leg on top to add weight. Lift your hips and use your arms to roll slowly from your ankle up to your knee. Stop and hold wherever it feels sore.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -437,53 +353,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Cat-Cow (Segmental Lumbar Mobilization)',
         dose: '3 sets x 10 slow reps, daily',
-        cue: 'Focus on moving one vertebra at a time. Exhale into flexion, inhale into extension. Never rush this.',
+        cue: 'Get on all fours with your hands under your shoulders and knees under your hips. Slowly arch your back up toward the ceiling like a scared cat, then let it sag down like a cow. Do this slowly and try to feel each section of your spine move. Do not rush.',
         equipment: 'Bodyweight / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Bird Dog (Opposite Arm/Leg)',
         dose: '3 sets x 10 reps each side, hold 3 sec',
-        cue: 'Core braced before moving. Reach long, not high. Hips stay level -- a glass of water should not spill.',
+        cue: 'Get on all fours. Tighten your stomach slightly. Slowly reach one arm straight forward and the opposite leg straight back at the same time. Keep your back flat the whole time. Hold 3 seconds, then switch sides. If your hips twist or rock, slow down.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Deadbug',
         dose: '3 sets x 8 reps each side',
-        cue: 'Low back pressed into floor the entire set. Breathe out as you lower limbs. Never let the arch return.',
+        cue: 'Lie on your back with your arms out to the sides. Press your lower back firmly into the floor. Slowly lower one arm overhead and the opposite leg toward the floor at the same time without letting your back arch. Bring them back up and switch sides.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Supine Knees-to-Chest Lumbar Decompression',
         dose: '2-3 sets x hold 60 sec',
-        cue: 'Both knees pulled to chest, low back flat. Rock side to side gently. Let the lumbar musculature fully release.',
+        cue: 'Lie on your back and pull both knees toward your chest. Keep your lower back pressed gently into the floor. Rock slowly side to side. Hold and breathe, letting your lower back fully relax.',
         equipment: 'Bodyweight / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Cobra / Press-Up (Lumbar Extension Mob)',
         dose: '3 sets x 10 press-ups',
-        cue: 'Hands under shoulders, hips stay on floor. Press up with arms, let the back relax -- passive extension.',
+        cue: 'Lie face down with your hands under your shoulders. Press up through your arms while letting your hips and lower body stay on the floor. Do not force it. Let your back sag and relax into the position. Hold briefly, then lower.',
         equipment: 'Bodyweight / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Thoracic + Lumbar Junction Foam Roll',
       dose: '60-90 sec, working T12-L2 area',
-      cue: 'Roller across mid-low back. Arms crossed on chest. Extend gently over roller, breathe deeply into each segment.',
+      cue: 'Sit on the floor and place the roller across your lower-mid back. Cross your arms over your chest. Let your body hang back gently over the roller. Breathe in deeply, then exhale and let your back relax over it. Move up or down 1 inch at a time.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -492,53 +396,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Cervical CARs (Controlled Articular Rotations)',
         dose: '3-5 reps each direction, daily',
-        cue: 'Chin traces the largest circle possible in slow motion. Pause and breathe at each end-range position.',
+        cue: 'Sit up straight. Move your head in the biggest, slowest circle you can. Go as far as it will comfortably go in every direction. Pause and breathe at the farthest point before continuing the circle. Do 3-5 circles each direction.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'SCM Strengthening (Isometric Side Resistance)',
         dose: '3 sets x 5 reps, hold 10 sec each side',
-        cue: 'Hand against temple, resist rotation without moving. Keep jaw relaxed. Equal tension both sides.',
+        cue: 'Sit up straight. Place your hand against the side of your head above your ear. Try to turn your head to that side, but use your hand to stop it from moving. Push for 10 seconds, then relax. Do this on both sides.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Deep Neck Flexor Chin Tuck',
         dose: '3 sets x 10 reps, hold 5 sec',
-        cue: 'Make a double chin by drawing the head straight back. No nodding -- pure retraction. Targets longus colli.',
+        cue: 'Sit up straight. Gently pull your head straight back like you are making a double chin. Do not tilt your head up or down. Just pull it straight back. Hold 5 seconds. This strengthens the small muscles at the front of your neck.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Lateral Neck Stretch (SCM / Scalene)',
         dose: '2-3 sets x hold 30-45 sec each side',
-        cue: 'Ear toward shoulder, gently anchor opposite shoulder down. No rotation, pure lateral flexion.',
+        cue: 'Sit up straight. Slowly tilt your ear toward your shoulder on the same side. Do not rotate your head. Use your other hand to gently pull down on the opposite shoulder to increase the stretch. Hold and breathe.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Suboccipital Release Stretch',
         dose: '2 sets x hold 45 sec',
-        cue: 'Chin tuck then slowly nod chin toward chest. Hands laced behind head for gentle overpressure. Breathe.',
+        cue: 'First, pull your head straight back to make a double chin. From that position, slowly nod your chin down toward your chest. Lace your fingers behind your head and add a very gentle downward pressure. Hold and breathe.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Suboccipital Release (Tennis Ball / Small Ball)',
       dose: '60-90 sec',
-      cue: 'Two tennis balls taped together (or a double ball). Place at base of skull, lie back. Slow yes-no movements.',
+      cue: 'Tape two tennis balls together or use a small firm ball. Lie on your back and place the balls at the base of your skull where your head meets your neck. Gently nod yes and shake no in tiny movements. Stay on any sore spots for 20-30 seconds.',
       equipment: 'Two tennis balls or massage ball',
-      videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-      videoLabel: 'Watch demo',
     },
   },
 
@@ -547,53 +439,41 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Open Books (Side-Lying Thoracic Rotation)',
         dose: '3 sets x 10 reps each side',
-        cue: 'Hips stacked, knees together. Top arm sweeps to ceiling and beyond. Eyes follow the hand. Breathe into the rotation.',
+        cue: 'Lie on your side with your knees bent and stacked. Stretch both arms in front of you. Keep your knees together and hips still. Sweep your top arm up toward the ceiling and then all the way to the floor on the other side. Follow your hand with your eyes. Breathe into the rotation.',
         equipment: 'Bodyweight / mat',
-        videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Thread-the-Needle',
         dose: '3 sets x 8 reps each side, hold 3 sec at end',
-        cue: 'Quadruped start. One arm threads under the body until shoulder touches floor. Keep hips square.',
+        cue: 'Get on all fours. Slide one arm across the floor under your body until your shoulder and the side of your head touch the floor. Keep your hips level and your other arm straight. Hold 3 seconds, then pull the arm back out and repeat.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Seated Thoracic Rotation with Stick',
         dose: '3 sets x 10 reps each side',
-        cue: 'Sit on chair, stick across shoulders. Rotate as far as possible WITHOUT hips moving. Slow and controlled.',
+        cue: 'Sit up straight in a chair with a stick or broomstick resting across your shoulders behind your neck. Hold each end lightly. Rotate your upper body to one side as far as you can without letting your hips turn. Come back and rotate the other way.',
         equipment: 'PVC pipe or broomstick',
-        videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-        videoLabel: 'Watch demo',
       },
     ],
     stretches: [
       {
         name: 'Quadruped Thoracic Rotation Stretch',
         dose: '2-3 sets x hold 30 sec each side',
-        cue: 'One hand behind head. Rotate elbow toward ceiling as far as possible. Hip stays over knee -- it does not twist.',
+        cue: 'Get on all fours. Put one hand behind your head. Rotate your elbow upward toward the ceiling as far as it will go. Your hips should stay still throughout. Hold 30 seconds at the top, then lower and switch sides.',
         equipment: 'Bodyweight',
-        videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-        videoLabel: 'Watch demo',
       },
       {
         name: 'Foam Roller Thoracic Extension + Rotation',
         dose: '60 sec per side',
-        cue: 'Roller perpendicular to spine at mid-back. Hands behind head. Drop one knee to floor for rotation component.',
+        cue: 'Sit with the foam roller across your mid-back and lie back over it. Place your hands behind your head. To add rotation, drop one knee to the floor so your body twists slightly to that side. Hold 30-60 seconds, then switch.',
         equipment: 'Foam roller',
-        videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-        videoLabel: 'Watch demo',
       },
     ],
     foam: {
       name: 'Thoracic Spine Foam Roll (Segmental)',
       dose: '90 sec, segment by segment T4-T10',
-      cue: 'Arms crossed on chest. Hinge back over roller one inch at a time. Breathe into each stiff segment before moving.',
+      cue: 'Sit on the floor with the foam roller across your mid-back. Cross your arms over your chest. Slowly lean back over the roller. Move just 1 inch at a time, from the middle of your back up toward your shoulders. Take a breath at each position before moving to the next.',
       equipment: 'Foam roller',
-      videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-      videoLabel: 'Watch demo',
     },
   },
 }
@@ -877,16 +757,7 @@ function TodayMovementCard({ rx, index }: { rx: Rx; index: number }) {
               <p className="text-xs text-charcoal-light leading-relaxed">
                 <span className="font-semibold text-charcoal">Coaching cue: </span>{rx.cue}
               </p>
-              {rx.videoUrl && (
-                <a
-                  href={rx.videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-teal font-medium hover:underline"
-                >
-                  <Play size={10} /> Watch demo
-                </a>
-              )}
+
             </div>
           )}
         </div>
@@ -1073,16 +944,7 @@ function RxItem({
                     <p className="text-xs text-charcoal-light leading-relaxed">
                       <span className="font-semibold text-charcoal">Coaching cue: </span>{rx.cue}
                     </p>
-                    {rx.videoUrl && (
-                      <a
-                        href={rx.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-teal font-medium hover:underline"
-                      >
-                        <Play size={10} /> {rx.videoLabel ?? 'Watch demo'}
-                      </a>
-                    )}
+
                   </div>
                 )}
               </div>
