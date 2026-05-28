@@ -94,11 +94,13 @@ export function Settings() {
   const [dominantSide, setDominantSide] = useState('right')
   const [saving, setSaving]             = useState(false)
   const [saved, setSaved]               = useState(false)
+  const [saveErr, setSaveErr]           = useState<string | null>(null)
 
   // ── Gym connection ──
   const [gymName, setGymName]     = useState('')
   const [gymSaving, setGymSaving] = useState(false)
   const [gymSaved, setGymSaved]   = useState(false)
+  const [gymErr, setGymErr]       = useState<string | null>(null)
 
   // ── Coach connection ──
   const [coachEmail, setCoachEmail]         = useState('')
@@ -182,25 +184,36 @@ export function Settings() {
     loadData()
   }, [user])
 
-  // ── Save profile ──
+  // ── Save profile (SECURITY DEFINER RPC — bypasses RLS) ──
   const handleSaveProfile = async () => {
     if (!user) return
     setSaving(true)
-    await Promise.all([
-      supabase.from('users').update({ full_name: fullName, belt }).eq('id', user.id),
-      supabase.from('athletes').update({ belt, dominant_side: dominantSide }).eq('user_id', user.id),
-    ])
+    setSaveErr(null)
+    const { data, error } = await supabase.rpc('save_my_profile', {
+      p_full_name:    fullName,
+      p_belt:         belt,
+      p_dominant_side: dominantSide,
+    })
     setSaving(false)
+    if (error || data?.ok === false) {
+      setSaveErr(error?.message ?? data?.error ?? 'Save failed. Try again.')
+      return
+    }
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
 
-  // ── Save gym ──
+  // ── Save gym (SECURITY DEFINER RPC) ──
   const handleSaveGym = async () => {
     if (!user) return
     setGymSaving(true)
-    await supabase.from('athletes').update({ gym_name: gymName }).eq('user_id', user.id)
+    setGymErr(null)
+    const { data, error } = await supabase.rpc('save_my_gym', { p_gym_name: gymName })
     setGymSaving(false)
+    if (error || data?.ok === false) {
+      setGymErr(error?.message ?? data?.error ?? 'Save failed. Try again.')
+      return
+    }
     setGymSaved(true)
     setTimeout(() => setGymSaved(false), 2500)
   }
@@ -376,6 +389,9 @@ export function Settings() {
             </div>
           </div>
 
+          {saveErr && (
+            <p className="text-xs text-red-tier font-medium">{saveErr}</p>
+          )}
           <button
             onClick={handleSaveProfile}
             disabled={saving}
@@ -405,6 +421,9 @@ export function Settings() {
             />
           </div>
 
+          {gymErr && (
+            <p className="text-xs text-red-tier font-medium">{gymErr}</p>
+          )}
           <button
             onClick={handleSaveGym}
             disabled={gymSaving}
