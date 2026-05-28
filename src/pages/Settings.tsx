@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 import {
   Save, Loader2, ExternalLink, Mail, HelpCircle,
   LogOut, Trash2, ChevronRight, ClipboardList, TrendingUp,
-  UserCheck, UserX, School, KeyRound, CheckCircle2,
+  UserCheck, UserX, School, KeyRound, CheckCircle2, Bell,
 } from 'lucide-react'
 import { beltColor, cn } from '../lib/utils'
 
@@ -125,6 +125,18 @@ export function Settings() {
   const [pwSaving, setPwSaving]           = useState(false)
   const [pwMsg, setPwMsg]                 = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
+  // ── Notification preferences ──
+  const [notifLoading, setNotifLoading]       = useState(false)
+  const [notifSaving, setNotifSaving]         = useState(false)
+  const [notifSaved, setNotifSaved]           = useState(false)
+  const [notifErr, setNotifErr]               = useState<string | null>(null)
+  const [emailReminders, setEmailReminders]   = useState(false)
+  const [pushReminders, setPushReminders]     = useState(false)
+  const [reminderTime, setReminderTime]       = useState('08:00')
+  const [pushLoading, setPushLoading]         = useState(false)
+  const [pushMsg, setPushMsg]                 = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
   // ── Delete modal ──
   const [showDelete, setShowDelete] = useState(false)
   const [deleteText, setDeleteText] = useState('')
@@ -187,6 +199,107 @@ export function Settings() {
     }
     loadData()
   }, [user])
+
+  // ── Load notification preferences on mount ──
+  useEffect(() => {
+    if (!user) return
+    async function loadNotifPrefs() {
+      setNotifLoading(true)
+      const { data } = await supabase
+        .from('notification_preferences')
+        .select('email_reminders, push_reminders, reminder_time, timezone')
+        .eq('user_id', user!.id)
+        .maybeSingle()
+      if (data) {
+        setEmailReminders(data.email_reminders ?? false)
+        setPushReminders(data.push_reminders ?? false)
+        setReminderTime(data.reminder_time ?? '08:00')
+      } else {
+        // First load — upsert defaults
+        await supabase.from('notification_preferences').upsert(
+          {
+            user_id: user!.id,
+            email_reminders: false,
+            push_reminders: false,
+            reminder_time: '08:00',
+            timezone: browserTimezone,
+          },
+          { onConflict: 'user_id' }
+        )
+      }
+      setNotifLoading(false)
+    }
+    loadNotifPrefs()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  // ── Save notification settings ──
+  const handleSaveNotifications = async () => {
+    if (!user) return
+    setNotifSaving(true)
+    setNotifErr(null)
+    const { error } = await supabase
+      .from('notification_preferences')
+      .upsert(
+        {
+          user_id: user.id,
+          email_reminders: emailReminders,
+          push_reminders: pushReminders,
+          reminder_time: reminderTime,
+          timezone: browserTimezone,
+        },
+        { onConflict: 'user_id' }
+      )
+    setNotifSaving(false)
+    if (error) {
+      setNotifErr(error.message)
+    } else {
+      setNotifSaved(true)
+      setTimeout(() => setNotifSaved(false), 2500)
+    }
+  }
+
+  // ── Enable push notifications ──
+  const handleEnablePush = async () => {
+    if (!user) return
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      setPushMsg({ type: 'err', text: 'Push notifications are not supported in this browser.' })
+      return
+    }
+    setPushLoading(true)
+    setPushMsg(null)
+    try {
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        setPushMsg({ type: 'err', text: 'Notification permission denied.' })
+        setPushLoading(false)
+        return
+      }
+      const registration = await navigator.serviceWorker.ready
+      // VAPID public key — replace with your actual key from vapidkeys.com
+      const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? ''
+      if (!VAPID_PUBLIC_KEY) {
+        setPushMsg({ type: 'err', text: 'VAPID public key not configured. Set VITE_VAPID_PUBLIC_KEY in .env.' })
+        setPushLoading(false)
+        return
+      }
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: VAPID_PUBLIC_KEY,
+      })
+      const { error } = await supabase.functions.invoke('save-push-subscription', {
+        body: { subscription: subscription.toJSON() },
+      })
+      if (error) throw error
+      setPushReminders(true)
+      setPushMsg({ type: 'ok', text: 'Push notifications enabled!' })
+      setTimeout(() => setPushMsg(null), 4000)
+    } catch (err) {
+      setPushMsg({ type: 'err', text: String(err) })
+    } finally {
+      setPushLoading(false)
+    }
+  }
 
   // ── Save profile (SECURITY DEFINER RPC — bypasses RLS) ──
   const handleSaveProfile = async () => {
@@ -690,6 +803,151 @@ export function Settings() {
               <ChevronRight size={14} className="text-charcoal-light" />
             </a>
           </div>
+        </Section>
+
+        {/* ── NOTIFICATIONS ── */}
+        <Section title="Notifications" icon={<Bell size={14} />}>
+          {notifLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 size={14} className="animate-spin text-teal" />
+              <span className="text-sm text-charcoal-light">Loading preferences...</span>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {/* Timezone display */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-charcoal-light font-semibold uppercase tracking-wide">Your Timezone</p>
+                <span className="text-xs font-medium text-charcoal bg-teal-light px-2.5 py-1 rounded-full">
+                  {browserTimezone}
+                </span>
+              </div>
+
+              {/* Email reminders toggle */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-charcoal">Email reminders</p>
+                    <p className="text-xs text-charcoal-light mt-0.5">
+                      Get an email on protocol days (Mon/Thu/Sun, Tue/Fri, Wed/Sat)
+                    </p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={emailReminders}
+                    onClick={() => setEmailReminders(v => !v)}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2',
+                      emailReminders ? 'bg-teal' : 'bg-charcoal-light/30'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
+                        emailReminders ? 'translate-x-6' : 'translate-x-1'
+                      )}
+                    />
+                  </button>
+                </div>
+
+                {/* Reminder time picker — shown when email reminders on */}
+                {emailReminders && (
+                  <div className="flex items-center gap-3 pl-1">
+                    <label className="text-xs text-charcoal-light font-semibold uppercase tracking-wide whitespace-nowrap">
+                      Reminder time
+                    </label>
+                    <input
+                      type="time"
+                      value={reminderTime}
+                      onChange={e => setReminderTime(e.target.value)}
+                      className="rounded-xl border border-teal-light bg-surface px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-teal"
+                    />
+                    <span className="text-xs text-charcoal-light">({browserTimezone})</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Push notifications toggle */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-charcoal">Push notifications</p>
+                    <p className="text-xs text-charcoal-light mt-0.5">
+                      Browser push alerts on protocol days
+                    </p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={pushReminders}
+                    onClick={() => {
+                      if (!pushReminders) {
+                        handleEnablePush()
+                      } else {
+                        setPushReminders(false)
+                      }
+                    }}
+                    disabled={pushLoading}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2 disabled:opacity-50',
+                      pushReminders ? 'bg-teal' : 'bg-charcoal-light/30'
+                    )}
+                  >
+                    {pushLoading ? (
+                      <Loader2 size={12} className="animate-spin text-white mx-auto" />
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
+                          pushReminders ? 'translate-x-6' : 'translate-x-1'
+                        )}
+                      />
+                    )}
+                  </button>
+                </div>
+
+                {pushMsg && (
+                  <div className={cn(
+                    'flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium',
+                    pushMsg.type === 'ok'
+                      ? 'bg-teal-light text-teal'
+                      : 'bg-red-tier-bg text-red-tier'
+                  )}>
+                    {pushMsg.type === 'ok' ? <CheckCircle2 size={12} /> : <span className="font-bold">!</span>}
+                    {pushMsg.text}
+                  </div>
+                )}
+              </div>
+
+              {/* Protocol schedule reference */}
+              <div className="rounded-xl bg-surface border border-teal-light/60 px-4 py-3 space-y-1.5">
+                <p className="text-xs font-semibold text-charcoal-light uppercase tracking-wide">Protocol Schedule</p>
+                <div className="space-y-1">
+                  {[
+                    { days: 'Mon / Thu / Sun', protocol: 'Protocol 1' },
+                    { days: 'Tue / Fri', protocol: 'Protocol 2' },
+                    { days: 'Wed / Sat', protocol: 'Protocol 3' },
+                  ].map(({ days, protocol }) => (
+                    <div key={days} className="flex items-center justify-between">
+                      <span className="text-xs text-charcoal-light">{days}</span>
+                      <span className="text-xs font-semibold text-teal">{protocol}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {notifErr && (
+                <p className="text-xs text-red-tier font-medium">{notifErr}</p>
+              )}
+
+              <button
+                onClick={handleSaveNotifications}
+                disabled={notifSaving}
+                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+              >
+                {notifSaving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                {notifSaved ? 'Saved!' : 'Save Notification Settings'}
+              </button>
+            </div>
+          )}
         </Section>
 
         {/* ── ACCOUNT ── */}
