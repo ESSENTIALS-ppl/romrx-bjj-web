@@ -15,12 +15,14 @@ export function Signup() {
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [agreedToRenewal, setAgreedToRenewal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password !== confirm) { setError('Passwords do not match.'); return }
     if (password.length < 6)  { setError('Password must be at least 6 characters.'); return }
     if (!agreedToTerms)       { setError('You must agree to the Terms of Service to continue.'); return }
+    if (!agreedToRenewal)     { setError('You must acknowledge the annual auto-renewal to continue.'); return }
     setLoading(true); setError('')
 
     const { data, error: signUpErr } = await supabase.auth.signUp({
@@ -142,21 +144,29 @@ export function Signup() {
             />
             <span className="text-xs text-charcoal-light leading-relaxed">
               I have read and agree to the{' '}
-              <a
-                href="/legal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-teal underline font-medium"
-              >
-                Terms of Service &amp; Privacy Policy
+              <a href="/legal" target="_blank" rel="noopener noreferrer" className="text-teal underline font-medium">
+                Terms of Service, Privacy Policy &amp; Refund Policy
               </a>
-              , including the collection and anonymized use of my ROM data for research and product development.
+              , including the collection and anonymized use of my ROM data for research and product development. All sales are final.
+            </span>
+          </label>
+
+          {/* Auto-renewal consent checkbox (ROSCA / California ARL required) */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreedToRenewal}
+              onChange={e => setAgreedToRenewal(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-teal-light accent-teal shrink-0 cursor-pointer"
+            />
+            <span className="text-xs text-charcoal-light leading-relaxed">
+              <span className="font-semibold text-charcoal">Auto-renewal consent:</span> I agree that my $149/yr subscription will automatically renew each year until I cancel. I can cancel anytime in Settings before my renewal date.
             </span>
           </label>
 
           {error && <p className="text-xs text-red-tier bg-red-tier-bg rounded-lg px-3 py-2">{error}</p>}
 
-          <button type="submit" disabled={loading || !agreedToTerms} className="btn-primary w-full flex items-center justify-center gap-2 mt-2 disabled:opacity-50">
+          <button type="submit" disabled={loading || !agreedToTerms || !agreedToRenewal} className="btn-primary w-full flex items-center justify-center gap-2 mt-2 disabled:opacity-50">
             {loading ? <Loader2 size={15} className="animate-spin" /> : <UserPlus size={15} />}
             Create account & start assessment
           </button>

@@ -14,8 +14,10 @@ export function CoachSignup() {
   const [belt, setBelt]           = useState('white')
   const [gym, setGym]             = useState('')
   const [role, setRole]           = useState<'instructor' | 'head_coach'>('instructor')
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [agreedToTerms, setAgreedToTerms]   = useState(false)
+  const [agreedToRenewal, setAgreedToRenewal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,6 +26,8 @@ export function CoachSignup() {
     if (!gym.trim()) { setError('Gym / Academy name is required.'); return }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
     if (password !== confirm) { setError('Passwords do not match.'); return }
+    if (!agreedToTerms)   { setError('You must agree to the Terms of Service to continue.'); return }
+    if (!agreedToRenewal) { setError('You must acknowledge the annual auto-renewal to continue.'); return }
     setLoading(true)
 
     const { data, error: signUpErr } = await supabase.auth.signUp({
@@ -182,14 +186,36 @@ export function CoachSignup() {
             />
           </div>
 
+          {/* Terms checkbox */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-teal-light accent-teal shrink-0 cursor-pointer" />
+            <span className="text-xs text-charcoal-light leading-relaxed">
+              I have read and agree to the{' '}
+              <a href="/legal" target="_blank" rel="noopener noreferrer" className="text-teal underline font-medium">
+                Terms of Service, Privacy Policy &amp; Refund Policy
+              </a>
+              . All sales are final.
+            </span>
+          </label>
+
+          {/* Auto-renewal consent (ROSCA required) */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={agreedToRenewal} onChange={e => setAgreedToRenewal(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-teal-light accent-teal shrink-0 cursor-pointer" />
+            <span className="text-xs text-charcoal-light leading-relaxed">
+              <span className="font-semibold text-charcoal">Auto-renewal consent:</span> I agree that my $349/yr Coach subscription will automatically renew each year until I cancel. I can cancel anytime in Settings.
+            </span>
+          </label>
+
           {error && (
             <p className="text-xs text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3 mt-2"
+            disabled={loading || !agreedToTerms || !agreedToRenewal}
+            className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3 mt-2 disabled:opacity-50"
           >
             {loading
               ? <><Loader2 size={16} className="animate-spin" /> Setting up your account...</>
