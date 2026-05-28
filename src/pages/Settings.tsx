@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import {
   Save, Loader2, ExternalLink, Mail, HelpCircle,
   LogOut, Trash2, ChevronRight, ClipboardList, TrendingUp,
+  UserCheck, UserX, School, KeyRound, CheckCircle2,
 } from 'lucide-react'
 import { beltColor, cn } from '../lib/utils'
 
@@ -63,44 +64,22 @@ function getPRSTier(s: number) {
 }
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title, icon, children,
+}: {
+  title: string
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
     <div className="card space-y-4">
-      <h2 className="text-xs font-bold text-charcoal uppercase tracking-widest">{title}</h2>
+      <div className="flex items-center gap-2">
+        {icon && <span className="text-charcoal-light">{icon}</span>}
+        <h2 className="text-xs font-bold text-charcoal uppercase tracking-widest">{title}</h2>
+      </div>
       {children}
     </div>
   )
-}
-
-// ── Row link/button ───────────────────────────────────────────────────────────
-function SettingsRow({
-  icon, label, sublabel, onClick, href, danger = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  sublabel?: string
-  onClick?: () => void
-  href?: string
-  danger?: boolean
-}) {
-  const cls = cn(
-    'w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-colors text-left',
-    danger
-      ? 'bg-red-tier-bg border-red-200 text-red-tier hover:bg-red-100'
-      : 'bg-surface border-teal-light text-charcoal hover:bg-teal-light'
-  )
-  const inner = (
-    <>
-      <span className={cn('shrink-0', danger ? 'text-red-tier' : 'text-charcoal-light')}>{icon}</span>
-      <span className="flex-1">
-        {label}
-        {sublabel && <span className="block text-xs text-charcoal-light font-normal mt-0.5">{sublabel}</span>}
-      </span>
-      <ChevronRight size={14} className={danger ? 'text-red-tier/50' : 'text-charcoal-light'} />
-    </>
-  )
-  if (href) return <a href={href} className={cls}>{inner}</a>
-  return <button onClick={onClick} className={cls}>{inner}</button>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -109,28 +88,45 @@ export function Settings() {
   const { user } = useAuth()
   const { profile, loading } = useProfile(user?.id)
 
-  // Profile fields
-  const [fullName, setFullName]       = useState('')
-  const [belt, setBelt]               = useState('')
+  // ── Profile fields ──
+  const [fullName, setFullName]         = useState('')
+  const [belt, setBelt]                 = useState('')
   const [dominantSide, setDominantSide] = useState('right')
-  const [gymName, setGymName]         = useState('')
-  const [saving, setSaving]           = useState(false)
-  const [saved, setSaved]             = useState(false)
+  const [saving, setSaving]             = useState(false)
+  const [saved, setSaved]               = useState(false)
 
-  // Subscription
-  const [subExpiry, setSubExpiry]     = useState<string | null>(null)
+  // ── Gym connection ──
+  const [gymName, setGymName]     = useState('')
+  const [gymSaving, setGymSaving] = useState(false)
+  const [gymSaved, setGymSaved]   = useState(false)
+
+  // ── Coach connection ──
+  const [coachEmail, setCoachEmail]         = useState('')
+  const [currentCoach, setCurrentCoach]     = useState<{ id: string; full_name: string | null; email: string } | null>(null)
+  const [coachLoading, setCoachLoading]     = useState(false)
+  const [coachSearching, setCoachSearching] = useState(false)
+  const [coachMsg, setCoachMsg]             = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  // ── Subscription ──
+  const [subExpiry, setSubExpiry]         = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
 
-  // Assessment history
+  // ── Assessment history ──
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [asLoading, setAsLoading]     = useState(true)
 
-  // Delete modal
-  const [showDelete, setShowDelete]   = useState(false)
-  const [deleteText, setDeleteText]   = useState('')
-  const [deleting, setDeleting]       = useState(false)
+  // ── Password reset ──
+  const [newPassword, setNewPassword]     = useState('')
+  const [confirmPw, setConfirmPw]         = useState('')
+  const [pwSaving, setPwSaving]           = useState(false)
+  const [pwMsg, setPwMsg]                 = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
-  // ── Sync profile into local state ──
+  // ── Delete modal ──
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
+  const [deleting, setDeleting]     = useState(false)
+
+  // ── Sync profile → local state ──
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name ?? '')
@@ -138,30 +134,40 @@ export function Settings() {
     }
   }, [profile])
 
-  // ── Load athlete + subscription expiry + assessments ──
+  // ── Load athlete data + sub expiry + assessments ──
   useEffect(() => {
     if (!user) return
     async function loadData() {
       // Athlete row
       const { data: athlete } = await supabase
         .from('athletes')
-        .select('dominant_side, gym_name')
+        .select('dominant_side, gym_name, coach_id')
         .eq('user_id', user!.id)
         .single()
       if (athlete) {
         setDominantSide(athlete.dominant_side ?? 'right')
         setGymName(athlete.gym_name ?? '')
+
+        // Load linked coach if any
+        if (athlete.coach_id) {
+          setCoachLoading(true)
+          const { data: coach } = await supabase
+            .from('coaches')
+            .select('id, full_name, email')
+            .eq('id', athlete.coach_id)
+            .single()
+          if (coach) setCurrentCoach(coach)
+          setCoachLoading(false)
+        }
       }
 
-      // Subscription expiry from users table
+      // Subscription expiry
       const { data: userData } = await supabase
         .from('users')
         .select('subscription_expiry')
         .eq('id', user!.id)
         .single()
-      if (userData?.subscription_expiry) {
-        setSubExpiry(userData.subscription_expiry)
-      }
+      if (userData?.subscription_expiry) setSubExpiry(userData.subscription_expiry)
 
       // All assessments newest-first
       setAsLoading(true)
@@ -176,17 +182,60 @@ export function Settings() {
     loadData()
   }, [user])
 
-  // ── Save handler ──
-  const handleSave = async () => {
+  // ── Save profile ──
+  const handleSaveProfile = async () => {
     if (!user) return
     setSaving(true)
     await Promise.all([
       supabase.from('users').update({ full_name: fullName, belt }).eq('id', user.id),
-      supabase.from('athletes').update({ belt, dominant_side: dominantSide, gym_name: gymName }).eq('user_id', user.id),
+      supabase.from('athletes').update({ belt, dominant_side: dominantSide }).eq('user_id', user.id),
     ])
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
+  }
+
+  // ── Save gym ──
+  const handleSaveGym = async () => {
+    if (!user) return
+    setGymSaving(true)
+    await supabase.from('athletes').update({ gym_name: gymName }).eq('user_id', user.id)
+    setGymSaving(false)
+    setGymSaved(true)
+    setTimeout(() => setGymSaved(false), 2500)
+  }
+
+  // ── Connect coach by email ──
+  const handleConnectCoach = async () => {
+    if (!user || !coachEmail.trim()) return
+    setCoachSearching(true)
+    setCoachMsg(null)
+    const { data: coach } = await supabase
+      .from('coaches')
+      .select('id, full_name, email')
+      .eq('email', coachEmail.trim().toLowerCase())
+      .eq('is_active', true)
+      .single()
+    if (!coach) {
+      setCoachMsg({ type: 'err', text: 'No active coach found with that email. Ask them to sign up at romrxbjj.com/signup/coach.' })
+      setCoachSearching(false)
+      return
+    }
+    await supabase.from('athletes').update({ coach_id: coach.id }).eq('user_id', user.id)
+    setCurrentCoach(coach)
+    setCoachEmail('')
+    setCoachMsg({ type: 'ok', text: `Connected to ${coach.full_name ?? coach.email}.` })
+    setCoachSearching(false)
+    setTimeout(() => setCoachMsg(null), 4000)
+  }
+
+  // ── Disconnect coach ──
+  const handleDisconnectCoach = async () => {
+    if (!user) return
+    await supabase.from('athletes').update({ coach_id: null }).eq('user_id', user.id)
+    setCurrentCoach(null)
+    setCoachMsg({ type: 'ok', text: 'Coach disconnected.' })
+    setTimeout(() => setCoachMsg(null), 3000)
   }
 
   // ── Stripe portal ──
@@ -202,6 +251,30 @@ export function Settings() {
       console.error('Stripe portal error', e)
     } finally {
       setPortalLoading(false)
+    }
+  }
+
+  // ── Change password ──
+  const handleChangePassword = async () => {
+    setPwMsg(null)
+    if (!newPassword || newPassword.length < 8) {
+      setPwMsg({ type: 'err', text: 'Password must be at least 8 characters.' })
+      return
+    }
+    if (newPassword !== confirmPw) {
+      setPwMsg({ type: 'err', text: 'Passwords do not match.' })
+      return
+    }
+    setPwSaving(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setPwSaving(false)
+    if (error) {
+      setPwMsg({ type: 'err', text: error.message })
+    } else {
+      setNewPassword('')
+      setConfirmPw('')
+      setPwMsg({ type: 'ok', text: 'Password updated.' })
+      setTimeout(() => setPwMsg(null), 4000)
     }
   }
 
@@ -226,7 +299,6 @@ export function Settings() {
     }
   }
 
-  // ── Loading spinner ──
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -304,9 +376,25 @@ export function Settings() {
             </div>
           </div>
 
+          <button
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className="btn-primary flex items-center gap-2"
+          >
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {saved ? 'Saved!' : 'Save Profile'}
+          </button>
+        </Section>
+
+        {/* ── GYM CONNECTION ── */}
+        <Section title="My Gym" icon={<School size={14} />}>
+          <p className="text-xs text-charcoal-light -mt-2">
+            Enter your gym or academy name. This is independent of your coach.
+          </p>
+
           <div>
             <label className="text-xs text-charcoal-light font-semibold uppercase tracking-wide block mb-1">
-              Gym / Academy
+              Gym / Academy Name
             </label>
             <input
               type="text"
@@ -315,19 +403,98 @@ export function Settings() {
               placeholder="e.g. Alliance BJJ Columbus"
               className="w-full rounded-xl border border-teal-light bg-surface px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-teal"
             />
-            <p className="text-xs text-charcoal-light mt-1">
-              Your coach uses this to find you in their roster.
-            </p>
           </div>
 
           <button
-            onClick={handleSave}
-            disabled={saving}
+            onClick={handleSaveGym}
+            disabled={gymSaving}
             className="btn-primary flex items-center gap-2"
           >
-            {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-            {saved ? 'Saved!' : 'Save Profile'}
+            {gymSaving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {gymSaved ? 'Saved!' : 'Save Gym'}
           </button>
+        </Section>
+
+        {/* ── COACH CONNECTION ── */}
+        <Section title="My Coach" icon={<UserCheck size={14} />}>
+          <p className="text-xs text-charcoal-light -mt-2">
+            Link to your coach directly by their email. Your coach does not need to be at the same gym.
+          </p>
+
+          {/* Connected coach card */}
+          {coachLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 size={14} className="animate-spin text-teal" />
+              <span className="text-sm text-charcoal-light">Loading...</span>
+            </div>
+          ) : currentCoach ? (
+            <div className="flex items-center justify-between rounded-xl bg-teal-light border border-teal/20 px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold text-charcoal">
+                  {currentCoach.full_name ?? currentCoach.email}
+                </p>
+                <p className="text-xs text-charcoal-light mt-0.5">{currentCoach.email}</p>
+              </div>
+              <button
+                onClick={handleDisconnectCoach}
+                className="flex items-center gap-1.5 text-xs font-semibold text-red-tier hover:underline"
+              >
+                <UserX size={13} />
+                Remove
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-charcoal-light italic">No coach connected yet.</p>
+          )}
+
+          {/* Connect by email */}
+          {!currentCoach && (
+            <div className="space-y-2">
+              <label className="text-xs text-charcoal-light font-semibold uppercase tracking-wide block">
+                Connect by Coach Email
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={coachEmail}
+                  onChange={e => setCoachEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleConnectCoach()}
+                  placeholder="coach@example.com"
+                  className="flex-1 rounded-xl border border-teal-light bg-surface px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-teal"
+                />
+                <button
+                  onClick={handleConnectCoach}
+                  disabled={coachSearching || !coachEmail.trim()}
+                  className="btn-primary flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
+                >
+                  {coachSearching ? <Loader2 size={14} className="animate-spin" /> : <UserCheck size={14} />}
+                  Connect
+                </button>
+              </div>
+              <p className="text-xs text-charcoal-light">
+                Your coach must have a ROMRx Coach account. Send them to{' '}
+                <a href="/signup/coach" className="text-teal hover:underline font-medium">
+                  romrxbjj.com/signup/coach
+                </a>
+              </p>
+            </div>
+          )}
+
+          {/* Message */}
+          {coachMsg && (
+            <div className={cn(
+              'flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium',
+              coachMsg.type === 'ok'
+                ? 'bg-teal-light text-teal'
+                : 'bg-red-tier-bg text-red-tier'
+            )}>
+              {coachMsg.type === 'ok'
+                ? <CheckCircle2 size={14} />
+                : <span className="text-xs font-bold">!</span>
+              }
+              {coachMsg.text}
+            </div>
+          )}
         </Section>
 
         {/* ── SUBSCRIPTION ── */}
@@ -383,10 +550,7 @@ export function Settings() {
         <Section title="Assessment History">
           <div className="flex items-center justify-between -mt-2 mb-1">
             <p className="text-xs text-charcoal-light">Your past ROM snapshots</p>
-            <a
-              href="/onboarding/assessment"
-              className="text-xs font-semibold text-teal hover:underline"
-            >
+            <a href="/onboarding/assessment" className="text-xs font-semibold text-teal hover:underline">
               + New Assessment
             </a>
           </div>
@@ -399,10 +563,7 @@ export function Settings() {
             <div className="text-center py-6">
               <ClipboardList size={28} className="mx-auto text-charcoal-light mb-2" />
               <p className="text-sm text-charcoal-light mb-2">No assessments on file yet.</p>
-              <a
-                href="/onboarding/assessment"
-                className="inline-block text-sm font-semibold text-teal hover:underline"
-              >
+              <a href="/onboarding/assessment" className="inline-block text-sm font-semibold text-teal hover:underline">
                 Take your first assessment
               </a>
             </div>
@@ -411,17 +572,18 @@ export function Settings() {
               {assessments.map((a, i) => {
                 const prs  = computePRS(a)
                 const tier = getPRSTier(prs)
-                const dateStr = new Date(a.assessed_at).toLocaleDateString('en-US', {
-                  month: 'short', day: 'numeric', year: 'numeric',
-                })
                 return (
                   <div key={a.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                     <div className="flex items-center gap-3">
-                      <div className={cn('w-10 h-10 rounded-full flex flex-col items-center justify-center shrink-0 border', tier.bg)}>
+                      <div className={cn('w-10 h-10 rounded-full flex flex-col items-center justify-center shrink-0', tier.bg)}>
                         <span className={cn('font-display font-bold text-sm leading-none', tier.color)}>{prs}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-charcoal">{dateStr}</p>
+                        <p className="text-sm font-medium text-charcoal">
+                          {new Date(a.assessed_at).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric',
+                          })}
+                        </p>
                         <p className={cn('text-xs font-bold', tier.color)}>{tier.label}</p>
                       </div>
                     </div>
@@ -449,38 +611,95 @@ export function Settings() {
         {/* ── SUPPORT ── */}
         <Section title="Support">
           <div className="space-y-2 -mt-1">
-            <SettingsRow
-              icon={<Mail size={15} />}
-              label="Email us"
-              sublabel="ROMRxBJJ@gmail.com"
+            <a
               href="mailto:ROMRxBJJ@gmail.com"
-            />
-            <SettingsRow
-              icon={<HelpCircle size={15} />}
-              label="Questions and FAQ"
-              sublabel="Send us a question anytime"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
+            >
+              <Mail size={15} className="text-teal shrink-0" />
+              <span className="flex-1">
+                Email us
+                <span className="block text-xs text-charcoal-light font-normal mt-0.5">ROMRxBJJ@gmail.com</span>
+              </span>
+              <ChevronRight size={14} className="text-charcoal-light" />
+            </a>
+            <a
               href="mailto:ROMRxBJJ@gmail.com?subject=ROMRxBJJ%20Question"
-            />
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
+            >
+              <HelpCircle size={15} className="text-teal shrink-0" />
+              <span className="flex-1">Questions and FAQ</span>
+              <ChevronRight size={14} className="text-charcoal-light" />
+            </a>
           </div>
         </Section>
 
         {/* ── ACCOUNT ── */}
         <Section title="Account">
-          <div className="space-y-2 -mt-1">
-            <SettingsRow
-              icon={<LogOut size={15} />}
-              label="Sign out"
-              onClick={handleSignOut}
-            />
-            <div className="pt-2 mt-1 border-t border-red-100">
-              <p className="text-xs text-charcoal-light mb-2">Danger zone</p>
-              <SettingsRow
-                icon={<Trash2 size={15} />}
-                label="Delete account"
-                sublabel="Removes all your data permanently"
-                onClick={() => setShowDelete(true)}
-                danger
+          <div className="space-y-4 -mt-1">
+
+            {/* Change password */}
+            <div className="space-y-3">
+              <p className="text-xs text-charcoal-light font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                <KeyRound size={12} />
+                Change Password
+              </p>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="New password"
+                className="w-full rounded-xl border border-teal-light bg-surface px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-teal"
               />
+              <input
+                type="password"
+                value={confirmPw}
+                onChange={e => setConfirmPw(e.target.value)}
+                placeholder="Confirm new password"
+                className="w-full rounded-xl border border-teal-light bg-surface px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-teal"
+              />
+              {pwMsg && (
+                <p className={cn(
+                  'text-xs font-medium flex items-center gap-1.5',
+                  pwMsg.type === 'ok' ? 'text-teal' : 'text-red-tier'
+                )}>
+                  {pwMsg.type === 'ok' && <CheckCircle2 size={12} />}
+                  {pwMsg.text}
+                </p>
+              )}
+              <button
+                onClick={handleChangePassword}
+                disabled={pwSaving || !newPassword}
+                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+              >
+                {pwSaving ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />}
+                {pwSaving ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+
+            <div className="border-t border-teal-light pt-3">
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
+              >
+                <LogOut size={15} className="text-charcoal-light shrink-0" />
+                <span className="flex-1 text-left">Sign out</span>
+                <ChevronRight size={14} className="text-charcoal-light" />
+              </button>
+            </div>
+
+            <div className="border-t border-red-100 pt-3">
+              <p className="text-xs text-charcoal-light mb-2">Danger zone</p>
+              <button
+                onClick={() => setShowDelete(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-tier-bg border border-red-200 text-sm font-medium text-red-tier hover:bg-red-100 transition-colors"
+              >
+                <Trash2 size={15} className="shrink-0" />
+                <span className="flex-1 text-left">
+                  Delete account
+                  <span className="block text-xs font-normal mt-0.5 opacity-70">Removes all your data permanently</span>
+                </span>
+                <ChevronRight size={14} />
+              </button>
             </div>
           </div>
         </Section>
@@ -496,12 +715,10 @@ export function Settings() {
               </div>
               <h3 className="font-display font-bold text-lg text-charcoal">Delete Account</h3>
             </div>
-
             <p className="text-sm text-charcoal-light leading-relaxed">
               This removes your profile, assessments, and protocol data. It cannot be undone.
               Type <span className="font-bold text-charcoal">DELETE</span> to confirm.
             </p>
-
             <input
               type="text"
               value={deleteText}
@@ -509,7 +726,6 @@ export function Settings() {
               placeholder="Type DELETE"
               className="w-full rounded-xl border border-red-200 bg-surface px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-red-400"
             />
-
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => { setShowDelete(false); setDeleteText('') }}
