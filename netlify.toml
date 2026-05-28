@@ -9,6 +9,13 @@
   status = 200
   force  = true
 
+# Legal page
+[[redirects]]
+  from   = "/legal"
+  to     = "/legal.html"
+  status = 200
+  force  = true
+
 # Marketing sub-pages
 [[redirects]]
   from   = "/athletes"

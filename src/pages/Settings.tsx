@@ -676,6 +676,19 @@ export function Settings() {
               <span className="flex-1">Questions and FAQ</span>
               <ChevronRight size={14} className="text-charcoal-light" />
             </a>
+            <a
+              href="/legal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
+            >
+              <ExternalLink size={15} className="text-teal shrink-0" />
+              <span className="flex-1">
+                Terms of Service &amp; Privacy Policy
+                <span className="block text-xs text-charcoal-light font-normal mt-0.5">romrxbjj.com/legal</span>
+              </span>
+              <ChevronRight size={14} className="text-charcoal-light" />
+            </a>
           </div>
         </Section>
 
