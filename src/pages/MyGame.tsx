@@ -51,7 +51,7 @@ const DEFENSE_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 // AI path sequences
 const STANDING_SEQ = ['Throws', 'Passes', 'Controls', 'Submissions'] as const
-const ONTOP_SEQ    = ['Passes', 'Controls', 'Controls', 'Submissions'] as const
+const ONTOP_SEQ    = ['Passes', 'Controls', 'Submissions'] as const
 const ONBOTTOM_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 type PathMode       = 'offense' | 'defense'
@@ -1244,12 +1244,15 @@ export function MyGame() {
                       {seq.map((cat, i) => {
                         const eligible = eligibleInCat(eligibility, cat)
                         const fromPos = CAT_FROM[cat]
-                        const toPos = CAT_TO[cat]
-                        const isLast = i === seq.length - 1
+                        const toPos   = CAT_TO[cat]
+                        const prevToPos = i > 0 ? CAT_TO[seq[i - 1]] : null
+                        // Only show FROM label if it differs from previous step's TO (avoids duplicates)
+                        const showFrom = i === 0 || fromPos !== prevToPos
+                        const isLast   = i === seq.length - 1
 
                         return (
-                          <div key={cat} className="space-y-1">
-                            <PositionPill pos={fromPos} />
+                          <div key={`${cat}-${i}`} className="space-y-1">
+                            {showFrom && <PositionPill pos={fromPos} />}
                             <ArrowDown size={14} className="text-charcoal-light mx-3 my-0" />
 
                             <p className="text-xs font-bold text-charcoal uppercase tracking-wide px-1 mb-1">
