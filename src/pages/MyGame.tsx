@@ -969,7 +969,7 @@ export function MyGame() {
                             ]).map(([val, label, sub, Icon]) => (
                               <button
                                 key={val}
-                                onClick={() => { setAiStyle(val); setAiStep(2.5 as unknown as number) }}
+                                onClick={() => setAiStyle(val)}
                                 className={cn(
                                   'flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all',
                                   aiStyle === val
