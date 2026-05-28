@@ -143,13 +143,18 @@ export function Login() {
                 Sign in
               </button>
 
-              <p className="text-center text-xs text-charcoal-light">
-                No password?{' '}
-                <button type="button" onClick={() => { setMode('magic'); setError('') }}
-                  className="text-teal underline">
-                  Send a magic link instead
+              <div className="flex items-center justify-between">
+                <button type="button"
+                  onClick={() => { setMode('magic'); setError(''); setMagicSent(false) }}
+                  className="text-xs text-teal underline">
+                  Forgot password?
                 </button>
-              </p>
+                <button type="button"
+                  onClick={() => { setMode('magic'); setError(''); setMagicSent(false) }}
+                  className="text-xs text-charcoal-light underline">
+                  Use magic link
+                </button>
+              </div>
             </form>
           ) : magicSent ? (
             <div className="text-center py-4">
