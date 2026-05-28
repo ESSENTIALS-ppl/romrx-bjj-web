@@ -86,15 +86,17 @@ function Section({
 export function Settings() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { profile, loading } = useProfile(user?.id)
+  const { profile, assessment, loading } = useProfile(user?.id)
 
   // ── Profile fields ──
   const [fullName, setFullName]         = useState('')
   const [belt, setBelt]                 = useState('')
+  const [originalBelt, setOriginalBelt] = useState('')
   const [dominantSide, setDominantSide] = useState('right')
   const [saving, setSaving]             = useState(false)
   const [saved, setSaved]               = useState(false)
   const [saveErr, setSaveErr]           = useState<string | null>(null)
+  const [recomputing, setRecomputing]   = useState(false)
 
   // ── Gym connection ──
   const [gymName, setGymName]     = useState('')
@@ -132,7 +134,9 @@ export function Settings() {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name ?? '')
-      setBelt(profile.belt ?? 'white')
+      const b = profile.belt ?? 'white'
+      setBelt(b)
+      setOriginalBelt(b)
     }
   }, [profile])
 
@@ -190,8 +194,8 @@ export function Settings() {
     setSaving(true)
     setSaveErr(null)
     const { data, error } = await supabase.rpc('save_my_profile', {
-      p_full_name:    fullName,
-      p_belt:         belt,
+      p_full_name:     fullName,
+      p_belt:          belt,
       p_dominant_side: dominantSide,
     })
     setSaving(false)
@@ -201,6 +205,23 @@ export function Settings() {
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
+
+    // Belt changed + user has an assessment — recompute technique eligibility
+    if (belt !== originalBelt && assessment) {
+      setRecomputing(true)
+      try {
+        await supabase.functions.invoke('compute-tiers', {
+          body: { record: assessment },
+        })
+      } catch (e) {
+        console.error('Recompute error', e)
+      } finally {
+        setRecomputing(false)
+        setOriginalBelt(belt)
+      }
+    } else {
+      setOriginalBelt(belt)
+    }
   }
 
   // ── Save gym (SECURITY DEFINER RPC) ──
@@ -392,9 +413,15 @@ export function Settings() {
           {saveErr && (
             <p className="text-xs text-red-tier font-medium">{saveErr}</p>
           )}
+          {recomputing && (
+            <div className="flex items-center gap-2 text-xs text-charcoal-light">
+              <Loader2 size={12} className="animate-spin text-teal" />
+              Updating technique library for your new belt...
+            </div>
+          )}
           <button
             onClick={handleSaveProfile}
-            disabled={saving}
+            disabled={saving || recomputing}
             className="btn-primary flex items-center gap-2"
           >
             {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
