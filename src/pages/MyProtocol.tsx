@@ -267,7 +267,7 @@ const RX: Record<string, Prescription> = {
       {
         name: 'Wall Slide (Forearm Version)',
         dose: '3 sets x 10-12 reps',
-        cue: 'Back against wall, forearms slide up. Keep shoulder blades down -- do not shrug. This trains scapular upward rotation.',
+        cue: 'Stand with your back flat against a wall. Bend your elbows to 90 degrees and press both elbows, forearms, and the backs of your hands against the wall. Start in a field goal position with your elbows at shoulder height and upper arms out to the sides. From there, slowly slide both arms straight UP the wall as high as you can go while keeping your elbows, forearms, and hands all touching the wall. Then slide back down. If your lower back arches away from the wall or your hands lose contact, you went too far. Do not shrug your shoulders toward your ears at any point.',
         equipment: 'Bodyweight / wall',
       },
       {
