@@ -17,6 +17,7 @@ import {
   Flame, Brain, Zap, Footprints, CircleDot,
   Bookmark, Share2, Trash2, Check, Lock,
   ChevronLeft, Star, Dumbbell, X,
+  Printer, GitBranch, Medal,
 } from 'lucide-react'
 
 // ── Position labels ───────────────────────────────────────────────────────────
@@ -56,11 +57,16 @@ const ONTOP_SEQ    = ['Passes', 'Controls', 'Submissions'] as const
 const ONBOTTOM_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 type PathMode       = 'offense' | 'defense'
-type GenMode        = 'quick' | 'custom' | 'ai'
+type GenMode        = 'quick' | 'custom' | 'ai' | 'competition'
 type Tab            = 'gameplan' | 'myflows' | 'library'
 type AIStart        = 'standing' | 'ontop' | 'onbottom'
 type AIFinish       = 'chokes' | 'arm' | 'legs'
 type AIStyle        = 'explosive' | 'technical'
+
+// Competition mode types
+type CompFormat   = 'points' | 'submission' | 'mma'
+type CompDuration = 'under5' | '5to8' | 'over8'
+type CompThreat   = 'takedown' | 'guard' | 'leglock'
 
 // ── Saved plan shape ──────────────────────────────────────────────────────────
 interface FlowTech {
@@ -72,6 +78,7 @@ interface FlowTech {
   category: string
   belt: string
   limiting_joints?: string[]
+  is_branch?: boolean
 }
 
 interface SavedPlan {
@@ -103,6 +110,13 @@ interface DrillSession {
   category: string
   notes: string | null
   drilled_at: string
+}
+
+// Branch point for If/Then branching
+interface BranchPoint {
+  stepIndex: number
+  primaryTech: FlowTech
+  altTech: FlowTech | null
 }
 
 function rowToSavedPlan(row: GamePlanRow): SavedPlan {
@@ -145,6 +159,15 @@ function eligibleInCat(eligibility: TechniqueEligibility[], cat: string) {
   return eligibility.filter(e => {
     const t = e.techniques as { category: string }
     return (e.tier === 'GREEN' || e.tier === 'YELLOW') && !e.flag &&
+      t.category.toLowerCase() === cat.toLowerCase()
+  })
+}
+
+// GREEN-only eligible techniques for competition mode
+function greenOnlyInCat(eligibility: TechniqueEligibility[], cat: string) {
+  return eligibility.filter(e => {
+    const t = e.techniques as { category: string }
+    return e.tier === 'GREEN' && !e.flag &&
       t.category.toLowerCase() === cat.toLowerCase()
   })
 }
@@ -197,6 +220,57 @@ function eligToFlowTech(e: TechniqueEligibility): FlowTech {
   }
 }
 
+// ── PrintButton component ─────────────────────────────────────────────────────
+function PrintButton({ planName: _planName }: { planName?: string }) {
+  return (
+    <button
+      onClick={() => window.print()}
+      className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface transition-colors"
+      title="Save as PDF via browser print dialog"
+    >
+      <Printer size={14} />
+      Save as PDF
+    </button>
+  )
+}
+
+// Print CSS injected once at module level (avoids re-injection)
+const PRINT_STYLE = `
+@media print {
+  /* Hide everything by default */
+  body > * { display: none !important; }
+  /* Show only the print target */
+  .print-flow-root, .print-flow-root * { display: revert !important; }
+  .print-flow-root { display: block !important; }
+  /* Hide non-flow elements inside the page */
+  .no-print { display: none !important; }
+  /* Node cards don't break across pages */
+  .flow-node-card { break-inside: avoid; page-break-inside: avoid; }
+  /* Plan header styling */
+  .print-plan-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .print-plan-desc {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 16px;
+  }
+}
+`
+
+// Inject print style once
+if (typeof document !== 'undefined') {
+  const existing = document.getElementById('romrx-print-style')
+  if (!existing) {
+    const style = document.createElement('style')
+    style.id = 'romrx-print-style'
+    style.textContent = PRINT_STYLE
+    document.head.appendChild(style)
+  }
+}
+
 // ── VisualFlow component ──────────────────────────────────────────────────────
 interface VisualFlowStep {
   tech: FlowTech | null
@@ -210,12 +284,13 @@ function tierBorderClass(tier: string | null): string {
 }
 
 function FlowNode({
-  step, index, totalSteps, eligibility,
+  step, index, totalSteps, eligibility, drillCount,
 }: {
   step: VisualFlowStep
   index: number
   totalSteps: number
   eligibility: TechniqueEligibility[]
+  drillCount?: number
 }) {
   const isFirst  = index === 0
   const isLast   = index === totalSteps - 1
@@ -262,6 +337,8 @@ function FlowNode({
   }
 
   const effectiveTier = step.tech.flag === 'DELAY_TECHNIQUE' ? 'RED' : step.tech.tier
+  const isReady = (drillCount ?? 0) >= 5
+  const hasDrills = (drillCount ?? 0) > 0
 
   return (
     <div>
@@ -276,7 +353,7 @@ function FlowNode({
         <span className="text-[10px] uppercase tracking-widest font-semibold">{step.category}</span>
       </div>
       <div className={cn(
-        'rounded-2xl border border-teal-light bg-white overflow-hidden',
+        'rounded-2xl border border-teal-light bg-white overflow-hidden relative flow-node-card',
         tierBorderClass(effectiveTier),
         isFinish && 'border border-yellow-300 bg-yellow-50',
       )}>
@@ -306,6 +383,20 @@ function FlowNode({
             </div>
           )}
         </div>
+        {/* Drill progress badge — bottom right */}
+        {hasDrills && (
+          <div className="absolute bottom-2 right-2">
+            {isReady ? (
+              <span className="flex items-center gap-1 text-[10px] font-bold bg-teal text-white px-2 py-0.5 rounded-full">
+                <Check size={9} /> Ready
+              </span>
+            ) : (
+              <span className="text-[10px] font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                {drillCount} {drillCount === 1 ? 'drill' : 'drills'}
+              </span>
+            )}
+          </div>
+        )}
       </div>
       {isLast && (
         <div className="flex items-center gap-2 py-2 pl-1 mt-1">
@@ -322,22 +413,58 @@ function FlowNode({
 }
 
 function VisualFlow({
-  steps, eligibility,
+  steps, eligibility, planId, planName, planDescription, isCompetition,
 }: {
   steps: VisualFlowStep[]
   eligibility: TechniqueEligibility[]
+  planId?: string
+  planName?: string
+  planDescription?: string
+  isCompetition?: boolean
 }) {
+  const [drillCounts, setDrillCounts] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (!planId) return
+    supabase.from('drill_sessions')
+      .select('technique_name')
+      .eq('game_plan_id', planId)
+      .then(({ data }) => {
+        const counts: Record<string, number> = {}
+        data?.forEach(d => { counts[d.technique_name] = (counts[d.technique_name] ?? 0) + 1 })
+        setDrillCounts(counts)
+      })
+  }, [planId])
+
   return (
-    <div className="space-y-1 bg-white rounded-2xl border border-teal-light p-5">
-      {steps.map((step, i) => (
-        <FlowNode
-          key={`${step.category}-${i}`}
-          step={step}
-          index={i}
-          totalSteps={steps.length}
-          eligibility={eligibility}
-        />
-      ))}
+    <div className="print-flow-root">
+      {/* Print-only header */}
+      {planName && (
+        <div className="hidden print-plan-header">{planName}</div>
+      )}
+      {planDescription && (
+        <div className="hidden print-plan-desc">{planDescription}</div>
+      )}
+      <div className="space-y-1 bg-white rounded-2xl border border-teal-light p-5">
+        {isCompetition && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="flex items-center gap-1.5 text-[11px] font-bold bg-red-500 text-white px-2.5 py-1 rounded-full">
+              <Medal size={11} /> Competition
+            </span>
+            <span className="text-[11px] text-charcoal-light">GREEN techniques only</span>
+          </div>
+        )}
+        {steps.map((step, i) => (
+          <FlowNode
+            key={`${step.category}-${i}`}
+            step={step}
+            index={i}
+            totalSteps={steps.length}
+            eligibility={eligibility}
+            drillCount={drillCounts[step.tech?.name ?? '']}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -623,6 +750,11 @@ function SavedPlanCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-bold text-charcoal text-sm">{plan.name}</p>
+            {plan.pathMode === 'competition' && (
+              <span className="flex items-center gap-1 text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
+                <Medal size={9} /> Competition
+              </span>
+            )}
             {drillCount > 0 && (
               <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-semibold shrink-0">
                 {drillCount} {drillCount === 1 ? 'session' : 'sessions'}
@@ -734,6 +866,191 @@ function SavedPlanCard({
   )
 }
 
+// ── BranchNode — a single node in the branch grid ────────────────────────────
+function BranchNodeCard({
+  tech, label, isAlt,
+}: {
+  tech: FlowTech | null
+  label?: string
+  isAlt?: boolean
+}) {
+  if (!tech) return (
+    <div className={cn(
+      'rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-3 flex items-center justify-center min-h-[60px]',
+      isAlt && 'opacity-50'
+    )}>
+      <p className="text-xs text-gray-400">{isAlt ? 'No alt set' : '—'}</p>
+    </div>
+  )
+
+  const effectiveTier = tech.flag === 'DELAY_TECHNIQUE' ? 'RED' : tech.tier
+
+  return (
+    <div className={cn(
+      'rounded-2xl border border-teal-light bg-white p-3',
+      tierBorderClass(effectiveTier),
+      isAlt && 'border-dashed opacity-80'
+    )}>
+      {label && <p className="text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">{label}</p>}
+      <p className="text-[10px] font-mono text-charcoal-light uppercase">{tech.code}</p>
+      <p className="text-xs font-semibold text-charcoal leading-snug mt-0.5">{tech.name}</p>
+      <div className="mt-1.5">
+        <TierBadge tier={effectiveTier} flag={tech.flag} size="sm" />
+      </div>
+    </div>
+  )
+}
+
+// ── Branch Builder UI ────────────────────────────────────────────────────────
+function BranchBuilder({
+  steps,
+  eligibility,
+  branches,
+  onBranchesChange,
+}: {
+  steps: VisualFlowStep[]
+  eligibility: TechniqueEligibility[]
+  branches: BranchPoint[]
+  onBranchesChange: (branches: BranchPoint[]) => void
+}) {
+  const [addingBranchAt, setAddingBranchAt] = useState<number | null>(null)
+  const [altPickOpen, setAltPickOpen] = useState<number | null>(null)
+
+  const branchAtStep = (idx: number) => branches.find(b => b.stepIndex === idx) ?? null
+
+  const addBranch = (stepIdx: number) => {
+    const step = steps[stepIdx]
+    if (!step.tech) return
+    const existing = branchAtStep(stepIdx)
+    if (existing) return
+    const newBranch: BranchPoint = { stepIndex: stepIdx, primaryTech: step.tech, altTech: null }
+    onBranchesChange([...branches, newBranch])
+    setAddingBranchAt(null)
+    setAltPickOpen(stepIdx)
+  }
+
+  const removeBranch = (stepIdx: number) => {
+    onBranchesChange(branches.filter(b => b.stepIndex !== stepIdx))
+  }
+
+  const setAltTech = (stepIdx: number, tech: FlowTech | null) => {
+    onBranchesChange(branches.map(b => b.stepIndex === stepIdx ? { ...b, altTech: tech } : b))
+    setAltPickOpen(null)
+  }
+
+  return (
+    <div className="space-y-3 pt-3 border-t border-teal-light/60">
+      <div className="flex items-center gap-2">
+        <GitBranch size={14} className="text-teal" />
+        <p className="text-xs font-bold text-charcoal uppercase tracking-wide">Contingency Branches</p>
+      </div>
+      <p className="text-xs text-charcoal-light">
+        Add "If/Then" alternates for each step. If your primary technique fails, you'll have a backup path ready.
+      </p>
+
+      {steps.map((step, i) => {
+        if (!step.tech) return null
+        const branch = branchAtStep(i)
+
+        return (
+          <div key={i} className="space-y-1">
+            {/* Step label */}
+            <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider px-1">
+              Step {i + 1} — {step.category}
+            </p>
+
+            {branch ? (
+              /* Branch row: primary | OR | alt */
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                <BranchNodeCard tech={step.tech} label="Primary" />
+                <div className="flex flex-col items-center gap-1">
+                  <div className="w-px h-4 bg-teal-light" />
+                  <span className="text-[10px] font-bold text-charcoal-light bg-surface border border-teal-light px-2 py-0.5 rounded-full">OR</span>
+                  <div className="w-px h-4 bg-teal-light" />
+                </div>
+                {altPickOpen === i ? (
+                  <div className="relative">
+                    <div className="bg-white rounded-2xl border border-teal-light shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                      {eligibleInCat(eligibility, step.category).filter(e => {
+                        const t = e.techniques as { name: string }
+                        return t.name !== step.tech?.name
+                      }).map(e => {
+                        const t = e.techniques as { code: string; name: string }
+                        return (
+                          <button
+                            key={e.id}
+                            onClick={() => setAltTech(i, eligToFlowTech(e))}
+                            className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors border-b border-teal-light/40 last:border-0"
+                          >
+                            <p className="text-[10px] font-mono text-charcoal-light uppercase">{t.code}</p>
+                            <p className="text-xs font-semibold text-charcoal">{t.name}</p>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setAltPickOpen(i)}
+                  >
+                    {branch.altTech ? (
+                      <BranchNodeCard tech={branch.altTech} label="If fails, try" isAlt />
+                    ) : (
+                      <div className="rounded-2xl border-2 border-dashed border-teal/30 bg-teal/5 p-3 text-center hover:border-teal/60 transition-colors min-h-[60px] flex items-center justify-center">
+                        <p className="text-xs text-teal font-semibold">+ Pick alternate</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Non-branch step — centered, with option to add branch */
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <BranchNodeCard tech={step.tech} />
+                </div>
+                {addingBranchAt === i ? (
+                  <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={() => addBranch(i)}
+                      className="text-[11px] bg-teal text-white px-2.5 py-1.5 rounded-xl font-semibold"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setAddingBranchAt(null)}
+                      className="text-[11px] bg-gray-100 text-charcoal-light px-2 py-1.5 rounded-xl"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setAddingBranchAt(i)}
+                    className="shrink-0 text-[11px] text-teal border border-teal/30 px-2.5 py-1.5 rounded-xl hover:bg-teal-light transition-colors font-semibold"
+                  >
+                    + Branch
+                  </button>
+                )}
+              </div>
+            )}
+
+            {branch && (
+              <button
+                onClick={() => removeBranch(i)}
+                className="text-[10px] text-red-400 hover:text-red-600 pl-1 flex items-center gap-1"
+              >
+                <X size={9} /> Remove branch
+              </button>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function MyGame() {
   const navigate = useNavigate()
@@ -750,6 +1067,9 @@ export function MyGame() {
   // Custom builder state
   const [customPicks, setCustomPicks] = useState<(TechniqueEligibility | null)[]>([null, null, null, null])
 
+  // Branch state (for Build My Own)
+  const [branches, setBranches] = useState<BranchPoint[]>([])
+
   // AI wizard state
   const [aiStep, setAiStep]           = useState<number>(0) // 0 = step1, 1 = step2, 2 = step3, 3 = result
   const [aiStart, setAiStart]         = useState<AIStart | null>(null)
@@ -758,6 +1078,15 @@ export function MyGame() {
   const [aiFlow, setAiFlow]           = useState<FlowTech[]>([])
   const [aiPlanName, setAiPlanName]   = useState<string>('')
   const [aiDescription, setAiDescription] = useState<string>('')
+
+  // Competition wizard state
+  const [compStep, setCompStep]       = useState<number>(0) // 0,1,2 = questions; 3 = result
+  const [compFormat, setCompFormat]   = useState<CompFormat | null>(null)
+  const [compDuration, setCompDuration] = useState<CompDuration | null>(null)
+  const [compThreat, setCompThreat]   = useState<CompThreat | null>(null)
+  const [compFlow, setCompFlow]       = useState<FlowTech[]>([])
+  const [compPlanName, setCompPlanName] = useState<string>('')
+  const [compDescription, setCompDescription] = useState<string>('')
 
   // Save state
   const [savingPlanName, setSavingPlanName]   = useState<string>('')
@@ -839,15 +1168,18 @@ export function MyGame() {
     setLoadedPlan(null)
   }, [pathMode, eligibility, sequence])
 
-  // Custom: when path changes, reset picks
+  // Custom: when path changes, reset picks + branches
   const setCustomPath = useCallback((p: PathMode) => {
     setPathMode(p)
     setCustomPicks([null, null, null, null])
+    setBranches([])
     setLoadedPlan(null)
   }, [])
 
   const setPick = useCallback((stepIdx: number, tech: TechniqueEligibility | null) => {
     setCustomPicks(prev => prev.map((v, i) => i === stepIdx ? tech : v))
+    // remove any branch at this step since the primary changed
+    setBranches(prev => prev.filter(b => b.stepIndex !== stepIdx))
   }, [])
 
   // AI generate
@@ -912,6 +1244,70 @@ export function MyGame() {
     setAiFinish(null)
     setAiStyle(null)
     setAiFlow([])
+    setShowSaveInput(false)
+    setSavedConfirm(false)
+  }
+
+  // Competition generate
+  const generateCompFlow = useCallback((format: CompFormat, duration: CompDuration, threat: CompThreat) => {
+    // Determine sequence based on threat
+    const seq = threat === 'guard'
+      ? ['Passes', 'Controls', 'Submissions'] as const
+      : threat === 'leglock'
+      ? ['Guards', 'Sweeps', 'Submissions'] as const
+      : ['Throws', 'Passes', 'Submissions'] as const
+
+    const flow: FlowTech[] = seq.map((cat, i) => {
+      // Competition: GREEN-only
+      const eligible = greenOnlyInCat(eligibility, cat)
+      const isLast = i === seq.length - 1
+      let chosen: TechniqueEligibility | null = null
+      if (isLast) {
+        // Submission preference based on format
+        const finishPref: AIFinish = format === 'mma' ? 'legs' : format === 'submission' ? 'chokes' : 'chokes'
+        chosen = pickByFinish(eligible, finishPref)
+      } else {
+        chosen = pick(eligible)
+      }
+      if (!chosen) return null
+      return eligToFlowTech(chosen)
+    }).filter((t): t is FlowTech => t !== null)
+
+    const formatShort: Record<CompFormat, string> = {
+      points: 'Points',
+      submission: 'Sub Only',
+      mma: 'MMA / No-Gi',
+    }
+
+    const name = `Comp Plan - ${formatShort[format]}`
+    const greenCount = eligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
+    const durationLabels: Record<CompDuration, string> = {
+      under5: 'under 5 minutes',
+      '5to8': '5–8 minutes',
+      over8: '8+ minutes',
+    }
+    const threatLabels: Record<CompThreat, string> = {
+      takedown: 'takedown-heavy opponents',
+      guard: 'guard players',
+      leglock: 'leg lockers',
+    }
+
+    const desc = `Competition plan built on GREEN-only techniques (${greenCount} available). In competition, you execute what is locked in — no experimenting with YELLOW or RED techniques under pressure. Built for ${formatShort[format]} format, ${durationLabels[duration]} matches, defending against ${threatLabels[threat]}.`
+
+    setCompFlow(flow)
+    setCompPlanName(name)
+    setCompDescription(desc)
+    setSavingPlanName(name)
+    setCompStep(3)
+    setLoadedPlan(null)
+  }, [eligibility])
+
+  const resetCompWizard = () => {
+    setCompStep(0)
+    setCompFormat(null)
+    setCompDuration(null)
+    setCompThreat(null)
+    setCompFlow([])
     setShowSaveInput(false)
     setSavedConfirm(false)
   }
@@ -1003,6 +1399,12 @@ export function MyGame() {
     category: t.category,
   }))
 
+  // Convert competition flow to VisualFlow steps
+  const compFlowSteps: VisualFlowStep[] = compFlow.map(t => ({
+    tech: t,
+    category: t.category,
+  }))
+
   // Convert loaded plan to VisualFlow steps
   const loadedFlowSteps: VisualFlowStep[] = loadedPlan
     ? loadedPlan.techniques.map(t => ({ tech: t, category: t.category }))
@@ -1025,7 +1427,7 @@ export function MyGame() {
       </div>
 
       {/* Page tabs */}
-      <div className="flex gap-1 bg-surface rounded-2xl p-1">
+      <div className="flex gap-1 bg-surface rounded-2xl p-1 no-print">
         {([
           ['gameplan', 'Game Plan'],
           ['myflows',  'My Flows'],
@@ -1044,7 +1446,7 @@ export function MyGame() {
 
           {/* Loaded plan banner */}
           {loadedPlan && (
-            <div className="bg-teal-light rounded-2xl p-4 flex items-center justify-between gap-3 border border-teal/20">
+            <div className="bg-teal-light rounded-2xl p-4 flex items-center justify-between gap-3 border border-teal/20 no-print">
               <div>
                 <p className="text-sm font-bold text-teal">Loaded: {loadedPlan.name}</p>
                 <p className="text-xs text-teal/70 mt-0.5">{loadedPlan.description}</p>
@@ -1061,18 +1463,30 @@ export function MyGame() {
           {/* Loaded plan VisualFlow */}
           {loadedPlan && (
             <div className="space-y-3">
-              <VisualFlow steps={loadedFlowSteps} eligibility={eligibility} />
+              <div className="flex items-center justify-between no-print">
+                <div />
+                <PrintButton planName={loadedPlan.name} />
+              </div>
+              <VisualFlow
+                steps={loadedFlowSteps}
+                eligibility={eligibility}
+                planId={loadedPlan.id}
+                planName={loadedPlan.name}
+                planDescription={loadedPlan.description}
+                isCompetition={loadedPlan.pathMode === 'competition'}
+              />
             </div>
           )}
 
           {!loadedPlan && (
             <>
-              {/* Generator mode toggle — 3 pills */}
-              <div className="flex gap-1.5 bg-surface rounded-2xl p-1">
+              {/* Generator mode toggle — 4 pills in 2x2 grid on small screens */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-surface rounded-2xl p-1 no-print">
                 {([
-                  ['ai',     'Guided Build', Wand2],
-                  ['quick',  'Quick Flow',   RefreshCw],
-                  ['custom', 'Build My Own', PenLine],
+                  ['ai',          'Guided Build',    Wand2],
+                  ['quick',       'Quick Flow',      RefreshCw],
+                  ['custom',      'Build My Own',    PenLine],
+                  ['competition', 'Competition',     Medal],
                 ] as const).map(([mode, label, Icon]) => (
                   <button
                     key={mode}
@@ -1081,10 +1495,12 @@ export function MyGame() {
                       setPathMode(null)
                       setQuickFlow([])
                       setCustomPicks([null, null, null, null])
+                      setBranches([])
                       if (mode === 'ai') resetAIWizard()
+                      if (mode === 'competition') resetCompWizard()
                     }}
                     className={cn(
-                      'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
+                      'flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
                       genMode === mode
                         ? 'bg-white text-charcoal shadow-sm'
                         : 'text-charcoal-light hover:text-charcoal'
@@ -1092,7 +1508,7 @@ export function MyGame() {
                   >
                     <Icon size={13} />
                     <span className="hidden sm:inline">{label}</span>
-                    <span className="sm:hidden">{label.split(' ')[0]}</span>
+                    <span className="sm:hidden text-xs">{label.split(' ')[0]}</span>
                   </button>
                 ))}
               </div>
@@ -1268,17 +1684,20 @@ export function MyGame() {
                   {/* AI result */}
                   {aiStep === 3 && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between no-print">
                         <div>
                           <p className="text-base font-bold text-charcoal">{aiPlanName}</p>
                           <p className="text-xs text-charcoal-light mt-0.5">AI-generated game plan</p>
                         </div>
-                        <button
-                          onClick={resetAIWizard}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors"
-                        >
-                          <ChevronLeft size={12} /> Rebuild
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <PrintButton planName={aiPlanName} />
+                          <button
+                            onClick={resetAIWizard}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors"
+                          >
+                            <ChevronLeft size={12} /> Rebuild
+                          </button>
+                        </div>
                       </div>
 
                       {/* Description */}
@@ -1287,10 +1706,15 @@ export function MyGame() {
                       </div>
 
                       {/* Visual flow */}
-                      <VisualFlow steps={aiFlowSteps} eligibility={eligibility} />
+                      <VisualFlow
+                        steps={aiFlowSteps}
+                        eligibility={eligibility}
+                        planName={aiPlanName}
+                        planDescription={aiDescription}
+                      />
 
                       {/* Action buttons */}
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 no-print">
                         {!showSaveInput && !savedConfirm && (
                           <button
                             onClick={() => { setSavingPlanName(aiPlanName); setShowSaveInput(true) }}
@@ -1366,7 +1790,7 @@ export function MyGame() {
                     Pick your starting position and ROMRx generates a flow using your GREEN and YELLOW techniques.
                   </p>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 no-print">
                     {([
                       ['offense', 'Offense', 'I get the takedown', Swords],
                       ['defense', 'Defense', 'They get the takedown', Shield],
@@ -1390,70 +1814,79 @@ export function MyGame() {
 
                   {quickFlow.length > 0 && pathMode && (
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between no-print">
                         <div>
                           <p className="text-sm font-bold text-charcoal">{pathMode === 'offense' ? 'Offense' : 'Defense'} Flow</p>
                           <p className="text-xs text-charcoal-light">GREEN + YELLOW only</p>
                         </div>
-                        <button onClick={quickRegenerate}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors">
-                          <RefreshCw size={12} /> New Flow
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <PrintButton />
+                          <button onClick={quickRegenerate}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors">
+                            <RefreshCw size={12} /> New Flow
+                          </button>
+                        </div>
                       </div>
 
-                      <VisualFlow steps={quickFlowSteps} eligibility={eligibility} />
+                      <VisualFlow
+                        steps={quickFlowSteps}
+                        eligibility={eligibility}
+                        planName={pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow'}
+                      />
 
                       {/* Save quick flow */}
-                      {!showSaveInput && !savedConfirm && (
-                        <button
-                          onClick={() => {
-                            setSavingPlanName(pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow')
-                            setShowSaveInput(true)
-                          }}
-                          className="w-full py-2.5 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
-                        >
-                          <Bookmark size={14} /> Save This Flow
-                        </button>
-                      )}
-                      {showSaveInput && (
-                        <div className="space-y-2">
-                          <input
-                            value={savingPlanName}
-                            onChange={e => setSavingPlanName(e.target.value)}
-                            className="w-full px-4 py-2.5 text-sm rounded-xl border border-teal-light focus:outline-none focus:border-teal bg-white"
-                            placeholder="Name your flow..."
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                const techs = quickFlowSteps
-                                  .filter(s => s.tech !== null)
-                                  .map(s => s.tech!)
-                                handleSavePlan(savingPlanName, '', pathMode ?? 'offense', techs)
-                              }}
-                              disabled={savingToDb}
-                              className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
-                            >
-                              {savingToDb ? 'Saving...' : 'Confirm Save'}
-                            </button>
-                            <button
-                              onClick={() => setShowSaveInput(false)}
-                              className="px-4 py-2 rounded-xl border border-teal-light text-sm text-charcoal-light hover:bg-surface"
-                            >
-                              Cancel
-                            </button>
+                      <div className="no-print space-y-2">
+                        {!showSaveInput && !savedConfirm && (
+                          <button
+                            onClick={() => {
+                              setSavingPlanName(pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow')
+                              setShowSaveInput(true)
+                            }}
+                            className="w-full py-2.5 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                          >
+                            <Bookmark size={14} /> Save This Flow
+                          </button>
+                        )}
+                        {showSaveInput && (
+                          <div className="space-y-2">
+                            <input
+                              value={savingPlanName}
+                              onChange={e => setSavingPlanName(e.target.value)}
+                              className="w-full px-4 py-2.5 text-sm rounded-xl border border-teal-light focus:outline-none focus:border-teal bg-white"
+                              placeholder="Name your flow..."
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  const techs = quickFlowSteps
+                                    .filter(s => s.tech !== null)
+                                    .map(s => s.tech!)
+                                  handleSavePlan(savingPlanName, '', pathMode ?? 'offense', techs)
+                                }}
+                                disabled={savingToDb}
+                                className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
+                              >
+                                {savingToDb ? 'Saving...' : 'Confirm Save'}
+                              </button>
+                              <button
+                                onClick={() => setShowSaveInput(false)}
+                                className="px-4 py-2 rounded-xl border border-teal-light text-sm text-charcoal-light hover:bg-surface"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {savedConfirm && (
-                        <div className="flex items-center gap-2 py-2.5 px-4 bg-teal-light rounded-xl text-teal text-sm font-semibold">
-                          <Check size={14} /> Flow saved to My Flows
-                        </div>
-                      )}
+                        )}
+                        {savedConfirm && (
+                          <div className="flex items-center gap-2 py-2.5 px-4 bg-teal-light rounded-xl text-teal text-sm font-semibold">
+                            <Check size={14} /> Flow saved to My Flows
+                          </div>
+                        )}
 
-                      <p className="text-center text-xs text-charcoal-light">
-                        Hit "New Flow" to randomize a different path. Switch to "Build My Own" to choose each move yourself.
-                      </p>
+                        <p className="text-center text-xs text-charcoal-light">
+                          Hit "New Flow" to randomize a different path. Switch to "Build My Own" to choose each move yourself.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1466,7 +1899,7 @@ export function MyGame() {
                     Choose your starting position, then pick your own techniques at each step.
                   </p>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 no-print">
                     {([
                       ['offense', 'Offense', 'I get the takedown', Swords],
                       ['defense', 'Defense', 'They get the takedown', Shield],
@@ -1526,63 +1959,358 @@ export function MyGame() {
                         )
                       })}
 
-                      {/* Custom complete: show visual flow + save */}
+                      {/* Custom complete: show visual flow + save + branch builder */}
                       {customComplete && (
                         <div className="space-y-3">
-                          <div className="bg-teal-light rounded-2xl p-4 text-center space-y-1 border border-teal/20">
+                          <div className="bg-teal-light rounded-2xl p-4 text-center space-y-1 border border-teal/20 no-print">
                             <CheckCircle2 size={20} className="text-teal mx-auto" />
                             <p className="text-sm font-bold text-teal">Flow complete</p>
                           </div>
 
-                          <VisualFlow steps={customFlowSteps} eligibility={eligibility} />
+                          <VisualFlow
+                            steps={customFlowSteps}
+                            eligibility={eligibility}
+                            planName={pathMode === 'offense' ? 'My Offense Build' : 'My Defense Build'}
+                          />
 
-                          {!showSaveInput && !savedConfirm && (
+                          {/* Branch Builder */}
+                          <BranchBuilder
+                            steps={customFlowSteps}
+                            eligibility={eligibility}
+                            branches={branches}
+                            onBranchesChange={setBranches}
+                          />
+
+                          <div className="no-print space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div />
+                              <PrintButton />
+                            </div>
+                            {!showSaveInput && !savedConfirm && (
+                              <button
+                                onClick={() => {
+                                  setSavingPlanName(pathMode === 'offense' ? 'My Offense Build' : 'My Defense Build')
+                                  setShowSaveInput(true)
+                                }}
+                                className="w-full py-2.5 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                              >
+                                <Bookmark size={14} /> Save This Flow
+                              </button>
+                            )}
+                            {showSaveInput && (
+                              <div className="space-y-2">
+                                <input
+                                  value={savingPlanName}
+                                  onChange={e => setSavingPlanName(e.target.value)}
+                                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-teal-light focus:outline-none focus:border-teal bg-white"
+                                  placeholder="Name your flow..."
+                                />
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      // Build techs array including branch alts with is_branch flag
+                                      const mainTechs = customFlowSteps
+                                        .filter(s => s.tech !== null)
+                                        .map(s => s.tech!)
+                                      const branchTechs: FlowTech[] = branches
+                                        .filter(b => b.altTech !== null)
+                                        .map(b => ({ ...b.altTech!, is_branch: true }))
+                                      handleSavePlan(savingPlanName, '', pathMode ?? 'offense', [...mainTechs, ...branchTechs])
+                                    }}
+                                    disabled={savingToDb}
+                                    className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
+                                  >
+                                    {savingToDb ? 'Saving...' : 'Confirm Save'}
+                                  </button>
+                                  <button
+                                    onClick={() => setShowSaveInput(false)}
+                                    className="px-4 py-2 rounded-xl border border-teal-light text-sm text-charcoal-light hover:bg-surface"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {savedConfirm && (
+                              <div className="flex items-center gap-2 py-2.5 px-4 bg-teal-light rounded-xl text-teal text-sm font-semibold">
+                                <Check size={14} /> Flow saved to My Flows
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── COMPETITION MODE ── */}
+              {genMode === 'competition' && (
+                <div className="space-y-5">
+                  {/* Intro banner */}
+                  <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+                    <Medal size={18} className="text-red-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-red-700">Competition Mode</p>
+                      <p className="text-xs text-red-600 mt-0.5 leading-relaxed">
+                        Only your GREEN-tier techniques will be used. In competition, execute what's locked in — no experimenting under pressure.
+                      </p>
+                    </div>
+                  </div>
+
+                  {compStep < 3 && (
+                    <div className="space-y-4">
+                      {/* Progress dots */}
+                      <div className="flex items-center gap-2">
+                        {[0, 1, 2].map(s => (
+                          <div key={s} className="flex items-center gap-2">
+                            <div className={cn(
+                              'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all',
+                              s === compStep ? 'bg-red-500 text-white' :
+                              s < compStep   ? 'bg-red-200 text-red-700' :
+                                              'bg-surface text-charcoal-light'
+                            )}>
+                              {s < compStep ? <Check size={10} /> : s + 1}
+                            </div>
+                            {s < 2 && <div className={cn('flex-1 h-0.5 w-8', s < compStep ? 'bg-red-200' : 'bg-surface')} />}
+                          </div>
+                        ))}
+                        <span className="text-xs text-charcoal-light ml-1">
+                          {compStep === 0 ? 'Format' : compStep === 1 ? 'Match length' : 'Primary threat'}
+                        </span>
+                      </div>
+
+                      {/* Step 1: Format */}
+                      {compStep === 0 && (
+                        <div className="space-y-3">
+                          <p className="text-sm font-semibold text-charcoal">What's your competition format?</p>
+                          <div className="grid grid-cols-1 gap-3">
+                            {([
+                              ['points',     'Points Match',      'IBJJF style — position dominant',         Trophy] as const,
+                              ['submission', 'Submission Only',   'Pure submission hunting',                  Zap] as const,
+                              ['mma',        'MMA / No-Gi',       'Leg locks open, aggression focus',         Flame] as const,
+                            ]).map(([val, label, sub, Icon]) => (
+                              <button
+                                key={val}
+                                onClick={() => { setCompFormat(val); setCompStep(1) }}
+                                className={cn(
+                                  'flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all',
+                                  compFormat === val
+                                    ? 'border-red-500 bg-red-500 text-white'
+                                    : 'border-teal-light bg-white hover:border-red-200'
+                                )}
+                              >
+                                <Icon size={22} className={compFormat === val ? 'text-white' : 'text-red-500'} />
+                                <div>
+                                  <p className="font-bold text-sm">{label}</p>
+                                  <p className={cn('text-xs mt-0.5', compFormat === val ? 'text-white/80' : 'text-charcoal-light')}>{sub}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Step 2: Duration */}
+                      {compStep === 1 && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => setCompStep(0)} className="text-charcoal-light hover:text-charcoal">
+                              <ChevronLeft size={16} />
+                            </button>
+                            <p className="text-sm font-semibold text-charcoal">How long is the match?</p>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            {([
+                              ['under5', 'Under 5 minutes', 'White/blue belt divisions — intensity matters',   Flame] as const,
+                              ['5to8',   '5–8 minutes',     'Middle divisions',                                Brain] as const,
+                              ['over8',  '8+ minutes',      'Advanced — endurance and patience',               Star] as const,
+                            ]).map(([val, label, sub, Icon]) => (
+                              <button
+                                key={val}
+                                onClick={() => { setCompDuration(val); setCompStep(2) }}
+                                className={cn(
+                                  'flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all',
+                                  compDuration === val
+                                    ? 'border-red-500 bg-red-500 text-white'
+                                    : 'border-teal-light bg-white hover:border-red-200'
+                                )}
+                              >
+                                <Icon size={22} className={compDuration === val ? 'text-white' : 'text-red-500'} />
+                                <div>
+                                  <p className="font-bold text-sm">{label}</p>
+                                  <p className={cn('text-xs mt-0.5', compDuration === val ? 'text-white/80' : 'text-charcoal-light')}>{sub}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Step 3: Primary threat */}
+                      {compStep === 2 && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => setCompStep(1)} className="text-charcoal-light hover:text-charcoal">
+                              <ChevronLeft size={16} />
+                            </button>
+                            <p className="text-sm font-semibold text-charcoal">Primary threat to defend?</p>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            {([
+                              ['takedown', 'Takedown-heavy',   'Need strong guard pull or takedown',   Swords] as const,
+                              ['guard',    'Guard players',    'Need passing game',                     Shield] as const,
+                              ['leglock',  'Leg lockers',      'Need guard that protects legs',         Footprints] as const,
+                            ]).map(([val, label, sub, Icon]) => (
+                              <button
+                                key={val}
+                                onClick={() => setCompThreat(val)}
+                                className={cn(
+                                  'flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all',
+                                  compThreat === val
+                                    ? 'border-red-500 bg-red-500 text-white'
+                                    : 'border-teal-light bg-white hover:border-red-200'
+                                )}
+                              >
+                                <Icon size={22} className={compThreat === val ? 'text-white' : 'text-red-500'} />
+                                <div>
+                                  <p className="font-bold text-sm">{label}</p>
+                                  <p className={cn('text-xs mt-0.5', compThreat === val ? 'text-white/80' : 'text-charcoal-light')}>{sub}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          {compThreat !== null && (
                             <button
                               onClick={() => {
-                                setSavingPlanName(pathMode === 'offense' ? 'My Offense Build' : 'My Defense Build')
-                                setShowSaveInput(true)
+                                if (compFormat && compDuration && compThreat) {
+                                  generateCompFlow(compFormat, compDuration, compThreat)
+                                }
                               }}
-                              className="w-full py-2.5 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                              className="w-full py-3 rounded-2xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                             >
-                              <Bookmark size={14} /> Save This Flow
+                              <Medal size={15} />
+                              Generate Competition Plan
                             </button>
                           )}
-                          {showSaveInput && (
-                            <div className="space-y-2">
-                              <input
-                                value={savingPlanName}
-                                onChange={e => setSavingPlanName(e.target.value)}
-                                className="w-full px-4 py-2.5 text-sm rounded-xl border border-teal-light focus:outline-none focus:border-teal bg-white"
-                                placeholder="Name your flow..."
-                              />
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    const techs = customFlowSteps
-                                      .filter(s => s.tech !== null)
-                                      .map(s => s.tech!)
-                                    handleSavePlan(savingPlanName, '', pathMode ?? 'offense', techs)
-                                  }}
-                                  disabled={savingToDb}
-                                  className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
-                                >
-                                  {savingToDb ? 'Saving...' : 'Confirm Save'}
-                                </button>
-                                <button
-                                  onClick={() => setShowSaveInput(false)}
-                                  className="px-4 py-2 rounded-xl border border-teal-light text-sm text-charcoal-light hover:bg-surface"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                          {savedConfirm && (
-                            <div className="flex items-center gap-2 py-2.5 px-4 bg-teal-light rounded-xl text-teal text-sm font-semibold">
-                              <Check size={14} /> Flow saved to My Flows
-                            </div>
-                          )}
                         </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Competition result */}
+                  {compStep === 3 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between no-print">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-bold text-charcoal">{compPlanName}</p>
+                            <span className="flex items-center gap-1 text-[11px] font-bold bg-red-500 text-white px-2.5 py-0.5 rounded-full">
+                              <Medal size={10} /> Competition
+                            </span>
+                          </div>
+                          <p className="text-xs text-charcoal-light mt-0.5">GREEN-only competition plan</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <PrintButton planName={compPlanName} />
+                          <button
+                            onClick={resetCompWizard}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-xl hover:bg-red-100 transition-colors"
+                          >
+                            <ChevronLeft size={12} /> Rebuild
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
+                        <p className="text-xs text-red-700 leading-relaxed">{compDescription}</p>
+                      </div>
+
+                      {compFlow.length === 0 ? (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 text-center">
+                          <AlertTriangle size={20} className="text-yellow-600 mx-auto mb-2" />
+                          <p className="text-sm font-semibold text-yellow-700">Not enough GREEN techniques</p>
+                          <p className="text-xs text-yellow-600 mt-1">
+                            You need more GREEN-tier techniques to build a competition plan. Keep drilling and working on your ROM!
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <VisualFlow
+                            steps={compFlowSteps}
+                            eligibility={eligibility}
+                            planName={compPlanName}
+                            planDescription={compDescription}
+                            isCompetition
+                          />
+
+                          <div className="flex flex-col gap-2 no-print">
+                            {!showSaveInput && !savedConfirm && (
+                              <button
+                                onClick={() => { setSavingPlanName(compPlanName); setShowSaveInput(true) }}
+                                className="w-full py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-red-600 transition-colors"
+                              >
+                                <Bookmark size={14} />
+                                Save Competition Plan
+                              </button>
+                            )}
+                            {showSaveInput && (
+                              <div className="space-y-2">
+                                <input
+                                  value={savingPlanName}
+                                  onChange={e => setSavingPlanName(e.target.value)}
+                                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-teal-light focus:outline-none focus:border-teal bg-white"
+                                  placeholder="Name your competition plan..."
+                                />
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      handleSavePlan(savingPlanName || compPlanName, compDescription, 'competition', compFlow)
+                                    }}
+                                    disabled={savingToDb}
+                                    className="flex-1 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-60"
+                                  >
+                                    {savingToDb ? 'Saving...' : 'Confirm Save'}
+                                  </button>
+                                  <button
+                                    onClick={() => setShowSaveInput(false)}
+                                    className="px-4 py-2 rounded-xl border border-teal-light text-sm text-charcoal-light hover:bg-surface"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {savedConfirm && (
+                              <div className="flex items-center gap-2 py-2.5 px-4 bg-teal-light rounded-xl text-teal text-sm font-semibold">
+                                <Check size={14} /> Plan saved to My Flows
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  if (compFormat && compDuration && compThreat) {
+                                    generateCompFlow(compFormat, compDuration, compThreat)
+                                  }
+                                }}
+                                className="flex-1 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                              >
+                                <RefreshCw size={13} /> Regenerate
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (compFormat && compDuration && compThreat) {
+                                    navigate(`/dashboard/chat?gameplan=1&mode=competition&format=${compFormat}&duration=${compDuration}&threat=${compThreat}`)
+                                  }
+                                }}
+                                className="flex-1 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                              >
+                                <Wand2 size={13} /> Build with ROMBot
+                              </button>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
