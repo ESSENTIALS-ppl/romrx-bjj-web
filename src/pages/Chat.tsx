@@ -1,11 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { PageHeader } from '../components/PageHeader'
 import { SectionCard } from '../components/SectionCard'
 import { Spinner } from '../components/Spinner'
-import { Send, Loader2, Settings, Trash2 } from 'lucide-react'
+import { Send, Loader2, Settings, Trash2, Wand2 } from 'lucide-react'
 import { cn } from '../lib/utils'
+
+const START_LABELS: Record<string, string> = {
+  standing: 'starting on the feet, fighting for takedowns',
+  ontop:    'starting in a top position, looking to pass and control',
+  onbottom: 'starting from guard on the bottom',
+}
+const FINISH_LABELS: Record<string, string> = {
+  chokes: 'choke submissions (rear naked, triangle, guillotine)',
+  arm:    'arm attack submissions (armbar, kimura, americana)',
+  legs:   'leg attack submissions (heel hook, kneebar, ankle lock)',
+}
+const STYLE_LABELS: Record<string, string> = {
+  explosive: 'explosive and physical',
+  technical: 'patient and technical',
+}
 
 const AI_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`
 
@@ -26,16 +42,20 @@ function formatLines(text: string) {
 }
 
 export function Chat() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const { user, session } = useAuth()
   const { profile, loading: profileLoading } = useProfile(user?.id)
-  const [messages, setMessages]           = useState<Message[]>([])
-  const [input, setInput]                 = useState('')
-  const [busy, setBusy]                   = useState(false)
-  const [convId, setConvId]               = useState<string | undefined>()
-  const [showSettings, setShowSettings]   = useState(false)
-  const [provider, setProvider]           = useState('rombot')
-  const [providerKey, setProviderKey]     = useState('')
-  const [error, setError]                 = useState('')
+  const [messages, setMessages]             = useState<Message[]>([])
+  const [input, setInput]                   = useState('')
+  const [busy, setBusy]                     = useState(false)
+  const [convId, setConvId]                 = useState<string | undefined>()
+  const [showSettings, setShowSettings]     = useState(false)
+  const [provider, setProvider]             = useState('rombot')
+  const [providerKey, setProviderKey]       = useState('')
+  const [error, setError]                   = useState('')
+  const [gamePlanBanner, setGamePlanBanner] = useState<string | null>(null)
+  const autoSentRef = useRef(false)
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,6 +74,45 @@ export function Chat() {
   }, [user, profile, profileLoading, messages.length])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+
+  // Auto-send game plan request from My Game URL params
+  useEffect(() => {
+    if (autoSentRef.current || profileLoading || !session || messages.length === 0) return
+    const params = new URLSearchParams(location.search)
+    if (params.get('gameplan') !== '1') return
+    const start  = params.get('start')  ?? ''
+    const finish = params.get('finish') ?? ''
+    const style  = params.get('style')  ?? ''
+    if (!start || !finish || !style) return
+    autoSentRef.current = true
+    // Clear URL params without navigation
+    navigate('/dashboard/chat', { replace: true })
+    const startLabel  = START_LABELS[start]  ?? start
+    const finishLabel = FINISH_LABELS[finish] ?? finish
+    const styleLabel  = STYLE_LABELS[style]  ?? style
+    const planName = `${start}-${finish}-${style}` // for banner
+    setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
+    const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}. Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
+    // Auto-send after brief delay so welcome message shows first
+    setTimeout(async () => {
+      setMessages(p => [...p, { role: 'user', content: msg }])
+      setBusy(true)
+      setError('')
+      try {
+        const res = await fetch(AI_CHAT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+          body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+        })
+        const data = await res.json()
+        if (data.error) throw new Error(data.error)
+        setConvId(data.conversation_id)
+        setMessages(p => [...p, { role: 'assistant', content: data.reply }])
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Something went wrong')
+      } finally { setBusy(false) }
+    }, 600)
+  }, [profileLoading, session, messages.length, location.search])
 
   const send = async () => {
     if (!input.trim() || busy || !session) return
@@ -127,6 +186,15 @@ export function Chat() {
             </div>
           </div>
         </SectionCard>
+      )}
+
+      {/* Game plan context banner */}
+      {gamePlanBanner && (
+        <div className="flex items-center gap-2 bg-teal text-white rounded-xl px-3 py-2 mb-2">
+          <Wand2 size={13} className="shrink-0" />
+          <span className="text-xs font-medium flex-1">{gamePlanBanner}</span>
+          <button onClick={() => setGamePlanBanner(null)} className="text-white/70 hover:text-white text-xs">x</button>
+        </div>
       )}
 
       {/* Disclaimer banner */}

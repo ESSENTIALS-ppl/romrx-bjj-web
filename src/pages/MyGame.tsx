@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import type { TechniqueEligibility } from '../hooks/useProfile'
@@ -550,6 +551,7 @@ function SavedPlanCard({
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function MyGame() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { profile, eligibility, loading } = useProfile(user?.id)
 
@@ -823,7 +825,7 @@ export function MyGame() {
               {/* Generator mode toggle — 3 pills */}
               <div className="flex gap-1.5 bg-surface rounded-2xl p-1">
                 {([
-                  ['ai',     'AI Build',     Wand2],
+                  ['ai',     'Guided Build', Wand2],
                   ['quick',  'Quick Flow',   RefreshCw],
                   ['custom', 'Build My Own', PenLine],
                 ] as const).map(([mode, label, Icon]) => (
@@ -987,17 +989,31 @@ export function MyGame() {
                           </div>
                           {/* Generate button appears after selecting style */}
                           {aiStyle !== null && (
-                            <button
-                              onClick={() => {
-                                if (aiStart && aiFinish && aiStyle) {
-                                  generateAIFlow(aiStart, aiFinish, aiStyle)
-                                }
-                              }}
-                              className="w-full py-3 rounded-2xl bg-teal text-white font-bold text-sm hover:bg-teal/90 transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Star size={15} />
-                              Generate My Game Plan
-                            </button>
+                            <div className="space-y-2">
+                              <button
+                                onClick={() => {
+                                  if (aiStart && aiFinish && aiStyle) {
+                                    generateAIFlow(aiStart, aiFinish, aiStyle)
+                                  }
+                                }}
+                                className="w-full py-3 rounded-2xl bg-teal text-white font-bold text-sm hover:bg-teal/90 transition-colors flex items-center justify-center gap-2"
+                              >
+                                <Star size={15} />
+                                Generate Guided Plan
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (aiStart && aiFinish && aiStyle) {
+                                    navigate(`/dashboard/chat?gameplan=1&start=${aiStart}&finish=${aiFinish}&style=${aiStyle}`)
+                                  }
+                                }}
+                                className="w-full py-2.5 rounded-2xl border-2 border-teal text-teal font-semibold text-sm hover:bg-teal-light transition-colors flex items-center justify-center gap-2"
+                              >
+                                <Wand2 size={14} />
+                                Build with ROMBot
+                              </button>
+                              <p className="text-center text-xs text-charcoal-light">ROMBot uses your actual technique library to write a personalized plan</p>
+                            </div>
                           )}
                         </div>
                       )}
