@@ -14,6 +14,7 @@ import { Settings } from './pages/Settings'
 import { CoachDashboard } from './pages/CoachDashboard'
 import { CoachSignup } from './pages/CoachSignup'
 import { ResultsPreview } from './pages/ResultsPreview'
+import { Unsubscribe } from './pages/Unsubscribe'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/auth/confirm"    element={<AuthConfirm />} />
         <Route path="/onboarding/assessment" element={<Assessment />} />
         <Route path="/onboarding/results"    element={<ResultsPreview />} />
+        <Route path="/unsubscribe"     element={<Unsubscribe />} />
 
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />
