@@ -167,22 +167,11 @@ export function Settings() {
         setDominantSide(athlete.dominant_side ?? 'right')
         setGymName(athlete.gym_name ?? '')
 
-        // Load linked coach if any (join through users table for name/email)
+        // Load linked coach via SECURITY DEFINER RPC (bypasses RLS on users table)
         if (athlete.coach_id) {
           setCoachLoading(true)
-          const { data: coachRow } = await supabase
-            .from('coaches')
-            .select('id, user_id')
-            .eq('id', athlete.coach_id)
-            .single()
-          if (coachRow) {
-            const { data: coachUser } = await supabase
-              .from('users')
-              .select('full_name, email')
-              .eq('id', coachRow.user_id)
-              .single()
-            if (coachUser) setCurrentCoach({ id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email })
-          }
+          const { data: coachData } = await supabase.rpc('get_my_coach')
+          if (coachData) setCurrentCoach({ id: coachData.id, full_name: coachData.full_name, email: coachData.email })
           setCoachLoading(false)
         }
       }
@@ -365,31 +354,18 @@ export function Settings() {
     if (!user || !coachEmail.trim()) return
     setCoachSearching(true)
     setCoachMsg(null)
-    // Look up coach via users table (coaches table has no email column)
-    const { data: coachUser } = await supabase
-      .from('users')
-      .select('id, full_name, email')
-      .eq('email', coachEmail.trim().toLowerCase())
-      .eq('portal_role', 'coach')
-      .single()
-    if (!coachUser) {
-      setCoachMsg({ type: 'err', text: 'No coach account found with that email. Ask them to sign up at romrxbjj.com/signup/coach.' })
-      setCoachSearching(false)
-      return
-    }
-    // Get their coaches table row
-    const { data: coachRow } = await supabase
-      .from('coaches')
-      .select('id')
-      .eq('user_id', coachUser.id)
-      .single()
-    if (!coachRow) {
-      setCoachMsg({ type: 'err', text: 'Coach account found but not fully set up yet. Ask them to complete their coach signup.' })
+    // SECURITY DEFINER RPC bypasses RLS so athletes can look up coach emails
+    const { data, error } = await supabase.rpc('find_coach_by_email', { p_email: coachEmail.trim() })
+    if (error || !data?.found) {
+      const msg = data?.reason === 'coach_row_missing'
+        ? 'Coach account found but not fully set up. Ask them to complete their signup at romrxbjj.com/signup/coach.'
+        : 'No coach account found with that email. Ask them to sign up at romrxbjj.com/signup/coach.'
+      setCoachMsg({ type: 'err', text: msg })
       setCoachSearching(false)
       return
     }
     // Show consent confirmation before saving
-    setPendingCoach({ id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email })
+    setPendingCoach({ id: data.coach_id, full_name: data.full_name, email: data.email })
     setCoachSearching(false)
   }
 
