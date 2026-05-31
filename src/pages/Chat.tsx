@@ -35,13 +35,7 @@ const PROVIDERS = [
   { value: 'perplexity', label: 'Perplexity (BYOK)' },
 ]
 
-// RosterAthlete kept for type reference (no longer used in UI)
-interface RosterAthlete {
-  user_id: string
-  name: string
-  email: string
-  belt: string
-}
+
 
 function formatLines(text: string) {
   return text
