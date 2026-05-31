@@ -588,12 +588,14 @@ function AthleteCard({
   session,
   coachId,
   drillCount,
+  protocolCount,
   onBeltUpdate,
 }: {
   athlete: AthleteRosterItem
   session: { access_token: string } | null
   coachId: string | null
   drillCount: number
+  protocolCount: number
   onBeltUpdate: (userId: string, newBelt: string) => void
 }) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
@@ -651,6 +653,14 @@ function AthleteCard({
             {drillCount} drill{drillCount !== 1 ? 's' : ''} logged
           </span>
         )}
+        <span className={cn(
+          'text-[10px] px-2 py-0.5 rounded-full font-medium',
+          protocolCount >= 5 ? 'bg-green-tier-bg text-green-tier' :
+          protocolCount >= 3 ? 'bg-yellow-tier-bg text-yellow-tier' :
+          'bg-surface text-charcoal-light'
+        )}>
+          {protocolCount}/7 ROM sessions
+        </span>
       </div>
 
       {/* Technique tiers */}
@@ -814,6 +824,7 @@ function RosterTab({
   session,
   coachId,
   drillCounts,
+  protocolCounts,
 }: {
   roster: AthleteRosterItem[]
   setRoster: React.Dispatch<React.SetStateAction<AthleteRosterItem[]>>
@@ -821,6 +832,7 @@ function RosterTab({
   session: { access_token: string } | null
   coachId: string | null
   drillCounts: Record<string, number>
+  protocolCounts: Record<string, number>
 }) {
   const [search, setSearch] = useState('')
 
@@ -863,6 +875,7 @@ function RosterTab({
               session={session}
               coachId={coachId}
               drillCount={a.user_id ? (drillCounts[a.user_id] ?? 0) : 0}
+              protocolCount={a.user_id ? (protocolCounts[a.user_id] ?? 0) : 0}
               onBeltUpdate={handleBeltUpdate}
             />
           ))}
@@ -1188,6 +1201,7 @@ export function CoachDashboard() {
   const [rosterLoading, setRosterLoading] = useState(true)
   const [coachId, setCoachId] = useState<string | null>(null)
   const [drillCounts, setDrillCounts] = useState<Record<string, number>>({})
+  const [protocolCounts, setProtocolCounts] = useState<Record<string, number>>({})
 
   // Load coach row on mount
   useEffect(() => {
@@ -1234,6 +1248,27 @@ export function CoachDashboard() {
     loadDrillCounts()
   }, [roster])
 
+  // Load protocol session counts (last 7 days) after roster loads
+  useEffect(() => {
+    if (roster.length === 0) return
+    const userIds = roster.map(a => a.user_id).filter(Boolean) as string[]
+    if (userIds.length === 0) return
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    async function loadProtocolCounts() {
+      const { data } = await supabase
+        .from('protocol_sessions')
+        .select('user_id')
+        .in('user_id', userIds)
+        .gte('session_date', sevenDaysAgo)
+      const counts: Record<string, number> = {}
+      for (const row of data ?? []) {
+        counts[row.user_id] = (counts[row.user_id] ?? 0) + 1
+      }
+      setProtocolCounts(counts)
+    }
+    loadProtocolCounts()
+  }, [roster])
+
   const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [
     { id: 'roster',  label: 'Roster',           icon: Users },
     { id: 'warmup',  label: 'Warmup Generator', icon: RotateCcw },
@@ -1275,6 +1310,7 @@ export function CoachDashboard() {
           session={session}
           coachId={coachId}
           drillCounts={drillCounts}
+          protocolCounts={protocolCounts}
         />
       )}
       {tab === 'warmup' && (

@@ -13,6 +13,8 @@ import { Chat } from './pages/Chat'
 import { Settings } from './pages/Settings'
 import { CoachDashboard } from './pages/CoachDashboard'
 import { CoachSignup } from './pages/CoachSignup'
+import { MyCoach } from './pages/MyCoach'
+import { MySchool } from './pages/MySchool'
 import { ResultsPreview } from './pages/ResultsPreview'
 import { Unsubscribe } from './pages/Unsubscribe'
 
@@ -42,6 +44,8 @@ export default function App() {
             <Route path="/dashboard/chat"        element={<Chat />} />
             <Route path="/dashboard/settings"    element={<Settings />} />
             <Route path="/dashboard/coach"        element={<CoachDashboard />} />
+            <Route path="/dashboard/my-coach"     element={<MyCoach />} />
+            <Route path="/dashboard/my-school"    element={<MySchool />} />
           </Route>
         </Route>
 

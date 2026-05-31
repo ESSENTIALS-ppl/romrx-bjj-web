@@ -798,6 +798,7 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
 
   const handleMarkComplete = useCallback(() => {
     const todayIso = new Date().toISOString().slice(0, 10)
+    const protocolDay = `P${todayPriorityIndex + 1}`
     setLog(prev => {
       const sessions = prev.sessions.includes(todayIso)
         ? prev.sessions
@@ -807,7 +808,13 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
       return next
     })
     setCompletedToday(true)
-  }, [storageKey])
+    // Also log to DB for coach visibility
+    supabase.from('protocol_sessions').upsert({
+      user_id: userId,
+      session_date: todayIso,
+      protocol_day: protocolDay,
+    }, { onConflict: 'user_id,session_date' }).then(() => {})
+  }, [storageKey, userId, todayPriorityIndex])
 
   const cycleStart = log.cycleStart || assessedAt
   const sessionsThisCycle = log.sessions.filter(s => s >= cycleStart.slice(0, 10)).length

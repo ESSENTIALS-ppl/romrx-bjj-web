@@ -3,12 +3,14 @@ import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { cn } from '../lib/utils'
-import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut, Users } from 'lucide-react'
+import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut, Users, UserCheck, Building2 } from 'lucide-react'
 
 const ATHLETE_NAV = [
   { to: '/dashboard/my-body',     icon: Dumbbell,       label: 'My Body' },
   { to: '/dashboard/my-game',     icon: Layers,          label: 'My Game' },
   { to: '/dashboard/my-protocol', icon: ClipboardList,   label: 'My Protocol' },
+  { to: '/dashboard/my-coach',    icon: UserCheck,       label: 'My Coach' },
+  { to: '/dashboard/my-school',   icon: Building2,       label: 'My School' },
   { to: '/dashboard/chat',        icon: MessageSquare,   label: 'ROMBot' },
   { to: '/dashboard/settings',    icon: Settings,        label: 'Settings' },
 ]
