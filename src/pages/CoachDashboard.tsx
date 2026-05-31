@@ -18,12 +18,19 @@ const COACH_ROSTER_URL   = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ge
 const COACH_ACTIONS_URL  = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coach-actions`
 
 const TYPE_LABEL: Record<string, string> = {
-  T: 'Throws',
+  T: 'Takedowns',
   P: 'Passes',
   G: 'Guards',
   S: 'Sweeps',
   C: 'Controls',
   X: 'Submissions',
+}
+
+// Submission sub-categories for grouping
+const SUB_TYPE_LABEL: Record<string, string> = {
+  'Chokes': 'Chokes',
+  'Arm Attacks': 'Arm Attacks',
+  'Leg Attacks': 'Leg Attacks',
 }
 
 const RAMP_STEPS = [
@@ -67,6 +74,8 @@ interface TechniqueWarmup {
   activate_drills: string
   mobilize_drills: string
   potentiate_drills: string
+  coaching_cue: string | null
+  submission_type: string | null
 }
 
 interface TechniqueItem {
@@ -75,6 +84,7 @@ interface TechniqueItem {
   belt: string
   technique_type: string
   primary_joints: string
+  submission_type?: string | null
 }
 
 interface AthleteNote {
@@ -105,8 +115,11 @@ function formatJointName(j: string): string {
 function groupTechniques(techniques: TechniqueItem[]): Record<string, Record<string, TechniqueItem[]>> {
   const result: Record<string, Record<string, TechniqueItem[]>> = {}
   for (const t of techniques) {
-    const belt = t.belt ?? 'White'
-    const typeFull = TYPE_LABEL[t.technique_type] ?? t.technique_type
+    const belt = t.belt ? (t.belt.charAt(0).toUpperCase() + t.belt.slice(1)) : 'White'
+    // Submissions broken into sub-types (Chokes / Arm Attacks / Leg Attacks)
+    const typeFull = t.technique_type === 'X' && t.submission_type
+      ? `Submissions - ${t.submission_type}`
+      : (TYPE_LABEL[t.technique_type] ?? t.technique_type)
     if (!result[belt]) result[belt] = {}
     if (!result[belt][typeFull]) result[belt][typeFull] = []
     result[belt][typeFull].push(t)
@@ -897,7 +910,7 @@ function WarmupTab({ session }: { session: { access_token: string } | null }) {
     fetch(COACH_ACTIONS_URL, {
       method: 'POST',
       headers: authHeaders(),
-      body: JSON.stringify({ action: 'list_techniques' }),
+      body: JSON.stringify({ action: 'list_techniques', include_submission_type: true }),
     })
       .then(r => r.json())
       .then(data => setTechniques(Array.isArray(data) ? data : data.techniques ?? []))
@@ -1038,6 +1051,18 @@ function WarmupTab({ session }: { session: { access_token: string } | null }) {
               />
             ))}
           </div>
+
+          {/* Coaching Cue card */}
+          {warmup.coaching_cue && (
+            <div className="mt-3 rounded-2xl border border-gold/40 bg-gold/10 p-4">
+              <p className="text-xs font-bold text-charcoal uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <span>🎓</span> Coaching Cue
+              </p>
+              <p className="text-xs text-charcoal leading-relaxed whitespace-pre-wrap">
+                {warmup.coaching_cue}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
