@@ -1221,7 +1221,7 @@ export function CoachDashboard() {
       },
     })
       .then(r => r.json())
-      .then(data => setRoster(Array.isArray(data) ? data : data.roster ?? []))
+      .then(data => setRoster(Array.isArray(data) ? data : data.athletes ?? []))
       .catch(() => setRoster([]))
       .finally(() => setRosterLoading(false))
   }, [session])
