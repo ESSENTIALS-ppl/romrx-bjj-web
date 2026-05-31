@@ -71,9 +71,13 @@ interface TechniqueItem {
 interface AthleteNote {
   id: string; athlete_id: string; note: string; updated_at: string
 }
+interface JointDetail {
+  joint: string; display: string; actual: number | null
+  side: string; severity: 'minor' | 'moderate' | 'significant' | null
+}
 interface TechniqueReadinessItem {
   user_id: string; name: string; belt: string; tier: string
-  joint_gaps: unknown; injuries: Array<{ body_part: string; stage: number }>
+  joint_details: JointDetail[]; injuries: Array<{ body_part: string; stage: number }>
 }
 interface TeachingEntry {
   id: string; technique_code: string; technique_name: string; technique_type: string; notes: string | null; taught_at: string
@@ -699,30 +703,72 @@ function TechniqueReadinessPanel({ session, code, techniqueName, onLogTaught }: 
           <NotebookPen size={10} /> Add to Journal
         </button>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {readiness.map(r => {
           const hasInjury = r.injuries.length > 0
           const tier = (r.tier ?? 'unassessed').toLowerCase()
-          const tierColor =
+          const tierBadgeColor =
             tier === 'green'  ? 'text-green-tier bg-green-tier-bg' :
             tier === 'yellow' ? 'text-gold bg-yellow-tier-bg' :
             tier === 'red'    ? 'text-red-tier bg-red-tier-bg' :
                                 'text-charcoal-light bg-surface'
           const tierLabel = tier === 'green' ? 'READY' : tier === 'yellow' ? 'DEVELOPING' : tier === 'red' ? 'AT RISK' : 'UNASSESSED'
+          const hasJointDetails = (r.joint_details ?? []).length > 0
           return (
-            <div key={r.user_id} className="flex items-center justify-between gap-2 py-1 border-b border-teal-light/40 last:border-0">
-              <div className="flex items-center gap-2 min-w-0">
-                {hasInjury && <span title="Active injury" className="text-red-tier shrink-0">🩹</span>}
-                <span className="text-xs font-medium text-charcoal truncate">{r.name}</span>
-                {hasInjury && (
-                  <span className="text-[10px] text-red-tier bg-red-50 px-1.5 py-0.5 rounded-full shrink-0">
-                    {r.injuries.map(i => i.body_part).join(', ')}
-                  </span>
-                )}
+            <div key={r.user_id} className={cn(
+              'rounded-xl p-3 border',
+              tier === 'red' ? 'border-red-tier/30 bg-red-50/50' :
+              tier === 'yellow' ? 'border-gold/30 bg-gold/5' :
+              tier === 'green' ? 'border-green-tier/30 bg-green-50/50' :
+              'border-teal-light bg-surface'
+            )}>
+              {/* Athlete header row */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {hasInjury && <span title="Active injury">🩹</span>}
+                  <span className="text-xs font-semibold text-charcoal truncate">{r.name}</span>
+                  {hasInjury && (
+                    <span className="text-[10px] text-red-tier bg-red-50 px-1.5 py-0.5 rounded-full shrink-0">
+                      {r.injuries.map(i => i.body_part).join(', ')}
+                    </span>
+                  )}
+                </div>
+                <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0', tierBadgeColor)}>
+                  {tierLabel}
+                </span>
               </div>
-              <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0', tierColor)}>
-                {tierLabel}
-              </span>
+
+              {/* Joint limitation details - actual value + severity, NO threshold exposed */}
+              {hasJointDetails && (
+                <div className="mt-2 space-y-1">
+                  {(r.joint_details ?? []).map(j => {
+                    const sevColor =
+                      j.severity === 'significant' ? 'text-red-tier' :
+                      j.severity === 'moderate'    ? 'text-gold' :
+                                                     'text-charcoal-light'
+                    const sevLabel =
+                      j.severity === 'significant' ? 'significant limitation' :
+                      j.severity === 'moderate'    ? 'moderate limitation' :
+                      j.severity === 'minor'       ? 'minor limitation' : ''
+                    return (
+                      <div key={j.joint} className="flex items-center gap-2 text-[11px] pl-1">
+                        <span className="text-charcoal-light w-24 shrink-0">{j.display}{j.side && j.side !== 'mid' ? ` (${j.side})` : ''}</span>
+                        {j.actual !== null && (
+                          <span className="font-semibold text-charcoal">{j.actual}°</span>
+                        )}
+                        {sevLabel && (
+                          <span className={cn('font-medium', sevColor)}>— {sevLabel}</span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Green = all clear */}
+              {tier === 'green' && (
+                <p className="text-[11px] text-green-tier mt-1.5 pl-1">All ROM requirements met</p>
+              )}
             </div>
           )
         })}
