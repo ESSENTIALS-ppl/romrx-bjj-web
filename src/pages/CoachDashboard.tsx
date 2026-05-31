@@ -498,40 +498,26 @@ function AddVideoForm({
 }
 
 // ── Athlete Game Plans ────────────────────────────────────────────────────────
-// athleteId here is the athletes.id (PK), not auth user_id
-function AthleteGamePlans({ athleteId }: { athleteId: string }) {
+// Pass athleteUserId directly — avoids coach needing to read athletes table via RLS
+function AthleteGamePlans({ athleteUserId }: { athleteUserId: string }) {
   const [plans, setPlans] = useState<AthleteGamePlan[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    if (!expanded) return
+    if (!expanded || !athleteUserId) return
     setLoading(true)
-    // Resolve user_id from athletes table, then query game_plans
     supabase
-      .from('athletes')
-      .select('user_id')
-      .eq('id', athleteId)
-      .maybeSingle()
-      .then(({ data: athleteRow }) => {
-        const userId = athleteRow?.user_id
-        if (!userId) {
-          setPlans([])
-          setLoading(false)
-          return
-        }
-        return supabase
-          .from('game_plans')
-          .select('id, name, path_mode, techniques, created_at')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(3)
-          .then(({ data }) => {
-            setPlans((data as AthleteGamePlan[]) ?? [])
-            setLoading(false)
-          })
+      .from('game_plans')
+      .select('id, name, path_mode, techniques, created_at')
+      .eq('user_id', athleteUserId)
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => {
+        setPlans((data as AthleteGamePlan[]) ?? [])
+        setLoading(false)
       })
-  }, [athleteId, expanded])
+  }, [athleteUserId, expanded])
 
   return (
     <div className="border-t border-teal-light pt-3">
@@ -778,7 +764,7 @@ function AthleteCard({
       )}
 
       {/* Game Plans */}
-      <AthleteGamePlans athleteId={athlete.id} />
+      <AthleteGamePlans athleteUserId={athlete.user_id ?? ''} />
     </div>
   )
 }
