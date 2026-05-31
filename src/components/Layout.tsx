@@ -14,11 +14,12 @@ const ATHLETE_NAV = [
 ]
 
 const COACH_NAV = [
-  { to: '/dashboard/coach',    icon: Users,    label: 'My Team' },
-  { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
+  { to: '/dashboard/coach',    icon: Users,         label: 'My Team' },
+  { to: '/dashboard/chat',     icon: MessageSquare, label: 'ROMBot' },
+  { to: '/dashboard/settings', icon: Settings,      label: 'Settings' },
 ]
 
-const ATHLETE_ONLY_ROUTES = ['/dashboard/my-body', '/dashboard/my-game', '/dashboard/my-protocol', '/dashboard/chat']
+const ATHLETE_ONLY_ROUTES = ['/dashboard/my-body', '/dashboard/my-game', '/dashboard/my-protocol']
 
 export function Layout() {
   const { user, signOut } = useAuth()
