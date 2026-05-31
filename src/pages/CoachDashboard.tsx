@@ -11,7 +11,7 @@ import {
   ChevronDown, Save, AlertTriangle, ClipboardList,
   Zap, GraduationCap, BookOpen, ChevronRight,
   Award, Video, Dumbbell, NotebookPen, Plus, CheckCircle2,
-  Syringe,
+  Syringe, Trophy, Building2, ShieldPlus, ChevronLeft, ChevronRight as ChevronR,
 } from 'lucide-react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -83,7 +83,9 @@ interface TeachingEntry {
   id: string; technique_code: string; technique_name: string; technique_type: string; notes: string | null; taught_at: string
 }
 
-type Tab = 'roster' | 'coaching' | 'journal' | 'notes'
+type Tab = 'team' | 'coaching' | 'competitions' | 'injury' | 'school'
+type TeamSubTab = 'roster' | 'notes'
+type CoachingSubTab = 'technique' | 'journal'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function formatDate(iso: string | null): string {
@@ -1278,10 +1280,271 @@ function NotesTab({ roster, session }: { roster: AthleteRosterItem[]; session: {
   )
 }
 
+// ── In Development Placeholder ───────────────────────────────────────────────
+function InDevelopmentTab({ title, description, features }: {
+  title: string; description: string; features: string[]
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mb-5">
+        <span className="text-3xl">🚧</span>
+      </div>
+      <h2 className="font-display font-bold text-charcoal text-xl mb-2">{title}</h2>
+      <p className="text-sm text-charcoal-light max-w-sm mb-6 leading-relaxed">{description}</p>
+      <div className="bg-surface rounded-2xl p-5 max-w-sm w-full text-left">
+        <p className="text-xs font-bold text-charcoal uppercase tracking-wide mb-3">Coming Features</p>
+        <ul className="space-y-2">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs text-charcoal-light">
+              <span className="text-teal mt-0.5">•</span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <span className="mt-6 text-[11px] font-bold bg-gold/20 text-gold px-3 py-1 rounded-full uppercase tracking-wide">In Development</span>
+    </div>
+  )
+}
+
+// ── My Injury Tab ─────────────────────────────────────────────────────────────
+const STAGE_LABELS: Record<number, { name: string; description: string; color: string }> = {
+  0: { name: 'Off Mat',            description: 'Complete rest — no physical activity affecting injury.', color: 'text-red-tier' },
+  1: { name: 'Cardio Only',        description: 'Bike, swim, walk — no grappling contact.',              color: 'text-red-tier' },
+  2: { name: 'Solo Movement',      description: 'Individual movement patterns, no contact.',             color: 'text-gold' },
+  3: { name: 'Technical Solo',     description: 'Solo drilling of non-affected techniques only.',       color: 'text-gold' },
+  4: { name: 'Technical Drilling', description: 'Compliant partner, zero resistance.',                  color: 'text-gold' },
+  5: { name: 'Positional (Protected)', description: 'Sparring avoiding the injury area.',             color: 'text-teal' },
+  6: { name: 'Flow Rolling',       description: 'Light intensity, injury-aware partner only.',         color: 'text-teal' },
+  7: { name: 'Modified Training',  description: 'Full class with specific technique restrictions.',    color: 'text-teal' },
+  8: { name: 'Full Training',      description: 'No modifications — full intensity.',                  color: 'text-green-tier' },
+  9: { name: 'Competition Ready',  description: 'Competition cleared — coach sign-off required.',     color: 'text-green-tier' },
+}
+
+interface InjuryRecord {
+  id: string; athlete_user_id: string; body_part: string; injury_type: string
+  side: string; severity: number; stage: number; status: string
+  injury_date: string; notes: string | null
+}
+
+function InjuryCard({
+  injury, athleteName, session, onUpdated,
+}: {
+  injury: InjuryRecord; athleteName: string
+  session: { access_token: string } | null
+  onUpdated: (id: string, stage: number, status: string) => void
+}) {
+  const [stageNote, setStageNote] = useState('')
+  const [saving, setSaving]       = useState(false)
+  const [expanded, setExpanded]   = useState(false)
+
+  const stageInfo = STAGE_LABELS[injury.stage] ?? STAGE_LABELS[0]
+  const isCleared = injury.status === 'cleared'
+
+  async function advance(newStage: number, newStatus?: string) {
+    if (!session) return
+    setSaving(true)
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coach-actions`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_injury_stage', injury_id: injury.id, stage: newStage, status: newStatus ?? injury.status, notes: stageNote.trim() || null }),
+      })
+      onUpdated(injury.id, newStage, newStatus ?? injury.status)
+    } finally { setSaving(false) }
+  }
+
+  const severityColor = injury.severity >= 8 ? 'text-red-tier' : injury.severity >= 5 ? 'text-gold' : 'text-charcoal-light'
+
+  return (
+    <div className={cn('rounded-2xl border-2 p-4 space-y-3', isCleared ? 'border-green-tier/40 bg-green-50/30' : 'border-teal-light bg-white')}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-bold text-charcoal">{athleteName}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs font-semibold text-charcoal">{injury.body_part}</span>
+            {injury.side !== 'unknown' && injury.side !== 'N/A' && (
+              <span className="text-[10px] bg-surface px-2 py-0.5 rounded-full text-charcoal-light">{injury.side}</span>
+            )}
+            <span className={cn('text-[10px] font-semibold', severityColor)}>{injury.severity}/10</span>
+            <span className="text-[10px] text-charcoal-light">{new Date(injury.injury_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          </div>
+        </div>
+        <span className={cn('text-[10px] font-bold px-2 py-1 rounded-full uppercase', isCleared ? 'bg-green-tier-bg text-green-tier' : 'bg-red-50 text-red-tier')}>
+          {isCleared ? 'Cleared' : 'Active'}
+        </span>
+      </div>
+
+      {/* Stage progress bar */}
+      {!isCleared && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className={cn('text-xs font-bold', stageInfo.color)}>Stage {injury.stage}/9 — {stageInfo.name}</p>
+            <button onClick={() => setExpanded(o => !o)} className="text-[11px] text-charcoal-light hover:text-charcoal transition-colors">
+              {expanded ? 'Less' : 'Advance'}
+            </button>
+          </div>
+          <div className="w-full bg-teal-light rounded-full h-1.5">
+            <div className="bg-teal h-1.5 rounded-full transition-all duration-500" style={{ width: `${(injury.stage / 9) * 100}%` }} />
+          </div>
+          <p className="text-[11px] text-charcoal-light">{stageInfo.description}</p>
+        </div>
+      )}
+
+      {/* Stage advancement controls */}
+      {expanded && !isCleared && (
+        <div className="border-t border-teal-light pt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-charcoal uppercase tracking-wide">Next Stage</p>
+              <p className={cn('text-xs font-semibold', STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.color)}>
+                Stage {Math.min(injury.stage + 1, 9)} — {STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.name}
+              </p>
+              <p className="text-[10px] text-charcoal-light">{STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.description}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-charcoal uppercase tracking-wide">Return Protocol</p>
+              {Object.entries(STAGE_LABELS).slice(injury.stage + 1, injury.stage + 4).map(([s, info]) => (
+                <p key={s} className="text-[10px] text-charcoal-light">{s}: {info.name}</p>
+              ))}
+            </div>
+          </div>
+          <textarea value={stageNote} onChange={e => setStageNote(e.target.value)} rows={2}
+            placeholder="Advancement notes (optional)..."
+            className="w-full text-xs rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none" />
+          <div className="flex gap-2 flex-wrap">
+            {injury.stage > 0 && (
+              <button onClick={() => advance(injury.stage - 1)} disabled={saving}
+                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-surface text-charcoal-light hover:text-charcoal transition-colors disabled:opacity-50">
+                <ChevronLeft size={12} /> Back a Stage
+              </button>
+            )}
+            {injury.stage < 9 && (
+              <button onClick={() => advance(injury.stage + 1)} disabled={saving}
+                className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1 disabled:opacity-50">
+                Advance to Stage {injury.stage + 1} <ChevronR size={12} />
+              </button>
+            )}
+            {injury.stage === 9 && (
+              <button onClick={() => advance(9, 'cleared')} disabled={saving}
+                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-green-tier text-white hover:bg-green-tier/90 transition-colors disabled:opacity-50">
+                <CheckCircle2 size={12} /> Clear Injury
+              </button>
+            )}
+            <button onClick={() => advance(injury.stage, 'cleared')} disabled={saving}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-surface text-charcoal-light hover:text-charcoal transition-colors disabled:opacity-50">
+              Clear Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {injury.notes && (
+        <p className="text-[11px] text-charcoal-light italic bg-surface rounded-xl px-3 py-1.5">Note: {injury.notes}</p>
+      )}
+    </div>
+  )
+}
+
+function MyInjuryTab({ session, roster }: { session: { access_token: string } | null; roster: AthleteRosterItem[] }) {
+  const [injuries, setInjuries] = useState<InjuryRecord[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [showCleared, setShowCleared] = useState(false)
+
+  useEffect(() => {
+    if (!session) return
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coach-actions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_injuries' }),
+    }).then(r => r.json()).then(data => {
+      setInjuries(Array.isArray(data.injuries) ? data.injuries : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [session])
+
+  function handleUpdated(id: string, stage: number, status: string) {
+    setInjuries(prev => prev.map(inj => inj.id === id ? { ...inj, stage, status } : inj))
+  }
+
+  // Build name map from roster
+  const nameMap: Record<string, string> = {}
+  for (const a of roster) { if (a.user_id) nameMap[a.user_id] = a.name }
+
+  const active  = injuries.filter(i => i.status !== 'cleared')
+  const cleared = injuries.filter(i => i.status === 'cleared')
+
+  if (loading) return <Spinner />
+
+  if (injuries.length === 0) {
+    return (
+      <EmptyState
+        icon={ShieldPlus}
+        title="No active injuries"
+        description="Injuries logged from athlete cards will appear here. Use the Injury button on any athlete card to log a new injury."
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Stage reference */}
+      <SectionCard title="Return-to-Mat Protocol">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {Object.entries(STAGE_LABELS).map(([stage, info]) => (
+            <div key={stage} className="text-center">
+              <p className={cn('text-[10px] font-bold', info.color)}>Stage {stage}</p>
+              <p className="text-[10px] text-charcoal-light leading-snug">{info.name}</p>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Active injuries */}
+      {active.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-bold text-charcoal uppercase tracking-wide flex items-center gap-2">
+            <Syringe size={13} className="text-red-tier" /> Active ({active.length})
+          </p>
+          {active.map(inj => (
+            <InjuryCard key={inj.id} injury={inj}
+              athleteName={nameMap[inj.athlete_user_id] ?? 'Athlete'}
+              session={session} onUpdated={handleUpdated} />
+          ))}
+        </div>
+      )}
+
+      {/* Cleared injuries toggle */}
+      {cleared.length > 0 && (
+        <div>
+          <button onClick={() => setShowCleared(o => !o)}
+            className="text-xs text-charcoal-light hover:text-charcoal flex items-center gap-1.5 transition-colors">
+            <ChevronRight size={12} className={cn('transition-transform', showCleared && 'rotate-90')} />
+            {showCleared ? 'Hide' : 'Show'} cleared injuries ({cleared.length})
+          </button>
+          {showCleared && (
+            <div className="mt-3 space-y-3">
+              {cleared.map(inj => (
+                <InjuryCard key={inj.id} injury={inj}
+                  athleteName={nameMap[inj.athlete_user_id] ?? 'Athlete'}
+                  session={session} onUpdated={handleUpdated} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────────
 export function CoachDashboard() {
   const { session, user } = useAuth()
-  const [tab, setTab] = useState<Tab>('roster')
+  const [tab, setTab]               = useState<Tab>('team')
+  const [teamSubTab, setTeamSubTab] = useState<TeamSubTab>('roster')
+  const [coachSubTab, setCoachSubTab] = useState<CoachingSubTab>('technique')
   const [roster, setRoster] = useState<AthleteRosterItem[]>([])
   const [rosterLoading, setRosterLoading] = useState(true)
   const [coachId, setCoachId] = useState<string | null>(null)
@@ -1370,14 +1633,16 @@ export function CoachDashboard() {
 
   function handleAddToJournal(code: string, name: string, type: string, notes: string) {
     setPendingJournalLog({ code, name, type, notes })
-    setTab('journal')
+    setTab('coaching')
+    setCoachSubTab('journal')
   }
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [
-    { id: 'roster',   label: 'Roster',   icon: Users },
-    { id: 'coaching', label: 'Coaching', icon: GraduationCap },
-    { id: 'journal',  label: 'Journal',  icon: NotebookPen },
-    { id: 'notes',    label: 'Notes',    icon: FileText },
+    { id: 'team',         label: 'My Team',         icon: Users },
+    { id: 'coaching',     label: 'My Coaching',     icon: GraduationCap },
+    { id: 'competitions', label: 'My Competitions', icon: Trophy },
+    { id: 'injury',       label: 'My Injury',       icon: Syringe },
+    { id: 'school',       label: 'My School',       icon: Building2 },
   ]
 
   return (
@@ -1394,19 +1659,84 @@ export function CoachDashboard() {
         ))}
       </div>
 
-      {tab === 'roster' && (
-        <RosterTab roster={roster} setRoster={setRoster} loading={rosterLoading} session={session} coachId={coachId}
-          drillCounts={drillCounts} protocolCounts={protocolCounts} noteMap={noteMap} onNoteUpdated={handleNoteUpdated} />
+      {/* MY TEAM ─ Roster + Notes sub-tabs */}
+      {tab === 'team' && (
+        <div className="space-y-4">
+          <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit">
+            {(['roster', 'notes'] as TeamSubTab[]).map(s => (
+              <button key={s} onClick={() => setTeamSubTab(s)}
+                className={cn('px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all',
+                  teamSubTab === s ? 'bg-white text-charcoal shadow-sm' : 'text-charcoal-light hover:text-charcoal')}>
+                {s === 'roster' ? 'Roster' : 'Notes'}
+              </button>
+            ))}
+          </div>
+          {teamSubTab === 'roster' && (
+            <RosterTab roster={roster} setRoster={setRoster} loading={rosterLoading} session={session} coachId={coachId}
+              drillCounts={drillCounts} protocolCounts={protocolCounts} noteMap={noteMap} onNoteUpdated={handleNoteUpdated} />
+          )}
+          {teamSubTab === 'notes' && <NotesTab roster={roster} session={session} />}
+        </div>
       )}
+
+      {/* MY COACHING ─ Technique + Journal sub-tabs */}
       {tab === 'coaching' && (
-        <WarmupTab session={session} techniques={coachingTechs} loadingTechs={coachingLoadingTechs}
-          selectedCode={selectedCode} setSelectedCode={setSelectedCode} warmup={warmup} setWarmup={setWarmup}
-          onAddToJournal={handleAddToJournal} />
+        <div className="space-y-4">
+          <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit">
+            {(['technique', 'journal'] as CoachingSubTab[]).map(s => (
+              <button key={s} onClick={() => setCoachSubTab(s)}
+                className={cn('px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all',
+                  coachSubTab === s ? 'bg-white text-charcoal shadow-sm' : 'text-charcoal-light hover:text-charcoal')}>
+                {s === 'technique' ? 'Technique' : 'Journal'}
+              </button>
+            ))}
+          </div>
+          {coachSubTab === 'technique' && (
+            <WarmupTab session={session} techniques={coachingTechs} loadingTechs={coachingLoadingTechs}
+              selectedCode={selectedCode} setSelectedCode={setSelectedCode} warmup={warmup} setWarmup={setWarmup}
+              onAddToJournal={handleAddToJournal} />
+          )}
+          {coachSubTab === 'journal' && (
+            <JournalTab session={session} pendingLog={pendingJournalLog} />
+          )}
+        </div>
       )}
-      {tab === 'journal' && (
-        <JournalTab session={session} pendingLog={pendingJournalLog} />
+
+      {/* MY COMPETITIONS ─ In Development */}
+      {tab === 'competitions' && (
+        <InDevelopmentTab
+          title="My Competitions"
+          description="Competition prep management is coming. You will be able to manage your athletes' competition calendars, track prep progress, and generate competition readiness scores."
+          features={[
+            'Competition calendar (coach-managed)',
+            '8-week periodized prep countdown',
+            'Weight class and cut tracking',
+            'Competition readiness composite score (ROM + injury + training load)',
+            'Pre-competition ROM clearance signal',
+            'Day-of RAMP warmup protocol per athlete',
+          ]}
+        />
       )}
-      {tab === 'notes' && <NotesTab roster={roster} session={session} />}
+
+      {/* MY INJURY ─ Return-to-mat tracker */}
+      {tab === 'injury' && (
+        <MyInjuryTab session={session} roster={roster} />
+      )}
+
+      {/* MY SCHOOL ─ In Development */}
+      {tab === 'school' && (
+        <InDevelopmentTab
+          title="My School"
+          description="Administrative school connectivity is coming. Link your gym, manage athletes, and view school-wide performance data."
+          features={[
+            'Gym / school profile management',
+            'Athlete invite and onboarding system',
+            'School-wide ROM stats and trends',
+            'Multi-coach support',
+            'Coach profile and credentials',
+          ]}
+        />
+      )}
     </div>
   )
 }
