@@ -35,6 +35,12 @@
   status = 200
   force  = true
 
+[[redirects]]
+  from   = "/schools"
+  to     = "/schools.html"
+  status = 200
+  force  = true
+
 # React SPA routes
 [[redirects]]
   from   = "/login"
