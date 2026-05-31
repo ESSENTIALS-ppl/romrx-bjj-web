@@ -746,19 +746,21 @@ function TechniqueReadinessPanel({ session, code, techniqueName, onLogTaught }: 
                       j.severity === 'significant' ? 'text-red-tier' :
                       j.severity === 'moderate'    ? 'text-gold' :
                                                      'text-charcoal-light'
+                    // Always show a label — fall back to 'limiting joint' if no threshold data
                     const sevLabel =
                       j.severity === 'significant' ? 'significant limitation' :
                       j.severity === 'moderate'    ? 'moderate limitation' :
-                      j.severity === 'minor'       ? 'minor limitation' : ''
+                      j.severity === 'minor'       ? 'minor limitation' :
+                                                     'limiting joint'
                     return (
                       <div key={j.joint} className="flex items-center gap-2 text-[11px] pl-1">
-                        <span className="text-charcoal-light w-24 shrink-0">{j.display}{j.side && j.side !== 'mid' ? ` (${j.side})` : ''}</span>
+                        <span className="font-medium text-charcoal-light w-24 shrink-0">
+                          {j.display}{j.side && j.side !== 'mid' ? ` (${j.side})` : ''}
+                        </span>
                         {j.actual !== null && (
                           <span className="font-semibold text-charcoal">{j.actual}°</span>
                         )}
-                        {sevLabel && (
-                          <span className={cn('font-medium', sevColor)}>— {sevLabel}</span>
-                        )}
+                        <span className={cn('font-medium', sevColor)}>— {sevLabel}</span>
                       </div>
                     )
                   })}
