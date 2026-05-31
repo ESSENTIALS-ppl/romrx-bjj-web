@@ -10,8 +10,12 @@ import {
   Users, Flame, FileText, Search, X, Printer,
   ChevronDown, Save, AlertTriangle, ClipboardList,
   Zap, RotateCcw, BookOpen, ChevronRight,
-  Award, Video, Dumbbell,
+  Award, Video, Dumbbell, NotebookPen, Plus, CheckCircle2,
 } from 'lucide-react'
+import {
+  RadarChart, Radar, PolarGrid, PolarAngleAxis,
+  ResponsiveContainer,
+} from 'recharts'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const COACH_ROSTER_URL   = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-coach-roster`
@@ -26,12 +30,6 @@ const TYPE_LABEL: Record<string, string> = {
   X: 'Submissions',
 }
 
-// Submission sub-categories for grouping
-const SUB_TYPE_LABEL: Record<string, string> = {
-  'Chokes': 'Chokes',
-  'Arm Attacks': 'Arm Attacks',
-  'Leg Attacks': 'Leg Attacks',
-}
 
 const RAMP_STEPS = [
   { key: 'raise',      label: 'R — Raise',      minutes: '3 min',  field: 'raise_drills',      bg: 'bg-teal',         text: 'text-white' },
@@ -94,7 +92,7 @@ interface AthleteNote {
   updated_at: string
 }
 
-type Tab = 'roster' | 'warmup' | 'notes'
+type Tab = 'roster' | 'coaching' | 'journal' | 'notes'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function formatDate(iso: string | null): string {
@@ -187,7 +185,7 @@ function JointFlag({
 }: {
   joint: string
   gap: number
-  onDismiss: () => void
+  onDismiss?: () => void
 }) {
   return (
     <div className="flex items-center justify-between gap-2 text-xs bg-surface rounded-xl px-3 py-1.5">
@@ -196,13 +194,15 @@ function JointFlag({
         <span className="text-charcoal font-medium truncate">{formatJointName(joint)}</span>
         <span className="text-charcoal-light shrink-0">{gap}deg</span>
       </div>
-      <button
-        onClick={onDismiss}
-        className="shrink-0 text-charcoal-light hover:text-charcoal transition-colors"
-        aria-label="Dismiss"
-      >
-        <X size={12} />
-      </button>
+      {onDismiss && (
+        <button
+          onClick={onDismiss}
+          className="shrink-0 text-charcoal-light hover:text-charcoal transition-colors"
+          aria-label="Dismiss"
+        >
+          <X size={12} />
+        </button>
+      )}
     </div>
   )
 }
@@ -511,26 +511,37 @@ function AddVideoForm({
 }
 
 // ── Athlete Game Plans ────────────────────────────────────────────────────────
-// Pass athleteUserId directly — avoids coach needing to read athletes table via RLS
-function AthleteGamePlans({ athleteUserId }: { athleteUserId: string }) {
+// Uses coach-actions edge function (admin client) to bypass RLS
+function AthleteGamePlans({
+  athleteUserId,
+  session,
+}: {
+  athleteUserId: string
+  session: { access_token: string } | null
+}) {
   const [plans, setPlans] = useState<AthleteGamePlan[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    if (!expanded || !athleteUserId) return
+    if (!expanded || !athleteUserId || !session) return
     setLoading(true)
-    supabase
-      .from('game_plans')
-      .select('id, name, path_mode, techniques, created_at')
-      .eq('user_id', athleteUserId)
-      .order('created_at', { ascending: false })
-      .limit(3)
-      .then(({ data }) => {
-        setPlans((data as AthleteGamePlan[]) ?? [])
+    fetch(COACH_ACTIONS_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'get_athlete_game_plans', athlete_user_id: athleteUserId }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        setPlans(Array.isArray(data.plans) ? data.plans : [])
         setLoading(false)
       })
-  }, [athleteUserId, expanded])
+      .catch(() => setLoading(false))
+  }, [athleteUserId, session, expanded])
 
   return (
     <div className="border-t border-teal-light pt-3">
@@ -597,15 +608,12 @@ function AthleteCard({
   protocolCount: number
   onBeltUpdate: (userId: string, newBelt: string) => void
 }) {
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [noteOpen, setNoteOpen] = useState(false)
   const [promoteOpen, setPromoteOpen] = useState(false)
   const [assignDrillOpen, setAssignDrillOpen] = useState(false)
   const [addVideoOpen, setAddVideoOpen] = useState(false)
 
-  const visibleJoints = athlete.priorityJoints
-    .filter(j => !dismissed.has(j.joint))
-    .slice(0, 3)
+  const visibleJoints = athlete.priorityJoints.slice(0, 3)
 
   async function handlePromote(newBelt: string) {
     const { data, error } = await supabase.rpc('coach_promote_athlete', {
@@ -649,7 +657,7 @@ function AthleteCard({
         )}
         {drillCount > 0 && (
           <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-medium">
-            {drillCount} drill{drillCount !== 1 ? 's' : ''} logged
+            {drillCount} drill{drillCount !== 1 ? 's' : ''}
           </span>
         )}
         <span className={cn(
@@ -658,7 +666,7 @@ function AthleteCard({
           protocolCount >= 3 ? 'bg-yellow-tier-bg text-yellow-tier' :
           'bg-surface text-charcoal-light'
         )}>
-          {protocolCount}/7 ROM sessions
+          {protocolCount}/7 ROM sessions this wk
         </span>
       </div>
 
@@ -680,7 +688,6 @@ function AthleteCard({
               key={j.joint}
               joint={j.joint}
               gap={j.gap}
-              onDismiss={() => setDismissed(d => new Set([...d, j.joint]))}
             />
           ))}
         </div>
@@ -777,7 +784,7 @@ function AthleteCard({
       )}
 
       {/* Game Plans */}
-      <AthleteGamePlans athleteUserId={athlete.user_id ?? ''} />
+      <AthleteGamePlans athleteUserId={athlete.user_id ?? ''} session={session} />
     </div>
   )
 }
@@ -1085,6 +1092,300 @@ function WarmupTab({ session }: { session: { access_token: string } | null }) {
   )
 }
 
+// ── TAB: JOURNAL ──────────────────────────────────────────────────────────────
+interface TeachingEntry {
+  id: string
+  technique_code: string
+  technique_name: string
+  technique_type: string
+  notes: string | null
+  taught_at: string
+}
+
+const TYPE_FULL: Record<string, string> = {
+  T: 'Takedowns', P: 'Passes', G: 'Guards',
+  S: 'Sweeps', C: 'Controls', X: 'Submissions',
+}
+
+function JournalTab({ session }: { session: { access_token: string } | null }) {
+  const [techniques, setTechniques] = useState<TechniqueItem[]>([])
+  const [selectedCode, setSelectedCode] = useState('')
+  const [dropOpen, setDropOpen] = useState(false)
+  const [logNote, setLogNote] = useState('')
+  const [logging, setLogging] = useState(false)
+  const [logMsg, setLogMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const [entries, setEntries] = useState<TeachingEntry[]>([])
+  const [counts, setCounts] = useState<Record<string, number>>({})
+  const [journalNote, setJournalNote] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [noteSaved, setNoteSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const authHeaders = useCallback(() => ({
+    'Authorization': `Bearer ${session?.access_token ?? ''}`,
+    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json',
+  }), [session])
+
+  // Load everything on mount
+  useEffect(() => {
+    if (!session) return
+    setLoading(true)
+    Promise.all([
+      fetch(COACH_ACTIONS_URL, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ action: 'list_techniques' }),
+      }).then(r => r.json()),
+      fetch(COACH_ACTIONS_URL, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ action: 'get_teaching_log' }),
+      }).then(r => r.json()),
+      fetch(COACH_ACTIONS_URL, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ action: 'get_journal_note' }),
+      }).then(r => r.json()),
+    ]).then(([techData, logData, noteData]) => {
+      setTechniques(Array.isArray(techData.techniques) ? techData.techniques : [])
+      setEntries(Array.isArray(logData.entries) ? logData.entries : [])
+      setCounts(logData.counts ?? {})
+      setJournalNote(noteData.note ?? '')
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [session, authHeaders])
+
+  async function handleLog() {
+    if (!selectedCode || !session) return
+    const tech = techniques.find(t => t.code === selectedCode)
+    if (!tech) return
+    setLogging(true)
+    setLogMsg(null)
+    try {
+      const res = await fetch(COACH_ACTIONS_URL, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          action: 'log_technique_taught',
+          technique_code: tech.code,
+          technique_name: tech.technique_name,
+          technique_type: tech.technique_type,
+          notes: logNote.trim() || null,
+        }),
+      })
+      const data = await res.json()
+      if (data.success && data.entry) {
+        setEntries(prev => [data.entry, ...prev])
+        setCounts(prev => ({
+          ...prev,
+          [tech.technique_type]: (prev[tech.technique_type] ?? 0) + 1,
+        }))
+        setSelectedCode('')
+        setLogNote('')
+        setLogMsg({ type: 'ok', text: `Logged: ${tech.technique_name}` })
+        setTimeout(() => setLogMsg(null), 3000)
+      } else {
+        setLogMsg({ type: 'err', text: data.error ?? 'Failed to log' })
+      }
+    } finally {
+      setLogging(false)
+    }
+  }
+
+  async function handleSaveNote() {
+    if (!session) return
+    setSavingNote(true)
+    try {
+      await fetch(COACH_ACTIONS_URL, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ action: 'save_journal_note', note: journalNote }),
+      })
+      setNoteSaved(true)
+      setTimeout(() => setNoteSaved(false), 2000)
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  const radarData = [
+    { category: 'Takedowns',   value: counts['T'] ?? 0 },
+    { category: 'Guards',      value: counts['G'] ?? 0 },
+    { category: 'Passes',      value: counts['P'] ?? 0 },
+    { category: 'Sweeps',      value: counts['S'] ?? 0 },
+    { category: 'Controls',    value: counts['C'] ?? 0 },
+    { category: 'Submissions', value: counts['X'] ?? 0 },
+  ]
+  const totalTaught = Object.values(counts).reduce((a, b) => a + b, 0)
+  const grouped = groupTechniques(techniques)
+  const beltOrder = ['White', 'Blue', 'Purple', 'Brown', 'Black']
+  const selectedTech = techniques.find(t => t.code === selectedCode)
+
+  if (loading) return <Spinner />
+
+  return (
+    <div className="space-y-5">
+      {/* Log Technique Taught */}
+      <SectionCard title="Log Technique Taught">
+        <div className="space-y-3">
+          <div className="relative">
+            <button
+              onClick={() => setDropOpen(o => !o)}
+              className={cn(
+                'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border-2 text-left transition-all',
+                selectedCode ? 'border-teal bg-teal/5' : 'border-teal-light bg-white hover:border-teal/30'
+              )}
+            >
+              <span className={cn('text-sm', selectedCode ? 'text-charcoal font-semibold' : 'text-charcoal-light')}>
+                {selectedCode ? (selectedTech?.technique_name ?? selectedCode) : 'Select a technique you taught...'}
+              </span>
+              <ChevronDown size={14} className={cn('text-charcoal-light shrink-0 transition-transform', dropOpen && 'rotate-180')} />
+            </button>
+            {dropOpen && (
+              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white rounded-2xl border border-teal-light shadow-lg overflow-hidden max-h-64 overflow-y-auto">
+                {beltOrder.map(belt => {
+                  const types = grouped[belt]
+                  if (!types) return null
+                  return (
+                    <div key={belt}>
+                      <div className="px-4 py-2 bg-surface border-b border-teal-light/50 sticky top-0">
+                        <span className={cn('text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full', beltColor(belt.toLowerCase()))}>
+                          {belt} Belt
+                        </span>
+                      </div>
+                      {Object.entries(types).map(([typeName, items]) => (
+                        <div key={typeName}>
+                          <div className="px-4 py-1.5 bg-surface/50">
+                            <span className="text-[10px] font-semibold text-charcoal-light uppercase tracking-wider">{typeName}</span>
+                          </div>
+                          {items.map(t => (
+                            <button
+                              key={t.code}
+                              onClick={() => { setSelectedCode(t.code); setDropOpen(false) }}
+                              className={cn(
+                                'w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface transition-colors border-b border-teal-light/30 last:border-0',
+                                selectedCode === t.code && 'bg-teal/5'
+                              )}
+                            >
+                              <span className="text-[10px] font-mono text-charcoal-light w-14 shrink-0">{t.code}</span>
+                              <span className="text-sm text-charcoal">{t.technique_name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+          <textarea
+            value={logNote}
+            onChange={e => setLogNote(e.target.value)}
+            rows={2}
+            placeholder="Session notes (optional) - e.g. class of 8, focused on the entry..."
+            className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none"
+          />
+          {logMsg && (
+            <p className={cn('text-xs flex items-center gap-1.5', logMsg.type === 'ok' ? 'text-green-tier' : 'text-red-tier')}>
+              {logMsg.type === 'ok' && <CheckCircle2 size={12} />}
+              {logMsg.text}
+            </p>
+          )}
+          <div className="flex justify-end">
+            <button
+              onClick={handleLog}
+              disabled={!selectedCode || logging}
+              className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Plus size={12} /> Log It
+            </button>
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Teaching Balance Radar */}
+      <SectionCard title={`Teaching Balance${totalTaught > 0 ? ` (${totalTaught} total)` : ''}`}>
+        {totalTaught === 0 ? (
+          <p className="text-xs text-charcoal-light py-4 text-center">
+            Log techniques to see your category balance. A well-rounded coach teaches across all areas.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <ResponsiveContainer width="100%" height={240}>
+              <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+                <PolarGrid stroke="#e2f0ee" />
+                <PolarAngleAxis
+                  dataKey="category"
+                  tick={{ fontSize: 11, fill: '#4a5568', fontWeight: 600 }}
+                />
+                <Radar
+                  name="Techniques Taught"
+                  dataKey="value"
+                  stroke="#0d9488"
+                  fill="#0d9488"
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {radarData.filter(d => d.value > 0).map(d => (
+                <span key={d.category} className="text-[11px] bg-surface px-2 py-1 rounded-full">
+                  <span className="font-semibold text-teal">{d.value}</span>
+                  <span className="text-charcoal-light ml-1">{d.category}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Recent Teaching Log */}
+      {entries.length > 0 && (
+        <SectionCard title="Recent Teaching Log">
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {entries.slice(0, 20).map(e => (
+              <div key={e.id} className="flex items-start justify-between gap-3 text-xs py-2 border-b border-teal-light/40 last:border-0">
+                <div className="min-w-0">
+                  <p className="font-semibold text-charcoal truncate">{e.technique_name}</p>
+                  {e.notes && <p className="text-charcoal-light mt-0.5 truncate">{e.notes}</p>}
+                </div>
+                <div className="shrink-0 flex flex-col items-end gap-1">
+                  <span className="text-[10px] bg-surface px-2 py-0.5 rounded-full text-charcoal-light font-medium">
+                    {TYPE_FULL[e.technique_type] ?? e.technique_type}
+                  </span>
+                  <span className="text-[10px] text-charcoal-light">
+                    {new Date(e.taught_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Coach Journal Notes */}
+      <SectionCard title="Coach Notes">
+        <div className="space-y-3">
+          <textarea
+            value={journalNote}
+            onChange={e => setJournalNote(e.target.value)}
+            rows={5}
+            placeholder="Personal coaching notes, class plans, observations, goals..."
+            className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal focus:bg-white transition-colors resize-none"
+          />
+          <div className="flex justify-end">
+            <button
+              onClick={handleSaveNote}
+              disabled={savingNote || noteSaved}
+              className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
+            >
+              {noteSaved ? <><CheckCircle2 size={12} /> Saved</> : savingNote ? 'Saving...' : <><Save size={12} /> Save Notes</>}
+            </button>
+          </div>
+        </div>
+      </SectionCard>
+    </div>
+  )
+}
+
 // ── TAB: NOTES ─────────────────────────────────────────────────────────────────
 function NoteCard({
   note,
@@ -1281,9 +1582,10 @@ export function CoachDashboard() {
   }, [roster])
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [
-    { id: 'roster',  label: 'Roster',           icon: Users },
-    { id: 'warmup',  label: 'Warmup Generator', icon: RotateCcw },
-    { id: 'notes',   label: 'Notes',            icon: FileText },
+    { id: 'roster',   label: 'Roster',    icon: Users },
+    { id: 'coaching', label: 'Coaching',  icon: RotateCcw },
+    { id: 'journal',  label: 'Journal',   icon: NotebookPen },
+    { id: 'notes',    label: 'Notes',     icon: FileText },
   ]
 
   return (
@@ -1324,8 +1626,11 @@ export function CoachDashboard() {
           protocolCounts={protocolCounts}
         />
       )}
-      {tab === 'warmup' && (
+      {tab === 'coaching' && (
         <WarmupTab session={session} />
+      )}
+      {tab === 'journal' && (
+        <JournalTab session={session} />
       )}
       {tab === 'notes' && (
         <NotesTab roster={roster} session={session} />
