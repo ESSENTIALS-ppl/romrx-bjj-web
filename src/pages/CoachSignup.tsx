@@ -57,6 +57,21 @@ export function CoachSignup() {
         platforms: ['bjj'],
       }, { onConflict: 'id' })
 
+      // Notify Jim of new coach account creation (pre-payment)
+      // Fire-and-forget — don't block checkout on this
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, fullName, gym, paid: false }),
+      }).catch(() => {})
+
+      // Send "complete your payment" email to the coach
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, fullName, gym, paid: false, sendToCoach: true }),
+      }).catch(() => {})
+
       // Get session token for edge function call
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
