@@ -681,9 +681,6 @@ function TechniqueReadinessPanel({ session, code }: {
       body: JSON.stringify({ action: 'get_technique_readiness', code }),
     }).then(r => r.json()).then(data => {
       setReadiness(Array.isArray(data.readiness) ? data.readiness : [])
-      // Infer type from code (T/P/G/S/C/X)
-      const typeChar = code.replace(/[^A-Z]/g, '').replace(/\d/g, '').charAt(1) || code.charAt(1)
-      setTechType(typeChar)
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [session, code])
