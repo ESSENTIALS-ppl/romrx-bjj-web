@@ -111,7 +111,7 @@ export function CoachSettings() {
       const { error } = await supabase.auth.updateUser({ password: newPw })
       if (error) { setPwMsg({ type: 'err', text: error.message }); return }
       setPwMsg({ type: 'ok', text: 'Password updated successfully.' })
-      setCurrentPw(''); setNewPw(''); setConfirmPw('')
+      setNewPw(''); setConfirmPw('')
     } finally { setPwSaving(false) }
     setTimeout(() => setPwMsg(null), 4000)
   }
