@@ -790,6 +790,22 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
 
   const [log, setLog] = useState<SessionLog>(getLog)
   const [completedToday, setCompletedToday] = useState(false)
+  // DB-authoritative session count (matches what coach sees)
+  const [dbSessionCount, setDbSessionCount] = useState(0)
+
+  const cycleStart = log.cycleStart || assessedAt
+  const cycleStartDate = cycleStart.slice(0, 10)
+
+  // Load session count from DB on mount and keep in sync
+  useEffect(() => {
+    if (!userId) return
+    supabase
+      .from('protocol_sessions')
+      .select('session_date', { count: 'exact' })
+      .eq('user_id', userId)
+      .gte('session_date', cycleStartDate)
+      .then(({ count }) => { if (count !== null) setDbSessionCount(count) })
+  }, [userId, cycleStartDate])
 
   useEffect(() => {
     const todayIso = new Date().toISOString().slice(0, 10)
@@ -808,16 +824,24 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
       return next
     })
     setCompletedToday(true)
-    // Also log to DB for coach visibility
+    // Log to DB (authoritative source for coach + athlete counts)
     supabase.from('protocol_sessions').upsert({
       user_id: userId,
       session_date: todayIso,
       protocol_day: protocolDay,
-    }, { onConflict: 'user_id,session_date' }).then(() => {})
-  }, [storageKey, userId, todayPriorityIndex])
+    }, { onConflict: 'user_id,session_date' }).then(({ error }) => {
+      if (!error) {
+        // Update display count from DB after successful write
+        setDbSessionCount(prev => {
+          // Only increment if this is a new day (upsert on same day = same count)
+          const todayCounted = log.sessions.includes(todayIso)
+          return todayCounted ? prev : prev + 1
+        })
+      }
+    })
+  }, [storageKey, userId, todayPriorityIndex, log])
 
-  const cycleStart = log.cycleStart || assessedAt
-  const sessionsThisCycle = log.sessions.filter(s => s >= cycleStart.slice(0, 10)).length
+  const sessionsThisCycle = dbSessionCount  // Use DB count (matches coach view)
   const progressPct = Math.min(100, Math.round((sessionsThisCycle / 36) * 100))
 
   const now = new Date()
