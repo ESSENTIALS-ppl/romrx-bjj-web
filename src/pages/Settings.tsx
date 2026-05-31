@@ -83,10 +83,17 @@ function Section({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+import { CoachSettings } from './CoachSettings'
+
 export function Settings() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { profile, assessment, loading } = useProfile(user?.id)
+
+  // Coaches get their own dedicated settings
+  const isCoach = user?.user_metadata?.portal_role === 'coach' ||
+                  user?.app_metadata?.portal_role === 'coach'
+  if (!loading && isCoach) return <CoachSettings />
 
   // ── Profile fields ──
   const [fullName, setFullName]         = useState('')
