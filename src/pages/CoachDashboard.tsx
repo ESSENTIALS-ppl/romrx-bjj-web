@@ -666,14 +666,11 @@ function CoachingCueCard({ cue }: { cue: string }) {
 }
 
 // ── Technique Readiness Panel ──────────────────────────────────────────────────
-function TechniqueReadinessPanel({ session, code, techniqueName, sessionNotes, onLogTaught }: {
-  session: { access_token: string } | null; code: string; techniqueName: string
-  sessionNotes: string
-  onLogTaught: (code: string, name: string, type: string, notes: string) => void
+function TechniqueReadinessPanel({ session, code }: {
+  session: { access_token: string } | null; code: string
 }) {
   const [readiness, setReadiness] = useState<TechniqueReadinessItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [techType, setTechType] = useState('')
 
   useEffect(() => {
     if (!session || !code) return
@@ -942,16 +939,7 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
           {warmup.coaching_cue && <CoachingCueCard cue={warmup.coaching_cue} />}
 
           {/* Athlete Readiness for this technique */}
-          <TechniqueReadinessPanel
-            session={session} code={warmup.code} techniqueName={warmup.technique_name}
-            sessionNotes={sessionNotes}
-            onLogTaught={(code, name, type, notes) => {
-              onAddToJournal(code, name, type, notes)
-              setLoggedMsg(`Logged: ${name}`)
-              setSessionNotes('')
-              setTimeout(() => setLoggedMsg(''), 3000)
-            }}
-          />
+          <TechniqueReadinessPanel session={session} code={warmup.code} />
 
           {/* Session Notes */}
           <div className="mt-3 rounded-2xl border border-teal-light bg-white p-4 space-y-2">
