@@ -702,12 +702,13 @@ function TechniqueReadinessPanel({ session, code, techniqueName, onLogTaught }: 
       <div className="space-y-2">
         {readiness.map(r => {
           const hasInjury = r.injuries.length > 0
+          const tier = (r.tier ?? 'unassessed').toLowerCase()
           const tierColor =
-            r.tier === 'green'  ? 'text-green-tier bg-green-tier-bg' :
-            r.tier === 'yellow' ? 'text-gold bg-yellow-tier-bg' :
-            r.tier === 'red'    ? 'text-red-tier bg-red-tier-bg' :
-                                  'text-charcoal-light bg-surface'
-          const tierLabel = r.tier === 'green' ? 'READY' : r.tier === 'yellow' ? 'DEVELOPING' : r.tier === 'red' ? 'AT RISK' : 'UNASSESSED'
+            tier === 'green'  ? 'text-green-tier bg-green-tier-bg' :
+            tier === 'yellow' ? 'text-gold bg-yellow-tier-bg' :
+            tier === 'red'    ? 'text-red-tier bg-red-tier-bg' :
+                                'text-charcoal-light bg-surface'
+          const tierLabel = tier === 'green' ? 'READY' : tier === 'yellow' ? 'DEVELOPING' : tier === 'red' ? 'AT RISK' : 'UNASSESSED'
           return (
             <div key={r.user_id} className="flex items-center justify-between gap-2 py-1 border-b border-teal-light/40 last:border-0">
               <div className="flex items-center gap-2 min-w-0">
