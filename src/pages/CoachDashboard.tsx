@@ -663,9 +663,10 @@ function CoachingCueCard({ cue }: { cue: string }) {
 }
 
 // ── Technique Readiness Panel ──────────────────────────────────────────────────
-function TechniqueReadinessPanel({ session, code, techniqueName, onLogTaught }: {
+function TechniqueReadinessPanel({ session, code, techniqueName, sessionNotes, onLogTaught }: {
   session: { access_token: string } | null; code: string; techniqueName: string
-  onLogTaught: (code: string, name: string, type: string) => void
+  sessionNotes: string
+  onLogTaught: (code: string, name: string, type: string, notes: string) => void
 }) {
   const [readiness, setReadiness] = useState<TechniqueReadinessItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -697,7 +698,7 @@ function TechniqueReadinessPanel({ session, code, techniqueName, onLogTaught }: 
           <Users size={13} className="text-teal" /> Athlete Readiness
         </p>
         <button
-          onClick={() => onLogTaught(code, techniqueName, techType || code.charAt(1))}
+          onClick={() => onLogTaught(code, techniqueName, techType || code.charAt(1), sessionNotes)}
           className="text-[11px] font-semibold bg-gold/20 text-gold px-3 py-1 rounded-full flex items-center gap-1 hover:bg-gold/30 transition-colors"
         >
           <NotebookPen size={10} /> Add to Journal
@@ -830,10 +831,12 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
   techniques: TechniqueItem[]; loadingTechs: boolean
   selectedCode: string; setSelectedCode: (c: string) => void
   warmup: TechniqueWarmup | null; setWarmup: (w: TechniqueWarmup | null) => void
-  onAddToJournal: (code: string, name: string, type: string) => void
+  onAddToJournal: (code: string, name: string, type: string, notes: string) => void
 }) {
   const [loadingWarmup, setLoadingWarmup] = useState(false)
   const [dropdownOpen, setDropdownOpen]   = useState(false)
+  const [sessionNotes, setSessionNotes]   = useState('')
+  const [loggedMsg, setLoggedMsg]         = useState('')
 
   const authHeaders = useCallback(() => ({
     'Authorization': `Bearer ${session?.access_token ?? ''}`,
@@ -944,8 +947,36 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
           {/* Athlete Readiness for this technique */}
           <TechniqueReadinessPanel
             session={session} code={warmup.code} techniqueName={warmup.technique_name}
-            onLogTaught={onAddToJournal}
+            sessionNotes={sessionNotes}
+            onLogTaught={(code, name, type, notes) => {
+              onAddToJournal(code, name, type, notes)
+              setLoggedMsg(`Logged: ${name}`)
+              setSessionNotes('')
+              setTimeout(() => setLoggedMsg(''), 3000)
+            }}
           />
+
+          {/* Session Notes — transfers to Journal on log */}
+          <div className="mt-3 rounded-2xl border border-teal-light bg-white p-4 space-y-2">
+            <p className="text-xs font-bold text-charcoal uppercase tracking-wide flex items-center gap-1.5">
+              <FileText size={13} className="text-teal" /> Session Notes
+            </p>
+            <p className="text-[11px] text-charcoal-light">
+              Notes added here will carry over to the Journal when you click Add to Journal.
+            </p>
+            <textarea
+              value={sessionNotes}
+              onChange={e => setSessionNotes(e.target.value)}
+              rows={3}
+              placeholder="e.g. 8 athletes, 20 min drilling. Blue belts struggled with the entry timing..."
+              className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal focus:bg-white transition-colors resize-none"
+            />
+            {loggedMsg && (
+              <p className="text-xs text-green-tier flex items-center gap-1.5">
+                <CheckCircle2 size={12} /> {loggedMsg} — notes included in Journal entry
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -962,7 +993,7 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
 // ── TAB: JOURNAL ──────────────────────────────────────────────────────────────
 const TYPE_FULL: Record<string, string> = { T: 'Takedowns', P: 'Passes', G: 'Guards', S: 'Sweeps', C: 'Controls', X: 'Submissions' }
 
-function JournalTab({ session, pendingLog }: { session: { access_token: string } | null; pendingLog: { code: string; name: string; type: string } | null }) {
+function JournalTab({ session, pendingLog }: { session: { access_token: string } | null; pendingLog: { code: string; name: string; type: string; notes: string } | null }) {
   const [techniques, setTechniques]   = useState<TechniqueItem[]>([])
   const [selectedCode, setSelectedCode] = useState('')
   const [dropOpen, setDropOpen]       = useState(false)
@@ -998,11 +1029,11 @@ function JournalTab({ session, pendingLog }: { session: { access_token: string }
     }).catch(() => setLoading(false))
   }, [session, authHeaders])
 
-  // Handle pending log from Coaching tab "Add to Journal"
+  // Handle pending log from Coaching tab "Add to Journal" (includes session notes)
   useEffect(() => {
     if (!pendingLog || !session) return
     const tech = { code: pendingLog.code, technique_name: pendingLog.name, technique_type: pendingLog.type }
-    doLog(tech, null)
+    doLog(tech, pendingLog.notes || null)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingLog])
 
@@ -1249,7 +1280,7 @@ export function CoachDashboard() {
   const [coachingLoadingTechs, setCoachingLoadingTechs] = useState(true)
   const [selectedCode, setSelectedCode]           = useState('')
   const [warmup, setWarmup]                       = useState<TechniqueWarmup | null>(null)
-  const [pendingJournalLog, setPendingJournalLog] = useState<{ code: string; name: string; type: string } | null>(null)
+  const [pendingJournalLog, setPendingJournalLog] = useState<{ code: string; name: string; type: string; notes: string } | null>(null)
 
   // Load coach row
   useEffect(() => {
@@ -1323,8 +1354,8 @@ export function CoachDashboard() {
     setNoteMap(prev => ({ ...prev, [athleteId]: note }))
   }
 
-  function handleAddToJournal(code: string, name: string, type: string) {
-    setPendingJournalLog({ code, name, type })
+  function handleAddToJournal(code: string, name: string, type: string, notes: string) {
+    setPendingJournalLog({ code, name, type, notes })
     setTab('journal')
   }
 
