@@ -696,16 +696,10 @@ function TechniqueReadinessPanel({ session, code, techniqueName, sessionNotes, o
 
   return (
     <div className="mt-4 rounded-2xl border border-teal-light bg-white p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3">
         <p className="text-xs font-bold text-charcoal uppercase tracking-wide flex items-center gap-1.5">
           <Users size={13} className="text-teal" /> Athlete Readiness
         </p>
-        <button
-          onClick={() => onLogTaught(code, techniqueName, techType || code.charAt(1), sessionNotes)}
-          className="text-[11px] font-semibold bg-gold/20 text-gold px-3 py-1 rounded-full flex items-center gap-1 hover:bg-gold/30 transition-colors"
-        >
-          <NotebookPen size={10} /> Add to Journal
-        </button>
       </div>
       <div className="space-y-3">
         {readiness.map(r => {
@@ -959,13 +953,13 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
             }}
           />
 
-          {/* Session Notes — transfers to Journal on log */}
+          {/* Session Notes */}
           <div className="mt-3 rounded-2xl border border-teal-light bg-white p-4 space-y-2">
             <p className="text-xs font-bold text-charcoal uppercase tracking-wide flex items-center gap-1.5">
               <FileText size={13} className="text-teal" /> Session Notes
             </p>
             <p className="text-[11px] text-charcoal-light">
-              Notes added here will carry over to the Journal when you click Add to Journal.
+              Optional notes for this session — included when you log to Journal below.
             </p>
             <textarea
               value={sessionNotes}
@@ -974,25 +968,27 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
               placeholder="e.g. 8 athletes, 20 min drilling. Blue belts struggled with the entry timing..."
               className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal focus:bg-white transition-colors resize-none"
             />
-            <div className="flex items-center justify-between">
-              {loggedMsg ? (
-                <p className="text-xs text-green-tier flex items-center gap-1.5">
-                  <CheckCircle2 size={12} /> {loggedMsg} — notes included
-                </p>
-              ) : <span />}
-              <button
-                onClick={() => {
-                  if (!warmup) return
-                  onAddToJournal(warmup.code, warmup.technique_name, warmup.technique_type, sessionNotes)
-                  setLoggedMsg(`Logged: ${warmup.technique_name}`)
-                  setSessionNotes('')
-                  setTimeout(() => setLoggedMsg(''), 3000)
-                }}
-                className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
-              >
-                <NotebookPen size={14} /> Add to Journal
-              </button>
-            </div>
+          </div>
+
+          {/* Add Session to Journal — standalone button below everything */}
+          <div className="flex items-center justify-between gap-4">
+            {loggedMsg ? (
+              <p className="text-xs text-green-tier flex items-center gap-1.5">
+                <CheckCircle2 size={12} /> {loggedMsg}
+              </p>
+            ) : <span />}
+            <button
+              onClick={() => {
+                if (!warmup) return
+                onAddToJournal(warmup.code, warmup.technique_name, warmup.technique_type, sessionNotes)
+                setLoggedMsg(`Logged: ${warmup.technique_name}`)
+                setSessionNotes('')
+                setTimeout(() => setLoggedMsg(''), 3000)
+              }}
+              className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm font-semibold"
+            >
+              <NotebookPen size={15} /> Add Session to Journal
+            </button>
           </div>
         </div>
       )}
