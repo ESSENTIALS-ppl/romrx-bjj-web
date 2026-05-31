@@ -971,11 +971,25 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
               placeholder="e.g. 8 athletes, 20 min drilling. Blue belts struggled with the entry timing..."
               className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal focus:bg-white transition-colors resize-none"
             />
-            {loggedMsg && (
-              <p className="text-xs text-green-tier flex items-center gap-1.5">
-                <CheckCircle2 size={12} /> {loggedMsg} — notes included in Journal entry
-              </p>
-            )}
+            <div className="flex items-center justify-between">
+              {loggedMsg ? (
+                <p className="text-xs text-green-tier flex items-center gap-1.5">
+                  <CheckCircle2 size={12} /> {loggedMsg} — notes included
+                </p>
+              ) : <span />}
+              <button
+                onClick={() => {
+                  if (!warmup) return
+                  onAddToJournal(warmup.code, warmup.technique_name, warmup.technique_type, sessionNotes)
+                  setLoggedMsg(`Logged: ${warmup.technique_name}`)
+                  setSessionNotes('')
+                  setTimeout(() => setLoggedMsg(''), 3000)
+                }}
+                className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+              >
+                <NotebookPen size={14} /> Add to Journal
+              </button>
+            </div>
           </div>
         </div>
       )}
