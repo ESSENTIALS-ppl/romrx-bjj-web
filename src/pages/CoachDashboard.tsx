@@ -10,6 +10,7 @@ import {
   Users, Flame, FileText, Search, X, Printer,
   ChevronDown, Save, AlertTriangle, ClipboardList,
   Zap, RotateCcw, BookOpen, ChevronRight,
+  Award, Video, Dumbbell,
 } from 'lucide-react'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -31,6 +32,9 @@ const RAMP_STEPS = [
   { key: 'mobilize',   label: 'M — Mobilize',   minutes: '5 min',  field: 'mobilize_drills',   bg: 'bg-charcoal',     text: 'text-white' },
   { key: 'potentiate', label: 'P — Potentiate', minutes: '7 min',  field: 'potentiate_drills', bg: 'bg-teal-dark',    text: 'text-white' },
 ] as const
+
+const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black']
+const CATEGORIES = ['Throws', 'Guards', 'Passes', 'Sweeps', 'Controls', 'Submissions']
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface AthleteGamePlan {
@@ -110,6 +114,38 @@ function groupTechniques(techniques: TechniqueItem[]): Record<string, Record<str
   return result
 }
 
+// ── Readiness ─────────────────────────────────────────────────────────────────
+function getReadiness(t: { green: number; yellow: number; red: number; total: number }) {
+  if (t.total === 0) return { label: 'No Data', color: 'gray' }
+  const greenPct = t.green / t.total
+  const redPct = t.red / t.total
+  if (redPct > 0.6) return { label: 'AT RISK', color: 'red' }
+  if (greenPct > 0.55) return { label: 'READY', color: 'green' }
+  return { label: 'DEVELOPING', color: 'yellow' }
+}
+
+function readinessSortKey(item: AthleteRosterItem): number {
+  const r = getReadiness(item.techniques)
+  if (r.label === 'AT RISK') return 0
+  if (r.label === 'DEVELOPING') return 1
+  if (r.label === 'READY') return 2
+  return 3
+}
+
+function ReadinessPill({ t }: { t: { green: number; yellow: number; red: number; total: number } }) {
+  const r = getReadiness(t)
+  const cls =
+    r.color === 'red'    ? 'bg-red-tier-bg text-red-tier' :
+    r.color === 'green'  ? 'bg-green-tier-bg text-green-tier' :
+    r.color === 'yellow' ? 'bg-yellow-tier-bg text-yellow-tier' :
+                           'bg-surface text-charcoal-light'
+  return (
+    <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide', cls)}>
+      {r.label}
+    </span>
+  )
+}
+
 // ── Belt Badge ─────────────────────────────────────────────────────────────────
 function BeltBadge({ belt }: { belt: string }) {
   return (
@@ -145,7 +181,7 @@ function JointFlag({
       <div className="flex items-center gap-2 min-w-0">
         <div className={cn('w-2 h-2 rounded-full shrink-0', jointDotColor(gap))} />
         <span className="text-charcoal font-medium truncate">{formatJointName(joint)}</span>
-        <span className="text-charcoal-light shrink-0">{gap}°</span>
+        <span className="text-charcoal-light shrink-0">{gap}deg</span>
       </div>
       <button
         onClick={onDismiss}
@@ -200,7 +236,7 @@ function InlineNoteEditor({
         value={note}
         onChange={e => setNote(e.target.value)}
         rows={3}
-        placeholder="Add a coaching note…"
+        placeholder="Add a coaching note..."
         className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal focus:bg-white transition-colors resize-none"
       />
       <div className="flex gap-2 justify-end">
@@ -215,7 +251,246 @@ function InlineNoteEditor({
           disabled={saving || saved}
           className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5"
         >
-          {saved ? '✓ Saved' : saving ? 'Saving…' : <><Save size={12} /> Save Note</>}
+          {saved ? '✓ Saved' : saving ? 'Saving...' : <><Save size={12} /> Save Note</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Promote Dialog ─────────────────────────────────────────────────────────────
+function PromoteDialog({
+  athlete,
+  onPromote,
+  onClose,
+}: {
+  athlete: AthleteRosterItem
+  onPromote: (belt: string) => Promise<void>
+  onClose: () => void
+}) {
+  const currentIdx = BELT_ORDER.indexOf(athlete.belt.toLowerCase())
+  const options = BELT_ORDER.slice(currentIdx + 1)
+  const [selected, setSelected] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  async function handlePromote() {
+    if (!selected) return
+    setSaving(true)
+    try {
+      await onPromote(selected)
+      setMsg({ type: 'ok', text: `Promoted to ${selected}!` })
+      setTimeout(onClose, 1500)
+    } catch (e) {
+      setMsg({ type: 'err', text: e instanceof Error ? e.message : 'Promotion failed' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (options.length === 0) {
+    return (
+      <div className="mt-3 border-t border-teal-light pt-3 text-xs text-charcoal-light">
+        {athlete.name} is already at the highest belt rank.
+        <button onClick={onClose} className="ml-2 text-teal hover:underline">Close</button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-3 border-t border-teal-light pt-3 space-y-2">
+      <p className="text-xs font-semibold text-charcoal">Promote to:</p>
+      <div className="flex gap-1.5 flex-wrap">
+        {options.map(b => (
+          <button
+            key={b}
+            onClick={() => setSelected(b)}
+            className={cn(
+              'px-3 py-1 rounded-full text-xs font-bold uppercase transition-all',
+              beltColor(b),
+              selected === b ? 'ring-2 ring-offset-1 ring-teal' : 'opacity-60 hover:opacity-90'
+            )}
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+      {msg && (
+        <p className={cn('text-xs', msg.type === 'ok' ? 'text-green-tier' : 'text-red-tier')}>{msg.text}</p>
+      )}
+      <div className="flex gap-2 justify-end">
+        <button onClick={onClose} className="text-xs text-charcoal-light hover:text-charcoal px-3 py-1.5 rounded-lg transition-colors">
+          Cancel
+        </button>
+        <button
+          onClick={handlePromote}
+          disabled={!selected || saving}
+          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {saving ? 'Promoting...' : <><Award size={12} /> Confirm Promotion</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Assign Drill Form ──────────────────────────────────────────────────────────
+function AssignDrillForm({
+  athlete,
+  coachId,
+  onClose,
+}: {
+  athlete: AthleteRosterItem
+  coachId: string
+  onClose: () => void
+}) {
+  const [techniqueName, setTechniqueName] = useState('')
+  const [category, setCategory] = useState('Throws')
+  const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function handleSubmit() {
+    if (!techniqueName.trim()) { setErr('Technique name is required.'); return }
+    if (!athlete.user_id) { setErr('Athlete user ID not found.'); return }
+    setSaving(true)
+    setErr(null)
+    const { error } = await supabase.from('coach_assignments').insert({
+      coach_id: coachId,
+      athlete_user_id: athlete.user_id,
+      technique_name: techniqueName.trim(),
+      category,
+      note: note.trim() || null,
+    })
+    setSaving(false)
+    if (error) {
+      setErr(error.message)
+    } else {
+      setSaved(true)
+      setTimeout(onClose, 1200)
+    }
+  }
+
+  return (
+    <div className="mt-3 border-t border-teal-light pt-3 space-y-2">
+      <p className="text-xs font-semibold text-charcoal">Assign Drill to {athlete.name}</p>
+      <input
+        type="text"
+        value={techniqueName}
+        onChange={e => setTechniqueName(e.target.value)}
+        placeholder="Technique name (required)"
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors"
+      />
+      <select
+        value={category}
+        onChange={e => setCategory(e.target.value)}
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors"
+      >
+        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+      </select>
+      <textarea
+        value={note}
+        onChange={e => setNote(e.target.value)}
+        rows={2}
+        placeholder="Optional note for athlete..."
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none"
+      />
+      {err && <p className="text-xs text-red-tier">{err}</p>}
+      <div className="flex gap-2 justify-end">
+        <button onClick={onClose} className="text-xs text-charcoal-light hover:text-charcoal px-3 py-1.5 rounded-lg transition-colors">
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={saving || saved}
+          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {saved ? '✓ Assigned!' : saving ? 'Saving...' : <><Dumbbell size={12} /> Assign Drill</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Add Video Form ─────────────────────────────────────────────────────────────
+function AddVideoForm({
+  athlete,
+  coachId,
+  onClose,
+}: {
+  athlete: AthleteRosterItem
+  coachId: string
+  onClose: () => void
+}) {
+  const [title, setTitle] = useState('')
+  const [url, setUrl] = useState('')
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  function validateUrl(u: string) {
+    return u.startsWith('https://youtu.be') || u.startsWith('https://www.youtube.com')
+  }
+
+  async function handleSubmit() {
+    if (!title.trim()) { setErr('Title is required.'); return }
+    if (!url.trim() || !validateUrl(url.trim())) { setErr('Please enter a valid YouTube URL (https://youtu.be/... or https://www.youtube.com/...).'); return }
+    if (!athlete.user_id) { setErr('Athlete user ID not found.'); return }
+    setSaving(true)
+    setErr(null)
+    const { error } = await supabase.from('coach_video_feedback').insert({
+      coach_id: coachId,
+      athlete_user_id: athlete.user_id,
+      youtube_url: url.trim(),
+      title: title.trim(),
+      notes: notes.trim() || null,
+    })
+    setSaving(false)
+    if (error) {
+      setErr(error.message)
+    } else {
+      setSaved(true)
+      setTimeout(onClose, 1200)
+    }
+  }
+
+  return (
+    <div className="mt-3 border-t border-teal-light pt-3 space-y-2">
+      <p className="text-xs font-semibold text-charcoal">Add Video for {athlete.name}</p>
+      <input
+        type="text"
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="Video title (required)"
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors"
+      />
+      <input
+        type="url"
+        value={url}
+        onChange={e => setUrl(e.target.value)}
+        placeholder="YouTube URL (required)"
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors"
+      />
+      <textarea
+        value={notes}
+        onChange={e => setNotes(e.target.value)}
+        rows={2}
+        placeholder="Optional notes..."
+        className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none"
+      />
+      {err && <p className="text-xs text-red-tier">{err}</p>}
+      <div className="flex gap-2 justify-end">
+        <button onClick={onClose} className="text-xs text-charcoal-light hover:text-charcoal px-3 py-1.5 rounded-lg transition-colors">
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={saving || saved}
+          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {saved ? '✓ Added!' : saving ? 'Saving...' : <><Video size={12} /> Add Video</>}
         </button>
       </div>
     </div>
@@ -281,7 +556,14 @@ function AthleteGamePlans({ athleteId }: { athleteId: string }) {
             plans.map(plan => (
               <div key={plan.id} className="bg-surface rounded-xl px-3 py-2 space-y-1">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-xs font-semibold text-charcoal leading-snug">{plan.name}</p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-xs font-semibold text-charcoal leading-snug truncate">{plan.name}</p>
+                    {plan.path_mode === 'competition' && (
+                      <span className="shrink-0 text-[9px] font-bold bg-red-tier text-white px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                        COMP
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] text-charcoal-light shrink-0">
                     {new Date(plan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
@@ -304,16 +586,42 @@ function AthleteGamePlans({ athleteId }: { athleteId: string }) {
 function AthleteCard({
   athlete,
   session,
+  coachId,
+  drillCount,
+  onBeltUpdate,
 }: {
   athlete: AthleteRosterItem
   session: { access_token: string } | null
+  coachId: string | null
+  drillCount: number
+  onBeltUpdate: (userId: string, newBelt: string) => void
 }) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [noteOpen, setNoteOpen] = useState(false)
+  const [promoteOpen, setPromoteOpen] = useState(false)
+  const [assignDrillOpen, setAssignDrillOpen] = useState(false)
+  const [addVideoOpen, setAddVideoOpen] = useState(false)
 
   const visibleJoints = athlete.priorityJoints
     .filter(j => !dismissed.has(j.joint))
     .slice(0, 3)
+
+  async function handlePromote(newBelt: string) {
+    const { data, error } = await supabase.rpc('coach_promote_athlete', {
+      p_athlete_user_id: athlete.user_id,
+      p_new_belt: newBelt,
+    })
+    if (error) throw new Error(error.message)
+    if (data?.ok === false) throw new Error(data?.error ?? 'Promotion failed')
+    if (athlete.user_id) onBeltUpdate(athlete.user_id, newBelt)
+  }
+
+  function closeAll() {
+    setNoteOpen(false)
+    setPromoteOpen(false)
+    setAssignDrillOpen(false)
+    setAddVideoOpen(false)
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-3 hover:border-teal/40 transition-colors">
@@ -323,7 +631,10 @@ function AthleteCard({
           <p className="text-sm font-bold text-charcoal leading-snug truncate">{athlete.name}</p>
           <p className="text-xs text-charcoal-light truncate">{athlete.email}</p>
         </div>
-        <BeltBadge belt={athlete.belt} />
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <BeltBadge belt={athlete.belt} />
+          <ReadinessPill t={athlete.techniques} />
+        </div>
       </div>
 
       {/* Last assessment */}
@@ -334,6 +645,11 @@ function AthleteCard({
           </span>
         ) : (
           <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">Not yet assessed</span>
+        )}
+        {drillCount > 0 && (
+          <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-medium">
+            {drillCount} drill{drillCount !== 1 ? 's' : ''} logged
+          </span>
         )}
       </div>
 
@@ -361,10 +677,10 @@ function AthleteCard({
         </div>
       )}
 
-      {/* Notes button + editor */}
-      <div>
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-1.5">
         <button
-          onClick={() => setNoteOpen(o => !o)}
+          onClick={() => { closeAll(); setNoteOpen(o => !o) }}
           className={cn(
             'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all',
             noteOpen
@@ -376,15 +692,80 @@ function AthleteCard({
           {noteOpen ? 'Close Notes' : 'Notes'}
         </button>
 
-        {noteOpen && (
-          <InlineNoteEditor
-            athleteId={athlete.id}
-            initialNote=""
-            session={session}
-            onClose={() => setNoteOpen(false)}
-          />
+        {coachId && athlete.user_id && (
+          <>
+            <button
+              onClick={() => { closeAll(); setPromoteOpen(o => !o) }}
+              className={cn(
+                'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all',
+                promoteOpen
+                  ? 'bg-charcoal text-white'
+                  : 'bg-surface text-charcoal-light hover:text-charcoal hover:bg-gray-100'
+              )}
+            >
+              <Award size={12} />
+              Promote
+            </button>
+            <button
+              onClick={() => { closeAll(); setAssignDrillOpen(o => !o) }}
+              className={cn(
+                'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all',
+                assignDrillOpen
+                  ? 'bg-teal text-white'
+                  : 'bg-surface text-charcoal-light hover:text-charcoal hover:bg-gray-100'
+              )}
+            >
+              <Dumbbell size={12} />
+              Assign Drill
+            </button>
+            <button
+              onClick={() => { closeAll(); setAddVideoOpen(o => !o) }}
+              className={cn(
+                'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all',
+                addVideoOpen
+                  ? 'bg-teal text-white'
+                  : 'bg-surface text-charcoal-light hover:text-charcoal hover:bg-gray-100'
+              )}
+            >
+              <Video size={12} />
+              Add Video
+            </button>
+          </>
         )}
       </div>
+
+      {noteOpen && (
+        <InlineNoteEditor
+          athleteId={athlete.id}
+          initialNote=""
+          session={session}
+          onClose={() => setNoteOpen(false)}
+        />
+      )}
+
+      {promoteOpen && coachId && (
+        <PromoteDialog
+          athlete={athlete}
+          onPromote={handlePromote}
+          onClose={() => setPromoteOpen(false)}
+        />
+      )}
+
+      {assignDrillOpen && coachId && (
+        <AssignDrillForm
+          athlete={athlete}
+          coachId={coachId}
+          onClose={() => setAssignDrillOpen(false)}
+        />
+      )}
+
+      {addVideoOpen && coachId && (
+        <AddVideoForm
+          athlete={athlete}
+          coachId={coachId}
+          onClose={() => setAddVideoOpen(false)}
+        />
+      )}
 
       {/* Game Plans */}
       <AthleteGamePlans athleteId={athlete.id} />
@@ -416,7 +797,7 @@ function RampCard({
       <ul className="space-y-1">
         {items.map((drill, i) => (
           <li key={i} className="flex items-start gap-2 text-xs leading-snug">
-            <span className="opacity-60 shrink-0 mt-0.5">•</span>
+            <span className="opacity-60 shrink-0 mt-0.5">-</span>
             <span>{drill}</span>
           </li>
         ))}
@@ -428,18 +809,29 @@ function RampCard({
 // ── TAB: ROSTER ────────────────────────────────────────────────────────────────
 function RosterTab({
   roster,
+  setRoster,
   loading,
   session,
+  coachId,
+  drillCounts,
 }: {
   roster: AthleteRosterItem[]
+  setRoster: React.Dispatch<React.SetStateAction<AthleteRosterItem[]>>
   loading: boolean
   session: { access_token: string } | null
+  coachId: string | null
+  drillCounts: Record<string, number>
 }) {
   const [search, setSearch] = useState('')
 
-  const filtered = roster.filter(a =>
+  const sorted = [...roster].sort((a, b) => readinessSortKey(a) - readinessSortKey(b))
+  const filtered = sorted.filter(a =>
     !search || a.name.toLowerCase().includes(search.toLowerCase())
   )
+
+  function handleBeltUpdate(userId: string, newBelt: string) {
+    setRoster(prev => prev.map(a => a.user_id === userId ? { ...a, belt: newBelt } : a))
+  }
 
   if (loading) return <Spinner />
 
@@ -451,7 +843,7 @@ function RosterTab({
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search athletes…"
+          placeholder="Search athletes..."
           className="w-full pl-8 pr-4 py-2 text-sm rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white transition-colors"
         />
       </div>
@@ -465,10 +857,22 @@ function RosterTab({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map(a => (
-            <AthleteCard key={a.id} athlete={a} session={session} />
+            <AthleteCard
+              key={a.id}
+              athlete={a}
+              session={session}
+              coachId={coachId}
+              drillCount={a.user_id ? (drillCounts[a.user_id] ?? 0) : 0}
+              onBeltUpdate={handleBeltUpdate}
+            />
           ))}
         </div>
       )}
+
+      {/* Data disclosure note */}
+      <p className="text-xs text-charcoal-light text-center pt-2">
+        Athletes are informed that their full ROM data is visible to their connected coach per the ROMRxBJJ Terms of Service.
+      </p>
     </div>
   )
 }
@@ -544,7 +948,7 @@ function WarmupTab({ session }: { session: { access_token: string } | null }) {
             )}
           >
             <span className={cn('text-sm', selectedCode ? 'text-charcoal font-semibold' : 'text-charcoal-light')}>
-              {selectedCode ? (selectedTech?.technique_name ?? selectedCode) : 'Choose a technique…'}
+              {selectedCode ? (selectedTech?.technique_name ?? selectedCode) : 'Choose a technique...'}
             </span>
             <ChevronDown
               size={14}
@@ -712,7 +1116,7 @@ function NoteCard({
             disabled={saving || saved}
             className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5"
           >
-            {saved ? '✓ Saved' : saving ? 'Saving…' : <><Save size={12} /> Save</>}
+            {saved ? '✓ Saved' : saving ? 'Saving...' : <><Save size={12} /> Save</>}
           </button>
         </div>
       </div>
@@ -778,10 +1182,19 @@ function NotesTab({
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export function CoachDashboard() {
-  const { session } = useAuth()
+  const { session, user } = useAuth()
   const [tab, setTab] = useState<Tab>('roster')
   const [roster, setRoster] = useState<AthleteRosterItem[]>([])
   const [rosterLoading, setRosterLoading] = useState(true)
+  const [coachId, setCoachId] = useState<string | null>(null)
+  const [drillCounts, setDrillCounts] = useState<Record<string, number>>({})
+
+  // Load coach row on mount
+  useEffect(() => {
+    if (!user) return
+    supabase.from('coaches').select('id').eq('user_id', user.id).single()
+      .then(({ data }) => { if (data) setCoachId(data.id) })
+  }, [user])
 
   // Fetch roster on mount
   useEffect(() => {
@@ -799,6 +1212,28 @@ export function CoachDashboard() {
       .finally(() => setRosterLoading(false))
   }, [session])
 
+  // Load drill session counts after roster loads
+  useEffect(() => {
+    if (roster.length === 0) return
+    const userIds = roster.map(a => a.user_id).filter(Boolean) as string[]
+    if (userIds.length === 0) return
+
+    async function loadDrillCounts() {
+      const counts: Record<string, number> = {}
+      await Promise.all(
+        userIds.map(async uid => {
+          const { count } = await supabase
+            .from('drill_sessions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', uid)
+          counts[uid] = count ?? 0
+        })
+      )
+      setDrillCounts(counts)
+    }
+    loadDrillCounts()
+  }, [roster])
+
   const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [
     { id: 'roster',  label: 'Roster',           icon: Users },
     { id: 'warmup',  label: 'Warmup Generator', icon: RotateCcw },
@@ -809,7 +1244,7 @@ export function CoachDashboard() {
     <div className="space-y-5">
       <PageHeader
         title="Coach Dashboard"
-        subtitle={rosterLoading ? 'Loading…' : `${roster.length} athlete${roster.length !== 1 ? 's' : ''}`}
+        subtitle={rosterLoading ? 'Loading...' : `${roster.length} athlete${roster.length !== 1 ? 's' : ''}`}
       />
 
       {/* Tab selector */}
@@ -833,7 +1268,14 @@ export function CoachDashboard() {
 
       {/* Tab content */}
       {tab === 'roster' && (
-        <RosterTab roster={roster} loading={rosterLoading} session={session} />
+        <RosterTab
+          roster={roster}
+          setRoster={setRoster}
+          loading={rosterLoading}
+          session={session}
+          coachId={coachId}
+          drillCounts={drillCounts}
+        />
       )}
       {tab === 'warmup' && (
         <WarmupTab session={session} />

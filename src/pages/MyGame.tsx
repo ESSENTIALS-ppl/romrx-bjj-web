@@ -17,7 +17,7 @@ import {
   Flame, Brain, Zap, Footprints, CircleDot,
   Bookmark, Share2, Trash2, Check, Lock,
   ChevronLeft, Star, Dumbbell, X,
-  Printer, GitBranch, Medal,
+  Printer, GitBranch, Medal, ChevronRight,
 } from 'lucide-react'
 
 // ── Position labels ───────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ const ONBOTTOM_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 type PathMode       = 'offense' | 'defense'
 type GenMode        = 'quick' | 'custom' | 'ai' | 'competition'
-type Tab            = 'gameplan' | 'myflows' | 'library'
+type Tab            = 'gameplan' | 'myflows' | 'library' | 'coachpicks'
 type AIStart        = 'standing' | 'ontop' | 'onbottom'
 type AIFinish       = 'chokes' | 'arm' | 'legs'
 type AIStyle        = 'explosive' | 'technical'
@@ -1051,6 +1051,200 @@ function BranchBuilder({
   )
 }
 
+// ── Coach Picks Tab ──────────────────────────────────────────────────────────
+interface CoachAssignment {
+  id: string
+  technique_name: string
+  category: string
+  note: string | null
+  assigned_at: string
+  is_completed: boolean
+  completed_at: string | null
+}
+
+interface CoachVideoFeedback {
+  id: string
+  youtube_url: string
+  title: string
+  notes: string | null
+  created_at: string
+}
+
+function CoachPicksTab({ userId }: { userId: string | null }) {
+  const [assignments, setAssignments] = useState<CoachAssignment[]>([])
+  const [videos, setVideos] = useState<CoachVideoFeedback[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showCompleted, setShowCompleted] = useState(false)
+  const [hasCoach, setHasCoach] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!userId) return
+    setLoading(true)
+
+    async function load() {
+      // Check if user has a coach
+      const { data: athleteRow } = await supabase
+        .from('athletes')
+        .select('coach_id')
+        .eq('user_id', userId!)
+        .maybeSingle()
+      const coachId = athleteRow?.coach_id ?? null
+      setHasCoach(!!coachId)
+
+      if (!coachId) {
+        setLoading(false)
+        return
+      }
+
+      const [assignRes, videoRes] = await Promise.all([
+        supabase
+          .from('coach_assignments')
+          .select('id, technique_name, category, note, assigned_at, is_completed, completed_at')
+          .eq('athlete_user_id', userId!)
+          .order('assigned_at', { ascending: false }),
+        supabase
+          .from('coach_video_feedback')
+          .select('id, youtube_url, title, notes, created_at')
+          .eq('athlete_user_id', userId!)
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ])
+
+      setAssignments((assignRes.data as CoachAssignment[]) ?? [])
+      setVideos((videoRes.data as CoachVideoFeedback[]) ?? [])
+      setLoading(false)
+    }
+
+    load()
+  }, [userId])
+
+  async function handleMarkComplete(assignmentId: string) {
+    const { error } = await supabase
+      .from('coach_assignments')
+      .update({ is_completed: true, completed_at: new Date().toISOString() })
+      .eq('id', assignmentId)
+    if (!error) {
+      setAssignments(prev => prev.map(a =>
+        a.id === assignmentId ? { ...a, is_completed: true, completed_at: new Date().toISOString() } : a
+      ))
+    }
+  }
+
+  if (loading) return <Spinner />
+
+  if (!userId) {
+    return (
+      <div className="text-center py-10 text-charcoal-light text-sm">
+        Sign in to see your coach picks.
+      </div>
+    )
+  }
+
+  if (hasCoach === false) {
+    return (
+      <div className="card text-center py-8 space-y-2">
+        <Dumbbell size={28} className="mx-auto text-charcoal-light" />
+        <p className="text-sm font-semibold text-charcoal">No coach connected</p>
+        <p className="text-xs text-charcoal-light">
+          Connect to a coach in Settings to receive drill assignments.
+        </p>
+      </div>
+    )
+  }
+
+  const pending = assignments.filter(a => !a.is_completed)
+  const completed = assignments.filter(a => a.is_completed)
+
+  return (
+    <div className="space-y-5">
+      {/* Assignments section */}
+      <div className="space-y-3">
+        <p className="text-xs font-bold text-charcoal uppercase tracking-widest">Assigned by Your Coach</p>
+
+        {pending.length === 0 && completed.length === 0 ? (
+          <div className="card text-center py-6">
+            <p className="text-sm text-charcoal-light">No assignments yet. Your coach will send drills here.</p>
+          </div>
+        ) : (
+          <>
+            {pending.map(a => (
+              <div key={a.id} className="bg-white rounded-2xl border border-teal-light p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-bold text-charcoal">{a.technique_name}</p>
+                  <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-semibold shrink-0">
+                    {a.category}
+                  </span>
+                </div>
+                <p className="text-[10px] text-charcoal-light">
+                  Assigned {new Date(a.assigned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+                {a.note && (
+                  <p className="text-xs text-charcoal bg-surface rounded-xl px-3 py-2">{a.note}</p>
+                )}
+                <button
+                  onClick={() => handleMarkComplete(a.id)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light hover:bg-teal/20 px-3 py-1.5 rounded-xl transition-colors"
+                >
+                  <CheckCircle2 size={13} /> Mark Complete
+                </button>
+              </div>
+            ))}
+
+            {completed.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowCompleted(o => !o)}
+                  className="text-xs text-charcoal-light hover:text-charcoal font-medium flex items-center gap-1 mb-2"
+                >
+                  <ChevronRight size={12} className={cn('transition-transform', showCompleted && 'rotate-90')} />
+                  {showCompleted ? 'Hide' : 'Show'} {completed.length} completed
+                </button>
+                {showCompleted && completed.map(a => (
+                  <div key={a.id} className="bg-surface rounded-2xl border border-teal-light p-4 space-y-1 opacity-60 mb-2">
+                    <p className="text-sm font-bold text-charcoal line-through">{a.technique_name}</p>
+                    <span className="text-[10px] bg-teal-light text-teal px-2 py-0.5 rounded-full font-semibold">
+                      {a.category}
+                    </span>
+                    {a.note && (
+                      <p className="text-xs text-charcoal-light">{a.note}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Videos section */}
+      {videos.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-bold text-charcoal uppercase tracking-widest">Videos from Your Coach</p>
+          {videos.map(v => (
+            <div key={v.id} className="bg-white rounded-2xl border border-teal-light p-4 space-y-2">
+              <p className="text-sm font-bold text-charcoal">{v.title}</p>
+              <p className="text-[10px] text-charcoal-light">
+                {new Date(v.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+              {v.notes && (
+                <p className="text-xs text-charcoal bg-surface rounded-xl px-3 py-2">{v.notes}</p>
+              )}
+              <a
+                href={v.youtube_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light hover:bg-teal/20 px-3 py-1.5 rounded-xl transition-colors"
+              >
+                Watch on YouTube
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function MyGame() {
   const navigate = useNavigate()
@@ -1429,9 +1623,10 @@ export function MyGame() {
       {/* Page tabs */}
       <div className="flex gap-1 bg-surface rounded-2xl p-1 no-print">
         {([
-          ['gameplan', 'Game Plan'],
-          ['myflows',  'My Flows'],
-          ['library',  'Technique Library'],
+          ['gameplan',   'Game Plan'],
+          ['myflows',    'My Flows'],
+          ['library',    'Technique Library'],
+          ['coachpicks', 'Coach Picks'],
         ] as const).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
             className={cn('flex-1 text-sm font-semibold py-2 rounded-xl transition-all',
@@ -2388,6 +2583,11 @@ export function MyGame() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── COACH PICKS ── */}
+      {tab === 'coachpicks' && (
+        <CoachPicksTab userId={user?.id ?? null} />
       )}
     </div>
   )

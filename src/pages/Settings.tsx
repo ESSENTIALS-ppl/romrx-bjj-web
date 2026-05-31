@@ -110,6 +110,7 @@ export function Settings() {
   const [coachLoading, setCoachLoading]     = useState(false)
   const [coachSearching, setCoachSearching] = useState(false)
   const [coachMsg, setCoachMsg]             = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const [pendingCoach, setPendingCoach]     = useState<{ id: string; full_name: string | null; email: string } | null>(null)
 
   // ── Subscription ──
   const [subExpiry, setSubExpiry]         = useState<string | null>(null)
@@ -387,12 +388,19 @@ export function Settings() {
       setCoachSearching(false)
       return
     }
-    await supabase.from('athletes').update({ coach_id: coachRow.id }).eq('user_id', user.id)
-    const displayCoach = { id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email }
-    setCurrentCoach(displayCoach)
-    setCoachEmail('')
-    setCoachMsg({ type: 'ok', text: `Connected to ${coachUser.full_name ?? coachUser.email}.` })
+    // Show consent confirmation before saving
+    setPendingCoach({ id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email })
     setCoachSearching(false)
+  }
+
+  // ── Confirm coach connection after consent ──
+  const handleConfirmCoach = async () => {
+    if (!user || !pendingCoach) return
+    await supabase.from('athletes').update({ coach_id: pendingCoach.id }).eq('user_id', user.id)
+    setCurrentCoach(pendingCoach)
+    setPendingCoach(null)
+    setCoachEmail('')
+    setCoachMsg({ type: 'ok', text: `Connected to ${pendingCoach.full_name ?? pendingCoach.email}.` })
     setTimeout(() => setCoachMsg(null), 4000)
   }
 
@@ -507,9 +515,11 @@ export function Settings() {
               {BELTS.map(b => (
                 <button
                   key={b}
-                  onClick={() => setBelt(b)}
+                  onClick={() => { if (!currentCoach) setBelt(b) }}
+                  disabled={!!currentCoach}
                   className={cn(
                     'px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-all',
+                    currentCoach ? 'opacity-50 cursor-not-allowed' : '',
                     belt === b
                       ? beltColor(b) + ' ring-2 ring-offset-1 ring-teal'
                       : beltColor(b) + ' opacity-50 hover:opacity-80'
@@ -519,6 +529,11 @@ export function Settings() {
                 </button>
               ))}
             </div>
+            {currentCoach && (
+              <p className="text-xs text-charcoal-light mt-2">
+                Your coach manages your belt. {currentCoach.full_name ?? currentCoach.email} can promote you from the team dashboard.
+              </p>
+            )}
           </div>
 
           <div>
@@ -626,8 +641,31 @@ export function Settings() {
             <p className="text-sm text-charcoal-light italic">No coach connected yet.</p>
           )}
 
+          {/* Pending coach consent banner */}
+          {pendingCoach && (
+            <div className="space-y-3 bg-teal-light border border-teal/20 rounded-xl px-4 py-3">
+              <p className="text-sm text-charcoal leading-snug">
+                Connecting to <span className="font-semibold">{pendingCoach.full_name ?? pendingCoach.email}</span> will allow them to view your full ROM data, technique readiness, and training history. Continue?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleConfirmCoach}
+                  className="btn-primary text-xs px-4 py-2"
+                >
+                  Yes, connect
+                </button>
+                <button
+                  onClick={() => setPendingCoach(null)}
+                  className="text-xs px-4 py-2 rounded-xl border border-teal-light text-charcoal-light hover:bg-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Connect by email */}
-          {!currentCoach && (
+          {!currentCoach && !pendingCoach && (
             <div className="space-y-2">
               <label className="text-xs text-charcoal-light font-semibold uppercase tracking-wide block">
                 Connect by Coach Email
