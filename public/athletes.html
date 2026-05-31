@@ -103,6 +103,8 @@
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--white); }
+    .nav-links a.current { color: var(--white); background: rgba(0,128,128,0.25); border: 1px solid rgba(0,128,128,0.4); }
+    .nav-mobile a.current { color: var(--teal); }
     .nav-cta {
       background: var(--gold);
       color: var(--charcoal-dark) !important;
@@ -987,10 +989,9 @@
   <div class="nav-inner">
     <a href="/" class="nav-logo" aria-label="ROMRxBJJ home">ROMRxBJJ™</a>
     <div class="nav-links">
-      <a href="#how-it-works">How It Works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
-      <a href="/login">Sign In</a>
+      <a href="/athletes" class="current">For Athletes</a>
+      <a href="/coaches">For Coaches</a>
+      <a href="/schools">For Schools</a>
       <a href="/signup" class="nav-cta">Get My Assessment →</a>
     </div>
     <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
@@ -1001,10 +1002,9 @@
   </div>
 </nav>
 <div class="nav-mobile" id="navMobile" role="navigation" aria-label="Mobile navigation">
-  <a href="#how-it-works">How It Works</a>
-  <a href="#pricing">Pricing</a>
-  <a href="#faq">FAQ</a>
-  <a href="/login">Sign In</a>
+  <a href="/athletes" class="current">For Athletes</a>
+  <a href="/coaches">For Coaches</a>
+  <a href="/schools">For Schools</a>
   <a href="/signup" class="nav-cta">Get My Assessment →</a>
 </div>
 
@@ -1365,7 +1365,7 @@
     </div>
     <h2 class="section-h2 text-center" id="pricing-heading" style="margin-top: 10px;">Simple Pricing. Serious Results.</h2>
     <p class="section-sub text-center" style="color: rgba(255,255,255,0.65); margin-top: 14px;">Less than the cost of one private lesson.</p>
-    <div class="pricing-grid">
+    <div class="pricing-grid" style="grid-template-columns: 1fr; max-width: 520px; margin: 48px auto 0;">
 
       <!-- Athlete Card -->
       <div class="pricing-card pricing-card-athlete">
@@ -1386,22 +1386,6 @@
         <a href="/signup" class="btn-pricing-gold">Start My Assessment →</a>
       </div>
 
-      <!-- Coach Card -->
-      <div class="pricing-card pricing-card-coach">
-        <p class="pricing-plan" style="color: var(--teal);">Coach Starter</p>
-        <p class="pricing-plan-sub">Individual coaches + academies</p>
-        <p class="pricing-price">$349</p>
-        <p class="pricing-period">per year</p>
-        <ul class="pricing-features" style="margin-top: 8px;">
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Full athlete roster ROM dashboard</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> GREEN/YELLOW/RED status per athlete</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Asymmetry alerts and trend tracking</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Auto-generated class warmup protocols</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Belt promotion workflow</li>
-          <li class="pricing-feature"><span class="pricing-check pricing-check-teal">✓</span> Unlimited athletes</li>
-        </ul>
-        <a href="mailto:romrxbjj@gmail.com" class="btn-pricing-ghost">Get Coach Access →</a>
-      </div>
     </div>
     <p class="pricing-note">All prices in USD. Annual subscription. Cancel anytime.</p>
   </div>

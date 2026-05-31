@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Schools | ROMRxBJJ™ — Coming Soon</title>
+  <meta name="description" content="ROMRxBJJ for Schools is coming. School-wide ROM dashboards, multi-coach access, curriculum planning, and competition management built for BJJ academies." />
+  <meta property="og:title" content="For Schools | ROMRxBJJ — The Academy Intelligence Platform" />
+  <meta property="og:description" content="School-wide ROM dashboards, multi-coach access, and curriculum planning tied to your athletes' actual bodies. Coming to ROMRxBJJ in 2026." />
+  <meta property="og:url" content="https://romrxbjj.com/schools" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://romrxbjj.com/schools" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6GXJWW0F1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G6GXJWW0F1');
+  </script>
+
+  <style>
+    /* -- CSS Variables -- */
+    :root {
+      --teal: #008080;
+      --teal-dark: #006666;
+      --gold: #FFB347;
+      --gold-hover: #FFA733;
+      --charcoal: #36454F;
+      --charcoal-dark: #2a363d;
+      --warm-white: #FAF9F6;
+      --white: #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--warm-white);
+      color: var(--charcoal);
+      padding-top: 64px;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* -- Nav -- */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      height: 64px;
+      background: rgba(42,54,61,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,128,128,0.25);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1160px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--teal);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .nav-logo:hover { color: #00a0a0; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.75);
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.08);
+    }
+    .nav-links a.current {
+      color: var(--white);
+      background: rgba(0,128,128,0.25);
+      border: 1px solid rgba(0,128,128,0.4);
+    }
+    .nav-cta {
+      background: var(--gold);
+      color: var(--charcoal-dark) !important;
+      font-weight: 700 !important;
+      font-size: 0.8rem !important;
+      padding: 8px 16px !important;
+      border-radius: 6px !important;
+      transition: background 0.2s, transform 0.15s !important;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .nav-cta:hover {
+      background: var(--gold-hover) !important;
+      transform: translateY(-1px);
+      color: var(--charcoal-dark) !important;
+    }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+    }
+    .nav-mobile {
+      display: none;
+      flex-direction: column;
+      background: var(--charcoal-dark);
+      padding: 16px 24px 24px;
+      gap: 8px;
+      border-top: 1px solid rgba(0,128,128,0.2);
+    }
+    .nav-mobile.open { display: flex; }
+    .nav-mobile a {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-mobile a.current { color: var(--teal); }
+    .nav-mobile .nav-cta-mobile {
+      margin-top: 8px;
+      display: inline-block;
+      background: var(--gold);
+      color: var(--charcoal-dark);
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* -- Hero -- */
+    .hero {
+      background: var(--charcoal-dark);
+      padding: 96px 24px 96px;
+      text-align: center;
+    }
+    .hero-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,179,71,0.12);
+      border: 1px solid rgba(255,179,71,0.35);
+      color: var(--gold);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+    .hero-h1 {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      max-width: 580px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-gold {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--charcoal-dark);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 15px 34px;
+      border-radius: 10px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(255,179,71,0.25);
+    }
+    .btn-gold:hover {
+      background: var(--gold-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(255,179,71,0.35);
+    }
+    .hero-note {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* -- Trust Bar -- */
+    .trust-bar {
+      background: var(--teal);
+      padding: 20px 24px;
+    }
+    .trust-bar-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+    .trust-item {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.95);
+      line-height: 1.4;
+    }
+
+    /* -- Section Base -- */
+    section { padding: 80px 24px; }
+    .section-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+    .section-h2 {
+      font-size: clamp(1.6rem, 3vw, 2.25rem);
+      font-weight: 800;
+      color: var(--charcoal-dark);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .section-h2.white { color: var(--white); }
+    .section-lead {
+      font-size: 1.05rem;
+      color: rgba(54,69,79,0.75);
+      line-height: 1.7;
+      max-width: 620px;
+      margin-bottom: 40px;
+    }
+
+    /* -- Problem Section -- */
+    .problem-section { background: var(--warm-white); }
+    .pain-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 36px;
+    }
+    .pain-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 28px 24px;
+      border: 1px solid rgba(0,0,0,0.07);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .pain-card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+    .pain-card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--charcoal-dark);
+      margin-bottom: 8px;
+    }
+    .pain-card-body {
+      font-size: 0.88rem;
+      color: rgba(54,69,79,0.7);
+      line-height: 1.6;
+    }
+
+    /* -- Features -- */
+    .features-section { background: var(--white); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid rgba(0,0,0,0.07);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 12px 12px 0;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+    }
+    .feature-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .feature-card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--teal);
+    }
+    .badge-dev {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(255,179,71,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(255,179,71,0.35);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .feature-card-body {
+      font-size: 0.92rem;
+      color: rgba(54,69,79,0.75);
+      line-height: 1.65;
+    }
+
+    /* -- Waitlist Section -- */
+    .waitlist-section { background: var(--warm-white); }
+    .waitlist-inner {
+      max-width: 620px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .waitlist-form {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .waitlist-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 14px 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      border: 1px solid rgba(0,128,128,0.3);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .waitlist-input:focus { border-color: var(--teal); }
+    .waitlist-input::placeholder { color: rgba(54,69,79,0.4); }
+    .btn-submit {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--charcoal-dark);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-submit:hover { background: var(--gold-hover); }
+    .waitlist-note {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: rgba(54,69,79,0.45);
+    }
+
+    /* -- Final CTA -- */
+    .final-cta {
+      background: linear-gradient(135deg, var(--charcoal-dark) 0%, var(--teal-dark) 100%);
+      text-align: center;
+      padding: 100px 24px;
+    }
+    .final-cta h2 {
+      font-size: clamp(1.875rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .final-cta p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 36px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* -- Footer -- */
+    .footer {
+      background: #1c2429;
+      padding: 40px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(0,128,128,0.2);
+    }
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .footer-tagline {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    .footer-email {
+      font-size: 0.82rem;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+    .footer-email a { color: var(--teal); transition: color 0.2s; }
+    .footer-email a:hover { color: #00a0a0; }
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* -- Responsive -- */
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta-desktop { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero { padding: 64px 20px; }
+      .trust-bar-inner { grid-template-columns: 1fr; gap: 14px; }
+      .trust-item + .trust-item { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 14px; }
+      .pain-cards { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      section { padding: 56px 20px; }
+      .final-cta { padding: 72px 20px; }
+      .waitlist-form { flex-direction: column; align-items: stretch; }
+      .waitlist-input { min-width: 0; }
+    }
+
+    @media (min-width: 769px) {
+      .nav-cta-desktop { display: inline-block; }
+    }
+
+    /* -- Fade animations -- */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">ROMRxBJJ&#8482;</a>
+      <ul class="nav-links">
+        <li><a href="/athletes">For Athletes</a></li>
+        <li><a href="/coaches">For Coaches</a></li>
+        <li><a href="/schools" class="current">For Schools</a></li>
+      </ul>
+      <a href="#waitlist" class="nav-links nav-cta nav-cta-desktop">Join Waitlist</a>
+      <button class="nav-hamburger" aria-label="Toggle menu" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Nav -->
+  <div class="nav-mobile" id="mobileNav">
+    <a href="/athletes">For Athletes</a>
+    <a href="/coaches">For Coaches</a>
+    <a href="/schools" class="current">For Schools</a>
+    <a href="#waitlist" class="nav-cta-mobile">Join Waitlist</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">&#9679; In Development</div>
+      <h1 class="hero-h1">The Mobility Intelligence Platform<br>Built for Academies</h1>
+      <p class="hero-sub">School-wide ROM dashboards, multi-coach access, and curriculum planning tied to your athletes' actual bodies. Coming to ROMRxBJJ in 2026.</p>
+      <a href="#waitlist" class="btn-gold">Join the Waitlist</a>
+      <p class="hero-note">Be the first academy on the platform. No commitment required.</p>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="trust-bar-inner">
+      <div class="trust-item">Athlete + Coach dashboards are live now</div>
+      <div class="trust-item">School tier launching 2026</div>
+      <div class="trust-item">Waitlist schools get priority access + founder pricing</div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section class="problem-section">
+    <div class="section-inner">
+      <h2 class="section-h2 fade-up">Running an academy without body data is coaching blind.</h2>
+      <p class="section-lead fade-up" style="margin-top: 12px;">Your athletes walk in with different ROM profiles, asymmetries, and injury histories across every coach and every mat. ROMRxBJJ for Schools gives you the full picture at the academy level.</p>
+      <div class="pain-cards">
+        <div class="pain-card fade-up">
+          <div class="pain-card-icon">&#128221;</div>
+          <div class="pain-card-title">No Visibility Across Coaches</div>
+          <div class="pain-card-body">Head instructors can not see what individual coaches know about each athlete's body. Gaps get missed. Injuries happen that could have been prevented.</div>
+        </div>
+        <div class="pain-card fade-up">
+          <div class="pain-card-icon">&#127947;</div>
+          <div class="pain-card-title">Curriculum Not Tied to Bodies</div>
+          <div class="pain-card-body">Curriculum is built on belt level, not body readiness. Athletes drill techniques their ROM cannot safely support, week after week.</div>
+        </div>
+        <div class="pain-card fade-up">
+          <div class="pain-card-icon">&#128202;</div>
+          <div class="pain-card-title">No School-Wide Analytics</div>
+          <div class="pain-card-body">You have no academy-wide picture of which ROM gaps are most common on your mats, or what is driving your injury rate across all students.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES COMING SOON -->
+  <section class="features-section">
+    <div class="section-inner">
+      <div style="display:flex; align-items:center; gap: 14px; flex-wrap: wrap; margin-bottom: 8px;">
+        <h2 class="section-h2 fade-up" style="margin-bottom: 0;">What is coming for schools</h2>
+        <span class="badge-dev" style="flex-shrink:0;">In Development</span>
+      </div>
+      <p class="section-lead fade-up" style="margin-top: 12px;">Every feature below is built to give your academy a complete picture of what every athlete's body is ready for.</p>
+
+      <div class="features-grid">
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">School-Wide Roster</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Head instructor view across all coaches and all athletes. See the full academy's readiness tiers, asymmetry flags, and injury status in one dashboard.</div>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">Multi-Coach Access</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Invite multiple coaches to your school account. Each coach manages their own class roster, teaching journal, and injury log under your school umbrella.</div>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">Curriculum Planning</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Build a week-by-week curriculum that adapts to your school's actual ROM data. Sequence techniques based on what your athletes' bodies are ready for, not just belt level.</div>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">School-Wide Analytics</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Aggregated, anonymized ROM trends across your entire academy. Identify the most common mobility gaps on your mats and adjust your curriculum and warmups accordingly.</div>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">Competition Management</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Coach-managed competition tracking integrated with athlete readiness data. See who is body-ready to compete, and build prep protocols tied to specific competition demands.</div>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-card-header">
+            <div class="feature-card-title">Enrollment + Belt Tracking</div>
+            <span class="badge-dev">Coming Soon</span>
+          </div>
+          <div class="feature-card-body">Manage enrollment, belt promotion history, and ROM progress in one place. Set custom belt requirement thresholds for your school's standard of readiness.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section class="waitlist-section" id="waitlist">
+    <div class="waitlist-inner">
+      <h2 class="section-h2 fade-up" style="margin-bottom: 16px;">Get Early Access</h2>
+      <p style="font-size: 1.05rem; color: rgba(54,69,79,0.75); line-height: 1.7;" class="fade-up">Join the waitlist. Waitlist schools get priority access and founder pricing when the school tier launches. Be the first academy with full ROM intelligence across every mat.</p>
+
+      <form class="waitlist-form fade-up" id="waitlistForm">
+        <input
+          type="email"
+          class="waitlist-input"
+          placeholder="Academy email address"
+          required
+          id="waitlistEmail"
+          name="email"
+        />
+        <button type="submit" class="btn-submit">Join Waitlist</button>
+      </form>
+      <p class="waitlist-note" id="waitlistMsg">No spam. No commitment. Just early access when we launch.</p>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <h2>Already coaching athletes?</h2>
+    <p>The Coach dashboard is live now. Get your athletes assessed and your roster running today.</p>
+    <a href="/coaches" class="btn-gold">See the Coach Platform</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo">ROMRxBJJ&#8482;</div>
+    <div class="footer-tagline">"Your body. Your game. Your protocol.&#8482;"</div>
+    <div class="footer-email"><a href="mailto:ROMRxBJJ@gmail.com">ROMRxBJJ@gmail.com</a></div>
+    <div class="footer-copy">&#169; 2026 ROMRxBJJ&#8482;. All rights reserved.</div>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    // Mobile nav toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+    hamburger.addEventListener('click', () => {
+      mobileNav.classList.toggle('open');
+    });
+
+    // Close mobile nav on link click
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('open');
+      });
+    });
+
+    // Fade-up animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Waitlist form - opens email client
+    const form = document.getElementById('waitlistForm');
+    const msg = document.getElementById('waitlistMsg');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('waitlistEmail').value;
+      const subject = encodeURIComponent('ROMRxBJJ School Waitlist');
+      const body = encodeURIComponent('Please add me to the ROMRxBJJ Schools waitlist.\n\nAcademy email: ' + email);
+      window.location.href = 'mailto:ROMRxBJJ@gmail.com?subject=' + subject + '&body=' + body;
+      msg.textContent = 'Thanks! We will be in touch when the school tier launches.';
+      msg.style.color = '#008080';
+      msg.style.fontWeight = '600';
+      form.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>
