@@ -166,15 +166,22 @@ export function Settings() {
         setDominantSide(athlete.dominant_side ?? 'right')
         setGymName(athlete.gym_name ?? '')
 
-        // Load linked coach if any
+        // Load linked coach if any (join through users table for name/email)
         if (athlete.coach_id) {
           setCoachLoading(true)
-          const { data: coach } = await supabase
+          const { data: coachRow } = await supabase
             .from('coaches')
-            .select('id, full_name, email')
+            .select('id, user_id')
             .eq('id', athlete.coach_id)
             .single()
-          if (coach) setCurrentCoach(coach)
+          if (coachRow) {
+            const { data: coachUser } = await supabase
+              .from('users')
+              .select('full_name, email')
+              .eq('id', coachRow.user_id)
+              .single()
+            if (coachUser) setCurrentCoach({ id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email })
+          }
           setCoachLoading(false)
         }
       }
@@ -357,21 +364,34 @@ export function Settings() {
     if (!user || !coachEmail.trim()) return
     setCoachSearching(true)
     setCoachMsg(null)
-    const { data: coach } = await supabase
-      .from('coaches')
+    // Look up coach via users table (coaches table has no email column)
+    const { data: coachUser } = await supabase
+      .from('users')
       .select('id, full_name, email')
       .eq('email', coachEmail.trim().toLowerCase())
-      .eq('is_active', true)
+      .eq('portal_role', 'coach')
       .single()
-    if (!coach) {
-      setCoachMsg({ type: 'err', text: 'No active coach found with that email. Ask them to sign up at romrxbjj.com/signup/coach.' })
+    if (!coachUser) {
+      setCoachMsg({ type: 'err', text: 'No coach account found with that email. Ask them to sign up at romrxbjj.com/signup/coach.' })
       setCoachSearching(false)
       return
     }
-    await supabase.from('athletes').update({ coach_id: coach.id }).eq('user_id', user.id)
-    setCurrentCoach(coach)
+    // Get their coaches table row
+    const { data: coachRow } = await supabase
+      .from('coaches')
+      .select('id')
+      .eq('user_id', coachUser.id)
+      .single()
+    if (!coachRow) {
+      setCoachMsg({ type: 'err', text: 'Coach account found but not fully set up yet. Ask them to complete their coach signup.' })
+      setCoachSearching(false)
+      return
+    }
+    await supabase.from('athletes').update({ coach_id: coachRow.id }).eq('user_id', user.id)
+    const displayCoach = { id: coachRow.id, full_name: coachUser.full_name, email: coachUser.email }
+    setCurrentCoach(displayCoach)
     setCoachEmail('')
-    setCoachMsg({ type: 'ok', text: `Connected to ${coach.full_name ?? coach.email}.` })
+    setCoachMsg({ type: 'ok', text: `Connected to ${coachUser.full_name ?? coachUser.email}.` })
     setCoachSearching(false)
     setTimeout(() => setCoachMsg(null), 4000)
   }

@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { cn } from '../lib/utils'
@@ -12,11 +13,27 @@ const ATHLETE_NAV = [
   { to: '/dashboard/settings',    icon: Settings,        label: 'Settings' },
 ]
 
+const COACH_NAV = [
+  { to: '/dashboard/coach',    icon: Users,    label: 'My Team' },
+  { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
+]
+
+const ATHLETE_ONLY_ROUTES = ['/dashboard/my-body', '/dashboard/my-game', '/dashboard/my-protocol', '/dashboard/chat']
+
 export function Layout() {
   const { user, signOut } = useAuth()
   const { profile } = useProfile(user?.id)
   const navigate = useNavigate()
+  const location = useLocation()
   const isCoach = profile?.portal_role === 'coach'
+
+  // Redirect coaches away from athlete-only pages
+  useEffect(() => {
+    if (!isCoach) return
+    if (ATHLETE_ONLY_ROUTES.some(r => location.pathname.startsWith(r))) {
+      navigate('/dashboard/coach', { replace: true })
+    }
+  }, [isCoach, location.pathname, navigate])
 
   const handleSignOut = async () => {
     await signOut()
@@ -30,18 +47,7 @@ export function Layout() {
         <div className="max-w-5xl mx-auto px-4 flex items-center h-14 gap-1">
           <span className="font-display font-bold text-teal mr-4 text-base">ROMRx</span>
           <nav className="flex gap-1 flex-1 overflow-x-auto scrollbar-none">
-            {isCoach && (
-              <NavLink
-                to="/dashboard/coach"
-                className={({ isActive }) => cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
-                  isActive ? 'bg-teal text-white' : 'text-charcoal-light hover:bg-teal-light hover:text-teal'
-                )}
-              >
-                <Users size={14} /> My Team
-              </NavLink>
-            )}
-            {ATHLETE_NAV.map(({ to, icon: Icon, label }) => (
+            {(isCoach ? COACH_NAV : ATHLETE_NAV).map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
                 to={to}
