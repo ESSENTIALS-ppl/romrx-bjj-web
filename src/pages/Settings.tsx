@@ -85,15 +85,20 @@ function Section({
 // ─────────────────────────────────────────────────────────────────────────────
 import { CoachSettings } from './CoachSettings'
 
+// Router: coaches get CoachSettings, athletes get AthleteSettings
+// MUST be a separate component so hook call order is never violated
 export function Settings() {
+  const { user } = useAuth()
+  const isCoach = user?.user_metadata?.portal_role === 'coach' ||
+                  (user?.app_metadata as Record<string,string> | undefined)?.portal_role === 'coach'
+  if (isCoach) return <CoachSettings />
+  return <AthleteSettings />
+}
+
+function AthleteSettings() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { profile, assessment, loading } = useProfile(user?.id)
-
-  // Coaches get their own dedicated settings
-  const isCoach = user?.user_metadata?.portal_role === 'coach' ||
-                  user?.app_metadata?.portal_role === 'coach'
-  if (!loading && isCoach) return <CoachSettings />
 
   // ── Profile fields ──
   const [fullName, setFullName]         = useState('')
