@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { cn } from '../lib/utils'
-import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut, Users, UserCheck, Building2 } from 'lucide-react'
+import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut, Users, UserCheck, Building2, GraduationCap, Trophy, Syringe } from 'lucide-react'
 
 const ATHLETE_NAV = [
   { to: '/dashboard/my-body',     icon: Dumbbell,       label: 'My Body' },
@@ -16,9 +16,13 @@ const ATHLETE_NAV = [
 ]
 
 const COACH_NAV = [
-  { to: '/dashboard/coach',    icon: Users,         label: 'My Team' },
-  { to: '/dashboard/chat',     icon: MessageSquare, label: 'ROMBot' },
-  { to: '/dashboard/settings', icon: Settings,      label: 'Settings' },
+  { to: '/dashboard/coach',              icon: Users,         label: 'My Team',         end: true },
+  { to: '/dashboard/coach-coaching',     icon: GraduationCap, label: 'My Coaching' },
+  { to: '/dashboard/coach-competitions', icon: Trophy,        label: 'My Competitions' },
+  { to: '/dashboard/coach-injury',       icon: Syringe,       label: 'My Injury' },
+  { to: '/dashboard/coach-school',       icon: Building2,     label: 'My School' },
+  { to: '/dashboard/chat',               icon: MessageSquare, label: 'ROMBot' },
+  { to: '/dashboard/settings',           icon: Settings,      label: 'Settings' },
 ]
 
 const ATHLETE_ONLY_ROUTES = ['/dashboard/my-body', '/dashboard/my-game', '/dashboard/my-protocol']
@@ -50,10 +54,11 @@ export function Layout() {
         <div className="max-w-5xl mx-auto px-4 flex items-center h-14 gap-1">
           <span className="font-display font-bold text-teal mr-4 text-base">ROMRx</span>
           <nav className="flex gap-1 flex-1 overflow-x-auto scrollbar-none">
-            {(isCoach ? COACH_NAV : ATHLETE_NAV).map(({ to, icon: Icon, label }) => (
+            {(isCoach ? COACH_NAV : ATHLETE_NAV).map(({ to, icon: Icon, label, end: isEnd }: { to: string; icon: typeof Users; label: string; end?: boolean }) => (
               <NavLink
                 key={to}
                 to={to}
+                end={isEnd}
                 className={({ isActive }) => cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                   isActive

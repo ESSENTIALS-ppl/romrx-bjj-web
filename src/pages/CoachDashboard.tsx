@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { PageHeader } from '../components/PageHeader'
 import { SectionCard } from '../components/SectionCard'
@@ -11,7 +12,7 @@ import {
   ChevronDown, Save, AlertTriangle, ClipboardList,
   Zap, GraduationCap, BookOpen, ChevronRight,
   Award, Video, Dumbbell, NotebookPen, Plus, CheckCircle2,
-  Syringe, Trophy, Building2, ShieldPlus, ChevronLeft, ChevronRight as ChevronR,
+  Syringe, ShieldPlus, ChevronLeft, ChevronRight as ChevronR,
 } from 'lucide-react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -1540,11 +1541,15 @@ function MyInjuryTab({ session, roster }: { session: { access_token: string } | 
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export function CoachDashboard() {
+export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: Tab }) {
   const { session, user } = useAuth()
-  const [tab, setTab]               = useState<Tab>('team')
+  const navigate = useNavigate()
+  const location = useLocation()
   const [teamSubTab, setTeamSubTab] = useState<TeamSubTab>('roster')
   const [coachSubTab, setCoachSubTab] = useState<CoachingSubTab>('technique')
+
+  // When navigated to coaching tab with a pending journal log (from Add to Journal)
+  const pendingFromRoute = (location.state as { pendingLog?: { code: string; name: string; type: string; notes: string } } | null)?.pendingLog
   const [roster, setRoster] = useState<AthleteRosterItem[]>([])
   const [rosterLoading, setRosterLoading] = useState(true)
   const [coachId, setCoachId] = useState<string | null>(null)
@@ -1557,7 +1562,8 @@ export function CoachDashboard() {
   const [coachingLoadingTechs, setCoachingLoadingTechs] = useState(true)
   const [selectedCode, setSelectedCode]           = useState('')
   const [warmup, setWarmup]                       = useState<TechniqueWarmup | null>(null)
-  const [pendingJournalLog, setPendingJournalLog] = useState<{ code: string; name: string; type: string; notes: string } | null>(null)
+  // pendingJournalLog comes from route state when navigating from Add to Journal
+  const pendingJournalLog = pendingFromRoute ?? null
 
   // Load coach row
   useEffect(() => {
@@ -1632,35 +1638,30 @@ export function CoachDashboard() {
   }
 
   function handleAddToJournal(code: string, name: string, type: string, notes: string) {
-    setPendingJournalLog({ code, name, type, notes })
-    setTab('coaching')
-    setCoachSubTab('journal')
+    navigate('/dashboard/coach-coaching', { state: { pendingLog: { code, name, type, notes } } })
   }
 
-  const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [
-    { id: 'team',         label: 'My Team',         icon: Users },
-    { id: 'coaching',     label: 'My Coaching',     icon: GraduationCap },
-    { id: 'competitions', label: 'My Competitions', icon: Trophy },
-    { id: 'injury',       label: 'My Injury',       icon: Syringe },
-    { id: 'school',       label: 'My School',       icon: Building2 },
-  ]
+  // Auto-switch to journal sub-tab if we arrived here via Add to Journal
+  useEffect(() => {
+    if (defaultSection === 'coaching' && pendingFromRoute) {
+      setCoachSubTab('journal')
+    }
+  }, [defaultSection, pendingFromRoute])
+
+  const sectionTitle = {
+    team: `My Team${!rosterLoading ? ` — ${roster.length} athlete${roster.length !== 1 ? 's' : ''}` : ''}`,
+    coaching: 'My Coaching',
+    competitions: 'My Competitions',
+    injury: 'My Injury',
+    school: 'My School',
+  }[defaultSection] ?? 'Coach Dashboard'
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Coach Dashboard" subtitle={rosterLoading ? 'Loading...' : `${roster.length} athlete${roster.length !== 1 ? 's' : ''}`} />
-
-      <div className="flex gap-1 bg-surface rounded-2xl p-1">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setTab(id)} className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-xl transition-all',
-            tab === id ? 'bg-white text-charcoal shadow-sm' : 'text-charcoal-light hover:text-charcoal')}>
-            <Icon size={14} /><span className="hidden sm:inline">{label}</span>
-          </button>
-        ))}
-      </div>
+      <PageHeader title={sectionTitle} subtitle="" />
 
       {/* MY TEAM ─ Roster + Notes sub-tabs */}
-      {tab === 'team' && (
+      {defaultSection === 'team' && (
         <div className="space-y-4">
           <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit">
             {(['roster', 'notes'] as TeamSubTab[]).map(s => (
@@ -1680,7 +1681,7 @@ export function CoachDashboard() {
       )}
 
       {/* MY COACHING ─ Technique + Journal sub-tabs */}
-      {tab === 'coaching' && (
+      {defaultSection === 'coaching' && (
         <div className="space-y-4">
           <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit">
             {(['technique', 'journal'] as CoachingSubTab[]).map(s => (
@@ -1697,13 +1698,13 @@ export function CoachDashboard() {
               onAddToJournal={handleAddToJournal} />
           )}
           {coachSubTab === 'journal' && (
-            <JournalTab session={session} pendingLog={pendingJournalLog} />
+            <JournalTab session={session} pendingLog={pendingJournalLog ?? null} />
           )}
         </div>
       )}
 
       {/* MY COMPETITIONS ─ In Development */}
-      {tab === 'competitions' && (
+      {defaultSection === 'competitions' && (
         <InDevelopmentTab
           title="My Competitions"
           description="Competition prep management is coming. You will be able to manage your athletes' competition calendars, track prep progress, and generate competition readiness scores."
@@ -1719,12 +1720,12 @@ export function CoachDashboard() {
       )}
 
       {/* MY INJURY ─ Return-to-mat tracker */}
-      {tab === 'injury' && (
+      {defaultSection === 'injury' && (
         <MyInjuryTab session={session} roster={roster} />
       )}
 
       {/* MY SCHOOL ─ In Development */}
-      {tab === 'school' && (
+      {defaultSection === 'school' && (
         <InDevelopmentTab
           title="My School"
           description="Administrative school connectivity is coming. Link your gym, manage athletes, and view school-wide performance data."

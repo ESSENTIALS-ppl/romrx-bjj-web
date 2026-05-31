@@ -43,7 +43,11 @@ export default function App() {
             <Route path="/dashboard/my-protocol" element={<MyProtocol />} />
             <Route path="/dashboard/chat"        element={<Chat />} />
             <Route path="/dashboard/settings"    element={<Settings />} />
-            <Route path="/dashboard/coach"        element={<CoachDashboard />} />
+            <Route path="/dashboard/coach"             element={<CoachDashboard defaultSection="team" />} />
+            <Route path="/dashboard/coach-coaching"    element={<CoachDashboard defaultSection="coaching" />} />
+            <Route path="/dashboard/coach-competitions" element={<CoachDashboard defaultSection="competitions" />} />
+            <Route path="/dashboard/coach-injury"      element={<CoachDashboard defaultSection="injury" />} />
+            <Route path="/dashboard/coach-school"      element={<CoachDashboard defaultSection="school" />} />
             <Route path="/dashboard/my-coach"     element={<MyCoach />} />
             <Route path="/dashboard/my-school"    element={<MySchool />} />
           </Route>
