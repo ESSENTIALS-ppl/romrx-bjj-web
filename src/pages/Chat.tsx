@@ -5,7 +5,7 @@ import { useProfile } from '../hooks/useProfile'
 import { PageHeader } from '../components/PageHeader'
 import { SectionCard } from '../components/SectionCard'
 import { Spinner } from '../components/Spinner'
-import { Send, Loader2, Settings, Trash2, Wand2, ChevronDown } from 'lucide-react'
+import { Send, Loader2, Settings, Trash2, Wand2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { supabase } from '../lib/supabase'
 
@@ -35,6 +35,7 @@ const PROVIDERS = [
   { value: 'perplexity', label: 'Perplexity (BYOK)' },
 ]
 
+// RosterAthlete kept for type reference (no longer used in UI)
 interface RosterAthlete {
   user_id: string
   name: string
@@ -65,11 +66,6 @@ export function Chat() {
   const [gamePlanBanner, setGamePlanBanner] = useState<string | null>(null)
   const autoSentRef = useRef(false)
   const endRef = useRef<HTMLDivElement>(null)
-
-  // Coach athlete selector state
-  const [coachAthletes, setCoachAthletes]           = useState<RosterAthlete[]>([])
-  const [selectedAthleteId, setSelectedAthleteId]   = useState<string | null>(null)
-  const [athleteSelectorOpen, setAthleteSelectorOpen] = useState(false)
 
   const isCoach = profile?.portal_role === 'coach'
 
@@ -102,16 +98,8 @@ export function Chat() {
         .select('id, full_name, email')
         .in('id', userIds)
 
-      const roster: RosterAthlete[] = athletes.map(a => {
-        const u = users?.find(u => u.id === a.user_id)
-        return {
-          user_id: a.user_id,
-          name: u?.full_name ?? u?.email ?? 'Unknown',
-          email: u?.email ?? '',
-          belt: a.belt ?? 'white',
-        }
-      })
-      setCoachAthletes(roster)
+      // Athletes loaded for roster reference (no longer needed for dropdown)
+      void athletes; void users; // suppress unused warnings
     }
     loadAthletes()
   }, [isCoach, user])
@@ -181,9 +169,7 @@ export function Chat() {
         provider,
         provider_key: providerKey,
       }
-      if (isCoach && selectedAthleteId) {
-        body.athlete_user_id = selectedAthleteId
-      }
+      // Coach mode: roster-level context is loaded server-side automatically
       const res = await fetch(AI_CHAT_URL, {
         method: 'POST',
         headers: {
@@ -209,7 +195,6 @@ export function Chat() {
 
   if (profileLoading) return <Spinner />
 
-  const selectedAthlete = coachAthletes.find(a => a.user_id === selectedAthleteId)
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 7rem)' }}>
@@ -253,56 +238,15 @@ export function Chat() {
         </SectionCard>
       )}
 
-      {/* Coach athlete selector */}
-      {isCoach && coachAthletes.length > 0 && (
-        <div className="mb-2 relative">
-          <button
-            onClick={() => setAthleteSelectorOpen(o => !o)}
-            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-teal-light bg-surface text-sm text-charcoal hover:border-teal transition-colors"
-          >
-            <span className="font-medium">
-              {selectedAthlete ? `Viewing: ${selectedAthlete.name}` : 'Ask about: All Athletes'}
-            </span>
-            <ChevronDown size={13} className={cn('text-charcoal-light transition-transform', athleteSelectorOpen && 'rotate-180')} />
-          </button>
-          {athleteSelectorOpen && (
-            <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white rounded-2xl border border-teal-light shadow-lg overflow-hidden">
-              <button
-                onClick={() => { setSelectedAthleteId(null); setAthleteSelectorOpen(false) }}
-                className={cn(
-                  'w-full text-left px-4 py-2.5 text-sm hover:bg-surface transition-colors border-b border-teal-light/30',
-                  !selectedAthleteId && 'bg-teal/5 font-semibold text-teal'
-                )}
-              >
-                All Athletes
-              </button>
-              {coachAthletes.map(a => (
-                <button
-                  key={a.user_id}
-                  onClick={() => { setSelectedAthleteId(a.user_id); setAthleteSelectorOpen(false) }}
-                  className={cn(
-                    'w-full text-left px-4 py-2.5 text-sm hover:bg-surface transition-colors border-b border-teal-light/30 last:border-0',
-                    selectedAthleteId === a.user_id && 'bg-teal/5 font-semibold text-teal'
-                  )}
-                >
-                  <span>{a.name}</span>
-                  <span className="ml-2 text-xs text-charcoal-light capitalize">{a.belt} belt</span>
-                </button>
-              ))}
-            </div>
-          )}
+      {/* Coach team context badge */}
+      {isCoach && (
+        <div className="flex items-center gap-2 bg-teal-light border border-teal/20 rounded-xl px-3 py-2 mb-2">
+          <span className="text-xs font-medium text-teal flex-1">
+            Team mode - ROMBot has full access to all your athletes' ROM profiles and technique readiness
+          </span>
         </div>
       )}
 
-      {/* Athlete context banner for coach */}
-      {isCoach && selectedAthlete && (
-        <div className="flex items-center gap-2 bg-teal text-white rounded-xl px-3 py-2 mb-2">
-          <span className="text-xs font-medium flex-1">
-            Viewing {selectedAthlete.name}'s profile - ROMBot has access to their full ROM data
-          </span>
-          <button onClick={() => setSelectedAthleteId(null)} className="text-white/70 hover:text-white text-xs">x</button>
-        </div>
-      )}
 
       {/* Game plan context banner */}
       {gamePlanBanner && (
