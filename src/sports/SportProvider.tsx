@@ -6,14 +6,11 @@
  *   - User's `active_sport` + `sports_enabled` from useProfile
  *
  * Exposes via useSport():
- *   - activeSport:    current SportConfig (theme, features, label)
+ *   - activeSport:    current SportConfig (theme, labels, feature flags)
  *   - availableSports: SportConfigs the user has access to
- *   - allSports:      every config in the DB (admin tooling)
+ *   - allSports:      every active config in the DB
  *   - setActiveSport(slug):  updates DB + local state
  *   - loading:        true until first fetch completes
- *
- * No UI behavior changes in PR #3 — this just wires the context.
- * PR #4 will consume `activeSport.features` to drive nav.
  */
 
 import {
@@ -36,18 +33,15 @@ interface SportContextValue {
   activeSport: SportConfig
   availableSports: SportConfig[]
   allSports: SportConfig[]
-  setActiveSport: (sport: string) => Promise<void>
+  setActiveSport: (slug: string) => Promise<void>
   loading: boolean
 }
 
 const SportContext = createContext<SportContextValue | undefined>(undefined)
 
 interface SportProviderProps {
-  /** Current user id — pass from useAuth */
   userId: string | undefined
-  /** User's active_sport from useProfile (single source of truth) */
   activeSportSlug: string | undefined
-  /** User's sports_enabled from useProfile */
   sportsEnabled: string[] | undefined
   children: ReactNode
 }
@@ -64,13 +58,16 @@ export function SportProvider({
   const [loading, setLoading] = useState(true)
   const [optimisticSlug, setOptimisticSlug] = useState<string | null>(null)
 
-  // Fetch sport_config table once per session
+  // Fetch sport_config once per session
   useEffect(() => {
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
         .from('sport_config')
-        .select('sport, display_name, theme_color, icon, features, enabled')
+        .select(
+          'slug, display_name, short_name, body_label, game_label, protocol_label, has_techniques, has_schools, has_coach_portal, theme_accent, is_active',
+        )
+        .eq('is_active', true)
       if (cancelled) return
       if (error) {
         console.warn('sport_config fetch failed, using defaults:', error.message)
@@ -91,25 +88,33 @@ export function SportProvider({
   const effectiveSlug = optimisticSlug ?? activeSportSlug ?? DEFAULT_SPORT_KEY
 
   const activeSport = useMemo<SportConfig>(() => {
-    const found = allSports.find((s) => s.sport === effectiveSlug)
+    const found = allSports.find((s) => s.slug === effectiveSlug)
     return found ?? getSportFallback(effectiveSlug)
   }, [allSports, effectiveSlug])
 
   const availableSports = useMemo<SportConfig[]>(() => {
-    const slugs = sportsEnabled && sportsEnabled.length > 0
-      ? sportsEnabled
-      : [DEFAULT_SPORT_KEY]
+    const slugs =
+      sportsEnabled && sportsEnabled.length > 0
+        ? sportsEnabled
+        : [DEFAULT_SPORT_KEY]
     return slugs
-      .map((slug) => allSports.find((s) => s.sport === slug) ?? getSportFallback(slug))
-      .filter((s) => s.enabled)
+      .map((slug) => allSports.find((s) => s.slug === slug) ?? getSportFallback(slug))
+      .filter((s) => s.is_active)
   }, [allSports, sportsEnabled])
 
-  async function setActiveSport(sport: string) {
+  // Inject theme accent as a CSS variable + data attribute on <html>
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.sport = activeSport.slug
+    root.dataset.sportAccent = activeSport.theme_accent
+  }, [activeSport.slug, activeSport.theme_accent])
+
+  async function setActiveSport(slug: string) {
     if (!userId) return
-    setOptimisticSlug(sport)
+    setOptimisticSlug(slug)
     const { error } = await supabase
       .from('users')
-      .update({ active_sport: sport })
+      .update({ active_sport: slug })
       .eq('id', userId)
     if (error) {
       console.error('Failed to update active_sport:', error.message)
