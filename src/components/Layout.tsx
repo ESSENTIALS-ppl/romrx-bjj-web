@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { cn } from '../lib/utils'
 import { Dumbbell, Layers, ClipboardList, MessageSquare, Settings, LogOut, Users, UserCheck, Building2, GraduationCap, Trophy, Syringe } from 'lucide-react'
+import { SportSwitcher } from '../sports/SportSwitcher'
 
 const ATHLETE_NAV = [
   { to: '/dashboard/my-body',     icon: Dumbbell,       label: 'My Body' },
@@ -71,6 +72,7 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
+          <SportSwitcher />
           <button
             onClick={handleSignOut}
             className="ml-2 p-2 rounded-full text-charcoal-light hover:bg-red-50 hover:text-red-600 transition-colors"
