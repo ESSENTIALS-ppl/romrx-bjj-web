@@ -10,6 +10,10 @@ export interface Profile {
   subscription_status: string
   subscription_tier: string
   platforms: string[]
+  /** Slug of the sport this user is currently focused on (FK -> sport_config.sport). Added in PR #2. */
+  active_sport: string
+  /** Slugs of every sport this user can access. Mirrors platforms via DB trigger. Added in PR #2. */
+  sports_enabled: string[]
 }
 
 export interface Assessment {
