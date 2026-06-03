@@ -251,13 +251,12 @@ const STEPS: Step[] = [
       'Keep your heel flat on the floor the entire test.',
     ],
     howTo: [
-      'Drive your knee forward to touch the wall without lifting your heel. If it touches easily, move your foot back 1 cm and try again.',
-      'Keep moving back 1 cm at a time until your knee can JUST barely touch the wall with the heel still flat.',
-      'The distance from the wall to your big toe at your last successful rep is your score. Record it in cm.',
+      'Drive your knee forward to touch the wall without lifting your heel. Move your foot closer or farther from the wall until you find the spot where your knee can just barely touch with the heel still flat.',
+      'Once you find that spot, measure the distance from the wall to the tip of your big toe. That is your score. Record it in cm.',
       'Repeat on the other side.',
     ],
     mistake: 'Your heel lifts off the floor as your knee drives forward.',
-    mistakeFix: 'Keep your eye on your heel the whole time. If it lifts even slightly - that rep does not count. Move your foot back closer to the wall and try again.',
+    mistakeFix: 'Keep your eye on your heel the whole time. If it lifts even slightly, that rep does not count. Adjust your foot closer to the wall and try again.',
     fields: [
       { key: 'ankle_df_l', label: 'Left', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
       { key: 'ankle_df_r', label: 'Right', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
