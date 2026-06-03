@@ -166,6 +166,62 @@ function eligibleInCat(eligibility: TechniqueEligibility[], cat: string) {
   })
 }
 
+// Controls reachable after passing guard (ONTOP/STANDING path)
+// Back Control (WC6) and Ashi Garami (BC1) are NOT typically reached by guard passing
+const PASS_COMPATIBLE_CONTROLS = ['WC1', 'WC2', 'WC3', 'WC4', 'WC5']
+
+// Valid submission codes for each control position
+// Ensures the submission is physically achievable from the selected control
+const CONTROL_SUB_COMPAT: Record<string, string[]> = {
+  'BC1':  ['BX19', 'BX20', 'BX21'],                     // Ashi Garami → Ankle Lock, Knee Bar, Toe Hold
+  'WC6':  ['WX7', 'WX8', 'BX15', 'BX16', 'BX8'],        // Back Control → RNC, Bow Arrow, Short/Sliding Collar, Mounted Triangle
+  'WC4':  ['BX10', 'BX11', 'BX12', 'BX13'],              // KOB → Far Armbar, Baseball Bat, Collar Choke, Armbar-Collar
+  'WC3':  ['WX5', 'WX6', 'BX7', 'BX8', 'BX9', 'BX14'],  // Mount → Armbar, Cross Collar, Ezekiel, Mounted Triangle, Americana, Armbar-Collar
+  'WC2':  ['BX3', 'WX1', 'WX2'],                         // North-South → N-S Choke, Armbar SC, Americana SC
+  'WC5':  ['WX1', 'WX2', 'BX1', 'BX2', 'BX3'],          // Scarf Hold → Armbar, Americana, Baseball Bat, Breadcutter, N-S Choke
+  'WC1':  ['WX1', 'WX2', 'BX1', 'BX2', 'BX3'],          // Side Control → Armbar, Americana, Baseball Bat, Breadcutter, N-S Choke
+}
+
+// Helper: generate a flow from a sequence with position-compatible control→submission filtering
+function generateFlowFromSeq(
+  eligibility: TechniqueEligibility[],
+  seq: readonly string[],
+  opts: { finish?: AIFinish; isPassPath?: boolean } = {}
+): TechniqueEligibility[] {
+  let controlCode: string | null = null
+  const result: TechniqueEligibility[] = []
+  for (let i = 0; i < seq.length; i++) {
+    const cat = seq[i]
+    let eligible = eligibleInCat(eligibility, cat)
+    const isLast = i === seq.length - 1
+    // For pass-first paths, restrict controls to positions reachable from guard passing
+    if (cat === 'Controls' && opts.isPassPath) {
+      const filtered = eligible.filter(e => PASS_COMPATIBLE_CONTROLS.includes((e.techniques as { code: string }).code))
+      if (filtered.length > 0) eligible = filtered
+    }
+    // Filter submissions to only those valid from the selected control position
+    if (isLast && cat === 'Submissions' && controlCode) {
+      const validCodes = CONTROL_SUB_COMPAT[controlCode]
+      if (validCodes) {
+        const compatible = eligible.filter(e => validCodes.includes((e.techniques as { code: string }).code))
+        if (compatible.length > 0) eligible = compatible
+      }
+    }
+    let chosen: TechniqueEligibility | null = null
+    if (isLast && opts.finish) {
+      chosen = pickByFinish(eligible, opts.finish)
+    } else {
+      const greens = eligible.filter(e => e.tier === 'GREEN')
+      chosen = pick(greens.length > 0 ? greens : eligible)
+    }
+    if (cat === 'Controls' && chosen) {
+      controlCode = (chosen.techniques as { code: string }).code
+    }
+    if (chosen) result.push(chosen)
+  }
+  return result
+}
+
 // GREEN-only eligible techniques for competition mode
 function greenOnlyInCat(eligibility: TechniqueEligibility[], cat: string) {
   return eligibility.filter(e => {
@@ -367,8 +423,7 @@ function FlowNode({
           </div>
         )}
         <div className="px-4 py-3">
-          <p className="text-[10px] font-mono text-charcoal-light uppercase tracking-wider">{step.tech.code}</p>
-          <p className="text-sm font-semibold text-charcoal leading-snug mt-0.5">{step.tech.name}</p>
+          <p className="text-sm font-semibold text-charcoal leading-snug">{step.tech.name}</p>
           <div className="flex gap-1.5 mt-2 flex-wrap items-center">
             <span className={cn('text-[11px] px-2 py-0.5 rounded-full capitalize font-medium', beltColor(step.tech.belt))}>
               {step.tech.belt}
@@ -514,7 +569,6 @@ function StepSelector({ category, eligible, selected, onSelect }: {
           <div className="min-w-0">
             {selected ? (
               <>
-                <p className="text-[10px] text-charcoal-light font-mono uppercase tracking-wider">{selectedTech?.code}</p>
                 <p className="text-sm font-semibold text-charcoal leading-tight truncate">{selectedTech?.name}</p>
               </>
             ) : (
@@ -547,7 +601,6 @@ function StepSelector({ category, eligible, selected, onSelect }: {
                   )}
                 >
                   <div>
-                    <p className="text-[10px] font-mono text-charcoal-light uppercase tracking-wider">{t.code}</p>
                     <p className="text-sm font-semibold text-charcoal leading-snug">{t.name}</p>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${beltColor(t.belt)}`}>{t.belt}</span>
                   </div>
@@ -573,7 +626,6 @@ function TechCard({ item }: { item: TechniqueEligibility }) {
     <div className="bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-2.5 hover:border-teal/40 transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="text-[10px] font-mono text-charcoal-light uppercase tracking-wider">{tech.code}</span>
           <p className="text-sm font-semibold text-charcoal leading-snug mt-0.5 line-clamp-2">{tech.name}</p>
         </div>
         <TierBadge tier={isDelay ? 'RED' : item.tier} flag={item.flag} size="sm" />
@@ -903,8 +955,7 @@ function BranchNodeCard({
       isAlt && 'border-dashed opacity-80'
     )}>
       {label && <p className="text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">{label}</p>}
-      <p className="text-[10px] font-mono text-charcoal-light uppercase">{tech.code}</p>
-      <p className="text-xs font-semibold text-charcoal leading-snug mt-0.5">{tech.name}</p>
+      <p className="text-xs font-semibold text-charcoal leading-snug">{tech.name}</p>
       <div className="mt-1.5">
         <TierBadge tier={effectiveTier} flag={tech.flag} size="sm" />
       </div>
@@ -993,7 +1044,6 @@ function BranchBuilder({
                             onClick={() => setAltTech(i, eligToFlowTech(e))}
                             className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors border-b border-teal-light/40 last:border-0"
                           >
-                            <p className="text-[10px] font-mono text-charcoal-light uppercase">{t.code}</p>
                             <p className="text-xs font-semibold text-charcoal">{t.name}</p>
                           </button>
                         )
@@ -1522,13 +1572,17 @@ export function MyGame() {
   // Quick generate
   const quickGenerate = useCallback((p: PathMode) => {
     setPathMode(p)
-    setQuickFlow(sequence(p).map(cat => pick(eligibleInCat(effectiveEligibility, cat)) as TechniqueEligibility))
+    const seq = sequence(p)
+    const isPassPath = p === 'offense' // offense = Throws→Passes→Controls→Subs (top game, use pass-compatible controls)
+    setQuickFlow(generateFlowFromSeq(effectiveEligibility, seq, { isPassPath }))
     setLoadedPlan(null)
   }, [effectiveEligibility, sequence])
 
   const quickRegenerate = useCallback(() => {
     if (!pathMode) return
-    setQuickFlow(sequence(pathMode).map(cat => pick(eligibleInCat(effectiveEligibility, cat)) as TechniqueEligibility))
+    const seq = sequence(pathMode)
+    const isPassPath = pathMode === 'offense'
+    setQuickFlow(generateFlowFromSeq(effectiveEligibility, seq, { isPassPath }))
     setLoadedPlan(null)
   }, [pathMode, effectiveEligibility, sequence])
 
@@ -1555,19 +1609,10 @@ export function MyGame() {
     }
     const seq = seqMap[start]
 
-    const flow: FlowTech[] = seq.map((cat, i) => {
-      const eligible = eligibleInCat(effectiveEligibility, cat)
-      const isLastStep = i === seq.length - 1
-      let chosen: TechniqueEligibility | null = null
-      if (isLastStep) {
-        chosen = pickByFinish(eligible, finish)
-      } else {
-        const greens = eligible.filter(e => e.tier === 'GREEN')
-        chosen = pick(greens.length > 0 ? greens : eligible)
-      }
-      if (!chosen) return null
-      return eligToFlowTech(chosen)
-    }).filter((t): t is FlowTech => t !== null)
+    // isPassPath: ONTOP starts from passing guard (no Back Control / Ashi Garami as control)
+    const isPassPath = start === 'ontop' || start === 'standing'
+    const rawFlow = generateFlowFromSeq(effectiveEligibility, seq, { finish, isPassPath })
+    const flow: FlowTech[] = rawFlow.map(eligToFlowTech)
 
     const planName = getAIPlanName(start, finish, style)
 
