@@ -70,6 +70,7 @@ export interface TechniqueEligibility {
 export function useProfile(userId: string | undefined) {
   const [profile, setProfile]       = useState<Profile | null>(null)
   const [assessment, setAssessment] = useState<Assessment | null>(null)
+  const [assessments, setAssessments] = useState<Assessment[]>([])
   const [eligibility, setEligibility] = useState<TechniqueEligibility[]>([])
   const [loading, setLoading]       = useState(true)
 
@@ -92,11 +93,13 @@ export function useProfile(userId: string | undefined) {
       const result = data as {
         profile: Profile | null
         assessment: Assessment | null
+        assessments: Assessment[]
         eligibility: TechniqueEligibility[]
       }
 
       setProfile(result.profile)
       setAssessment(result.assessment)
+      setAssessments(result.assessments ?? [])
       setEligibility(result.eligibility ?? [])
       setLoading(false)
     }
@@ -104,5 +107,5 @@ export function useProfile(userId: string | undefined) {
     load()
   }, [userId])
 
-  return { profile, assessment, eligibility, loading }
+  return { profile, assessment, assessments, eligibility, loading }
 }

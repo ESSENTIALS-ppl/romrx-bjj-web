@@ -5,7 +5,7 @@ import { PageHeader } from '../components/PageHeader'
 import { SectionCard } from '../components/SectionCard'
 import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { cn, beltColor, formatJoint } from '../lib/utils'
 import { AlertTriangle, Activity, TrendingUp } from 'lucide-react'
 
@@ -72,21 +72,27 @@ function norm(val: number, optimal: number) {
   return Math.min(100, Math.round((val / optimal) * 100))
 }
 
-function buildRadar(a: Assessment) {
-  return [
-    { joint: 'Hip ER',       value: norm(Math.max(a.hip_er_l ?? 0, a.hip_er_r ?? 0), OPTIMAL['Hip ER']) },
-    { joint: 'Hip IR',       value: norm(Math.max(a.hip_ir_l ?? 0, a.hip_ir_r ?? 0), OPTIMAL['Hip IR']) },
-    { joint: 'Hip Abd',      value: norm(Math.max(a.hip_abd_l ?? 0, a.hip_abd_r ?? 0), OPTIMAL['Hip Abd']) },
-    { joint: 'Hip Flex',     value: norm(Math.max(a.hip_flex_l ?? 0, a.hip_flex_r ?? 0), OPTIMAL['Hip Flex']) },
-    { joint: 'Shoulder ER',  value: norm(Math.max(a.shoulder_er_l ?? 0, a.shoulder_er_r ?? 0), OPTIMAL['Shoulder ER']) },
-    { joint: 'Shoulder Flex',value: norm(Math.max(a.shoulder_flex_l ?? 0, a.shoulder_flex_r ?? 0), OPTIMAL['Shoulder Flex']) },
-    { joint: 'Ankle DF',     value: norm(Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0), OPTIMAL['Ankle DF']) },
-    { joint: 'Lumbar Flex',  value: norm(a.lumbar_flex ?? 0, OPTIMAL['Lumbar Flex']) },
-    { joint: 'Lumbar Ext',   value: norm(a.lumbar_ext ?? 0, OPTIMAL['Lumbar Ext']) },
-    { joint: 'Cerv Lat',     value: norm(Math.max(a.cervical_lat_l ?? 0, a.cervical_lat_r ?? 0), OPTIMAL['Cervical Lat']) },
-    { joint: 'Cerv Flex',    value: norm(a.cervical_flex ?? 0, OPTIMAL['Cervical Flex']) },
-    { joint: 'Cerv Ext',     value: norm(a.cervical_ext ?? 0, OPTIMAL['Cervical Ext']) },
-  ]
+const JOINTS = [
+  { key: 'Hip ER',       get: (a: Assessment) => norm(Math.max(a.hip_er_l ?? 0, a.hip_er_r ?? 0), OPTIMAL['Hip ER']) },
+  { key: 'Hip IR',       get: (a: Assessment) => norm(Math.max(a.hip_ir_l ?? 0, a.hip_ir_r ?? 0), OPTIMAL['Hip IR']) },
+  { key: 'Hip Abd',      get: (a: Assessment) => norm(Math.max(a.hip_abd_l ?? 0, a.hip_abd_r ?? 0), OPTIMAL['Hip Abd']) },
+  { key: 'Hip Flex',     get: (a: Assessment) => norm(Math.max(a.hip_flex_l ?? 0, a.hip_flex_r ?? 0), OPTIMAL['Hip Flex']) },
+  { key: 'Shoulder ER',  get: (a: Assessment) => norm(Math.max(a.shoulder_er_l ?? 0, a.shoulder_er_r ?? 0), OPTIMAL['Shoulder ER']) },
+  { key: 'Shoulder Flex',get: (a: Assessment) => norm(Math.max(a.shoulder_flex_l ?? 0, a.shoulder_flex_r ?? 0), OPTIMAL['Shoulder Flex']) },
+  { key: 'Ankle DF',     get: (a: Assessment) => norm(Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0), OPTIMAL['Ankle DF']) },
+  { key: 'Lumbar Flex',  get: (a: Assessment) => norm(a.lumbar_flex ?? 0, OPTIMAL['Lumbar Flex']) },
+  { key: 'Lumbar Ext',   get: (a: Assessment) => norm(a.lumbar_ext ?? 0, OPTIMAL['Lumbar Ext']) },
+  { key: 'Cerv Lat',     get: (a: Assessment) => norm(Math.max(a.cervical_lat_l ?? 0, a.cervical_lat_r ?? 0), OPTIMAL['Cervical Lat']) },
+  { key: 'Cerv Flex',    get: (a: Assessment) => norm(a.cervical_flex ?? 0, OPTIMAL['Cervical Flex']) },
+  { key: 'Cerv Ext',     get: (a: Assessment) => norm(a.cervical_ext ?? 0, OPTIMAL['Cervical Ext']) },
+]
+
+function buildRadar(assessments: Assessment[]) {
+  return JOINTS.map(j => {
+    const row: Record<string, string | number> = { joint: j.key }
+    assessments.forEach((a, i) => { row[`v${i}`] = j.get(a) })
+    return row
+  })
 }
 
 function JointBar({ label, left, right, midline, optimal }: {
@@ -130,7 +136,7 @@ function JointBar({ label, left, right, midline, optimal }: {
 
 export function MyBody() {
   const { user } = useAuth()
-  const { profile, assessment, loading } = useProfile(user?.id)
+  const { profile, assessment, assessments, loading } = useProfile(user?.id)
 
   if (loading) return <Spinner />
 
@@ -143,7 +149,11 @@ export function MyBody() {
     />
   )
 
-  const radarData = buildRadar(assessment)
+  const radarData = buildRadar(assessments.length > 0 ? assessments : assessment ? [assessment] : [])
+  const RADAR_COLORS = ['#008080', '#4ade80', '#facc15', '#94a3b8']
+  const RADAR_LABELS = assessments.map(a =>
+    new Date(a.assessed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+  )
   const belt = profile?.belt ?? 'white'
   const prs = computePRS(assessment)
   const tier = getPRSTier(prs)
@@ -187,15 +197,28 @@ export function MyBody() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <SectionCard title="ROM Profile">
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={280}>
             <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
               <PolarGrid stroke="#cde0e0" />
-              <PolarAngleAxis dataKey="joint" tick={{ fontSize: 10, fill: '#5a7070', fontFamily: 'Inter' }} />
-              <Radar dataKey="value" stroke="#008080" fill="#008080" fillOpacity={0.2} dot={{ fill: '#008080', r: 3 }} />
+              <PolarAngleAxis dataKey="joint" tick={{ fontSize: 9, fill: '#5a7070', fontFamily: 'Inter' }} />
+              {RADAR_LABELS.map((label, i) => (
+                <Radar
+                  key={label}
+                  name={label}
+                  dataKey={`v${i}`}
+                  stroke={RADAR_COLORS[i]}
+                  fill={RADAR_COLORS[i]}
+                  fillOpacity={i === 0 ? 0.25 : 0.08}
+                  strokeWidth={i === 0 ? 2 : 1}
+                  strokeDasharray={i === 0 ? undefined : '4 2'}
+                  dot={i === 0 ? { fill: RADAR_COLORS[i], r: 3 } : false}
+                />
+              ))}
               <Tooltip
                 contentStyle={{ fontSize: 12, borderRadius: 10, border: '1px solid #e0ecec', fontFamily: 'Inter' }}
-                formatter={(v) => [`${v}%`, '% of optimal']}
+                formatter={(v, name) => [`${v}%`, name]}
               />
+              {RADAR_LABELS.length > 1 && <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />}
             </RadarChart>
           </ResponsiveContainer>
         </SectionCard>
