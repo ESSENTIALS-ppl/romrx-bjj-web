@@ -139,10 +139,10 @@ const STEPS: Step[] = [
     mistake: 'Shrugging your shoulder up to meet your ear on the lateral flexion, or moving your whole body instead of just your head.',
     mistakeFix: 'Keep both shoulders pressed DOWN the whole time. Only your head and neck move. If your shoulder rises to meet your ear - that reading does not count.',
     fields: [
-      { key: 'cervical_lat_l', label: 'Lateral Left', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
-      { key: 'cervical_lat_r', label: 'Lateral Right', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
-      { key: 'cervical_flex', label: 'Flexion', unit: '°', normalLow: 50, normalHigh: 60, riskBelow: 40 },
-      { key: 'cervical_ext', label: 'Extension', unit: '°', normalLow: 60, normalHigh: 75, riskBelow: 45 },
+      { key: 'cervical_lat_l', label: 'Lateral Left', unit: '°', normalLow: 40, normalHigh: 45, riskBelow: 30 },
+      { key: 'cervical_lat_r', label: 'Lateral Right', unit: '°', normalLow: 40, normalHigh: 45, riskBelow: 30 },
+      { key: 'cervical_flex', label: 'Flexion', unit: '°', normalLow: 45, normalHigh: 60, riskBelow: 35 },
+      { key: 'cervical_ext', label: 'Extension', unit: '°', normalLow: 55, normalHigh: 70, riskBelow: 40 },
     ],
   },
   {
