@@ -128,16 +128,16 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair  ·  Two setups below',
     position: [
       'Sit upright in a chair. Feet flat. Back straight. Do not let your shoulders move during any of these.',
-      'LATERAL FLEXION (ear to shoulder): Hold your phone UPRIGHT on top of your head, bottom edge on your skull, screen facing FORWARD. Hold it steady with one hand. Tap to zero while looking straight ahead.',
-      'FLEXION and EXTENSION (chin to chest / chin up): Press your phone flat against your cheek, screen facing the wall beside you. Zero while looking straight ahead.',
+      'LATERAL FLEXION (ear to shoulder): Press your phone flat against your FOREHEAD, screen facing forward away from your face. Tap to zero while looking straight ahead.',
+      'FLEXION and EXTENSION (chin to chest / chin up): Press your phone flat against the SIDE of your head at the temple, screen facing the wall beside you. Tap to zero while looking straight ahead.',
     ],
     howTo: [
-      'LATERAL FLEXION: Tilt your ear toward your left shoulder as far as you can. Read the number. Re-zero. Tilt to the right. Read and record both.',
-      'FLEXION: Switch to cheek hold. Drop your chin toward your chest as far as it will go. Read the number. Record it.',
+      'LATERAL FLEXION: Tilt your ear toward your left shoulder as far as it will go. Read the number. Re-zero. Tilt to the right. Read and record both.',
+      'FLEXION: Switch to temple hold. Drop your chin toward your chest as far as it will go. Read the number. Record it.',
       'EXTENSION: Re-zero. Lift your chin toward the ceiling as far as it will go. Read the number. Record it.',
     ],
-    mistake: 'Shrugging your shoulder up to meet your ear instead of letting the ear drop toward the shoulder.',
-    mistakeFix: 'Keep both shoulders pressed DOWN. Only your head moves. If your shoulder rises, that reading does not count.',
+    mistake: 'Shrugging your shoulder up to meet your ear on the lateral flexion, or moving your whole body instead of just your head.',
+    mistakeFix: 'Keep both shoulders pressed DOWN the whole time. Only your head and neck move. If your shoulder rises to meet your ear - that reading does not count.',
     fields: [
       { key: 'cervical_lat_l', label: 'Lateral Left', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
       { key: 'cervical_lat_r', label: 'Lateral Right', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
