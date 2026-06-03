@@ -224,16 +224,15 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Standing',
     position: [
       'Stand straight, feet shoulder-width apart, toes pointing forward.',
-      'Press your phone flat against your LOWER BACK at belt level, screen facing away from your body. Hold it there with one hand.',
-      'Tap to zero while standing tall. You will need to use voice command to read the number - say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android).',
+      'Hold your phone at your side with the screen facing away from your body. Keep the phone aligned with your torso throughout the whole test.',
+      'Tap to zero while standing tall.',
     ],
     howTo: [
-      'FLEXION: Keep your legs straight. Slowly bend forward and reach toward the floor. Stop when the movement shifts from your back to your hips. Use voice command to capture the number.',
-      'Stand back up. Re-zero.',
-      'EXTENSION: Lean backward slowly. Stop before your knees bend or your hips push forward. Use voice command to capture the number.',
+      'Flexion: Keep your legs straight. Slowly bend forward. Keep your back flat and the phone aligned with your torso. Stop when you feel a strong stretch in the back of your legs. Read the number.',
+      'Re-zero. Extension: Slowly lean backward. Stop before your knees bend or your hips push forward. Read the number.',
     ],
-    mistake: 'Bending your knees on the way forward, or letting your hips push forward on the way back.',
-    mistakeFix: 'Flexion: legs stay straight the whole time. Extension: your hips stay stacked directly over your heels - do not let them drift forward to cheat range.',
+    mistake: 'Rounding the back to go farther on flexion, or letting the knees bend or hips push forward on extension.',
+    mistakeFix: 'For flexion, keep your back flat - the stretch you feel in the back of your legs is your true stopping point, not how close you get to the floor. For extension, your hips stay directly over your heels the whole time.',
     fields: [
       { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
       { key: 'lumbar_ext', label: 'Extension', unit: '°', normalLow: 20, normalHigh: 30, riskBelow: 15 },
