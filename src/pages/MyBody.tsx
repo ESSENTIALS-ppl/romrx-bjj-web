@@ -150,7 +150,7 @@ export function MyBody() {
   )
 
   const radarData = buildRadar(assessments.length > 0 ? assessments : assessment ? [assessment] : [])
-  const RADAR_COLORS = ['#008080', '#4ade80', '#facc15', '#94a3b8']
+  const RADAR_COLORS = ['#008080', '#f59e0b', '#60a5fa', '#c084fc']
   const RADAR_LABELS = assessments.map(a =>
     new Date(a.assessed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
   )
@@ -201,19 +201,22 @@ export function MyBody() {
             <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
               <PolarGrid stroke="#cde0e0" />
               <PolarAngleAxis dataKey="joint" tick={{ fontSize: 9, fill: '#5a7070', fontFamily: 'Inter' }} />
-              {RADAR_LABELS.map((label, i) => (
-                <Radar
-                  key={label}
-                  name={label}
-                  dataKey={`v${i}`}
-                  stroke={RADAR_COLORS[i]}
-                  fill={RADAR_COLORS[i]}
-                  fillOpacity={i === 0 ? 0.25 : 0.08}
-                  strokeWidth={i === 0 ? 2 : 1}
-                  strokeDasharray={i === 0 ? undefined : '4 2'}
-                  dot={i === 0 ? { fill: RADAR_COLORS[i], r: 3 } : false}
-                />
-              ))}
+              {[...RADAR_LABELS].reverse().map((label, ri) => {
+                const i = RADAR_LABELS.length - 1 - ri
+                return (
+                  <Radar
+                    key={label}
+                    name={label}
+                    dataKey={`v${i}`}
+                    stroke={RADAR_COLORS[i]}
+                    fill={RADAR_COLORS[i]}
+                    fillOpacity={i === 0 ? 0.1 : 0}
+                    strokeWidth={i === 0 ? 2.5 : 2}
+                    strokeDasharray={i === 0 ? undefined : '5 3'}
+                    dot={i === 0 ? { fill: RADAR_COLORS[i], r: 3 } : false}
+                  />
+                )
+              })}
               <Tooltip
                 contentStyle={{ fontSize: 12, borderRadius: 10, border: '1px solid #e0ecec', fontFamily: 'Inter' }}
                 formatter={(v, name) => [`${v}%`, name]}
