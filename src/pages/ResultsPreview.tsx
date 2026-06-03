@@ -17,18 +17,20 @@ const BILATERAL_JOINTS = [
   { l: 'shoulder_er_l',  r: 'shoulder_er_r',  riskBelow: 60,  normalMin: 60  },
   { l: 'shoulder_flex_l',r: 'shoulder_flex_r', riskBelow: 120, normalMin: 140 },
   { l: 'ankle_df_l',     r: 'ankle_df_r',     riskBelow: 10,  normalMin: 10  },
-  { l: 'cervical_rot_l', r: 'cervical_rot_r', riskBelow: 60,  normalMin: 70  },
+  { l: 'cervical_lat_l', r: 'cervical_lat_r', riskBelow: 30, normalMin: 40 },
 ]
 const UNILATERAL_JOINTS = [
   { key: 'lumbar_flex', riskBelow: 40, normalMin: 40 },
   { key: 'lumbar_ext',  riskBelow: 15, normalMin: 20 },
-  { key: 'thoracic_rot',riskBelow: 30, normalMin: 40 },
+  { key: 'cervical_flex', riskBelow: 35, normalMin: 45 },
+  { key: 'cervical_ext',  riskBelow: 40, normalMin: 55 },
+  { key: 'thoracic_rot',  riskBelow: 30, normalMin: 40 },
 ]
 const JOINT_LABELS: Record<string, string> = {
   hip_er: 'Hip External Rotation', hip_ir: 'Hip Internal Rotation',
   hip_abd: 'Hip Abduction', hip_flex: 'Hip Flexion',
   shoulder_er: 'Shoulder External Rotation', shoulder_flex: 'Shoulder Flexion',
-  ankle_df: 'Ankle Dorsiflexion', cervical_rot: 'Cervical Rotation',
+  ankle_df: 'Ankle Dorsiflexion', cervical_lat: 'Cervical Lateral Flex',
   lumbar_flex: 'Lumbar Flexion', lumbar_ext: 'Lumbar Extension', thoracic_rot: 'Thoracic Rotation',
 }
 

@@ -38,7 +38,13 @@ export interface Assessment {
   lumbar_ext: number | null
   cervical_rot_l: number | null
   cervical_rot_r: number | null
+  cervical_lat_l: number | null
+  cervical_lat_r: number | null
+  cervical_flex: number | null
+  cervical_ext: number | null
   thoracic_rot: number | null
+  thoracic_rot_l: number | null
+  thoracic_rot_r: number | null
   rom_total: number | null
   rom_percentile: number | null
   worst_joints: string[] | null
