@@ -145,30 +145,6 @@ const STEPS: Step[] = [
       { key: 'cervical_ext', label: 'Extension', unit: '°', normalLow: 55, normalHigh: 70, riskBelow: 40 },
     ],
   },
-  {
-    id: 'thoracic_rot',
-    title: 'Thoracic Rotation',
-    bjjWhy: 'Hip escapes, guard passing hip drive, and armbar rotation all start here.',
-    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated, lean forward first',
-    position: [
-      'Sit at the edge of a chair. Feet flat, hip-width apart. Squeeze your knees together lightly to lock your hips.',
-      'Cross your arms over your chest, each hand gripping the opposite shoulder. Tuck your phone between your crossed forearms and your chest, screen facing down toward the floor.',
-      'LEAN FORWARD about 45 degrees - halfway between upright and bowing. Hold this forward lean the entire time. Tap to zero here.',
-    ],
-    howTo: [
-      'From the leaned position, rotate your upper body LEFT as far as you can. Knees and feet must not move.',
-      'Stop the moment your hips start to turn or your knees shift. Read the number.',
-      'Return to center. Re-zero. Rotate RIGHT. Read and record both sides.',
-    ],
-    mistake: 'Letting your hips rotate to get more range.',
-    mistakeFix: 'Watch your knees - if either knee moves, your hips went with it. Lock the knees together and only your ribcage should rotate.',
-    videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-    videoLabel: 'Thoracic Rotation - Bent-Forward Inclinometer Method (reference video)',
-    fields: [
-      { key: 'thoracic_rot_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 30 },
-      { key: 'thoracic_rot_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 30 },
-    ],
-  },
 
   // ── FLOOR CLUSTER ──────────────────────────────────────────────────────────
   {

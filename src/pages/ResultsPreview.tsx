@@ -24,14 +24,14 @@ const UNILATERAL_JOINTS = [
   { key: 'lumbar_ext',  riskBelow: 15, normalMin: 20 },
   { key: 'cervical_flex', riskBelow: 35, normalMin: 45 },
   { key: 'cervical_ext',  riskBelow: 40, normalMin: 55 },
-  { key: 'thoracic_rot',  riskBelow: 30, normalMin: 40 },
+
 ]
 const JOINT_LABELS: Record<string, string> = {
   hip_er: 'Hip External Rotation', hip_ir: 'Hip Internal Rotation',
   hip_abd: 'Hip Abduction', hip_flex: 'Hip Flexion',
   shoulder_er: 'Shoulder External Rotation', shoulder_flex: 'Shoulder Flexion',
   ankle_df: 'Ankle Dorsiflexion', cervical_lat: 'Cervical Lateral Flex',
-  lumbar_flex: 'Lumbar Flexion', lumbar_ext: 'Lumbar Extension', thoracic_rot: 'Thoracic Rotation',
+  lumbar_flex: 'Lumbar Flexion', lumbar_ext: 'Lumbar Extension',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
