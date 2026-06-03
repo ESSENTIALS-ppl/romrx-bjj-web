@@ -58,7 +58,7 @@ const ONBOTTOM_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 type PathMode       = 'offense' | 'defense'
 type GenMode        = 'quick' | 'custom' | 'ai' | 'competition'
-type Tab            = 'gameplan' | 'myflows' | 'library' | 'coachpicks'
+type Tab            = 'gameplan' | 'myflows' | 'library'
 type AIStart        = 'standing' | 'ontop' | 'onbottom'
 type AIFinish       = 'chokes' | 'arm' | 'legs'
 type AIStyle        = 'explosive' | 'technical'
@@ -1626,7 +1626,6 @@ export function MyGame() {
           ['gameplan',   'Game Plan'],
           ['myflows',    'My Flows'],
           ['library',    'Technique Library'],
-          ['coachpicks', 'Coach Picks'],
         ] as const).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
             className={cn('flex-1 text-sm font-semibold py-2 rounded-xl transition-all',
@@ -2585,10 +2584,7 @@ export function MyGame() {
         </div>
       )}
 
-      {/* ── COACH PICKS ── */}
-      {tab === 'coachpicks' && (
-        <CoachPicksTab userId={user?.id ?? null} />
-      )}
+
     </div>
   )
 }

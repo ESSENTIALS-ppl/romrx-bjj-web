@@ -111,42 +111,70 @@ export function Chat() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  // Auto-send game plan request from My Game URL params
+  // Auto-send from My Game URL params (game plan or competition)
   useEffect(() => {
     if (autoSentRef.current || profileLoading || !session || messages.length === 0) return
     const params = new URLSearchParams(location.search)
     if (params.get('gameplan') !== '1') return
-    const start  = params.get('start')  ?? ''
-    const finish = params.get('finish') ?? ''
-    const style  = params.get('style')  ?? ''
-    if (!start || !finish || !style) return
     autoSentRef.current = true
-    // Clear URL params without navigation
     navigate('/dashboard/chat', { replace: true })
-    const startLabel  = START_LABELS[start]  ?? start
-    const finishLabel = FINISH_LABELS[finish] ?? finish
-    const styleLabel  = STYLE_LABELS[style]  ?? style
-    setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
-    const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}. Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
-    // Auto-send after brief delay so welcome message shows first
-    setTimeout(async () => {
-      setMessages(p => [...p, { role: 'user', content: msg }])
-      setBusy(true)
-      setError('')
-      try {
-        const res = await fetch(AI_CHAT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
-          body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
-        })
-        const data = await res.json()
-        if (data.error) throw new Error(data.error)
-        setConvId(data.conversation_id)
-        setMessages(p => [...p, { role: 'assistant', content: data.reply }])
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Something went wrong')
-      } finally { setBusy(false) }
-    }, 600)
+
+    const mode = params.get('mode') ?? ''
+
+    if (mode === 'competition') {
+      // Competition plan mode
+      const format   = params.get('format')   ?? ''
+      const duration = params.get('duration') ?? ''
+      const threat   = params.get('threat')   ?? ''
+      const formatLabel   = ({ points: 'Points scoring', submission: 'Submission Only', mma: 'MMA / No-Gi' } as Record<string, string>)[format] ?? format
+      const durationLabel = ({ under5: 'under 5 minutes', '5to8': '5 to 8 minutes', over8: '8+ minutes' } as Record<string, string>)[duration] ?? duration
+      const threatLabel   = ({ takedown: 'takedown-heavy opponents', guard: 'guard players', leglock: 'leg lockers' } as Record<string, string>)[threat] ?? threat
+      setGamePlanBanner(`Competition plan: ${formatLabel}, ${durationLabel} matches, vs ${threatLabel}`)
+      const msg = `I just built a competition game plan using only my GREEN-tier techniques. Competition format: ${formatLabel}. Match duration: ${durationLabel}. My opponent tends to be ${threatLabel}. Based on my ROM profile and the techniques that are truly locked in for me, what is your strategic advice for this matchup? What should I prioritize, what should I avoid, and how do I put my GREEN techniques to best use under competition pressure?`
+      setTimeout(async () => {
+        setMessages(p => [...p, { role: 'user', content: msg }])
+        setBusy(true); setError('')
+        try {
+          const res = await fetch(AI_CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+          })
+          const data = await res.json()
+          if (data.error) throw new Error(data.error)
+          setConvId(data.conversation_id)
+          setMessages(p => [...p, { role: 'assistant', content: data.reply }])
+        } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong') }
+        finally { setBusy(false) }
+      }, 600)
+    } else {
+      // Standard game plan mode
+      const start  = params.get('start')  ?? ''
+      const finish = params.get('finish') ?? ''
+      const style  = params.get('style')  ?? ''
+      if (!start || !finish || !style) return
+      const startLabel  = START_LABELS[start]  ?? start
+      const finishLabel = FINISH_LABELS[finish] ?? finish
+      const styleLabel  = STYLE_LABELS[style]  ?? style
+      setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
+      const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}. Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
+      setTimeout(async () => {
+        setMessages(p => [...p, { role: 'user', content: msg }])
+        setBusy(true); setError('')
+        try {
+          const res = await fetch(AI_CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+          })
+          const data = await res.json()
+          if (data.error) throw new Error(data.error)
+          setConvId(data.conversation_id)
+          setMessages(p => [...p, { role: 'assistant', content: data.reply }])
+        } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong') }
+        finally { setBusy(false) }
+      }, 600)
+    }
   }, [profileLoading, session, messages.length, location.search])
 
   const send = async () => {
