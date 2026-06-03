@@ -454,7 +454,7 @@ export function Assessment() {
         {/* Cluster label */}
         <div className="flex items-center gap-1.5 text-xs text-charcoal-light">
           <span className="text-[10px] font-bold uppercase tracking-widest text-teal/70">
-            {stepIdx <= 5 ? '🪑 Seated' : stepIdx === 6 ? '🛏 Floor' : stepIdx <= 8 ? '🧍 Standing' : '🧱 Wall'}
+            {stepIdx === 3 ? '🧍 Standing' : stepIdx <= 5 ? '🪑 Seated' : stepIdx === 6 ? '🛏 Floor' : stepIdx <= 8 ? '🧍 Standing' : '🧱 Wall'}
           </span>
           <span className="text-teal-light">·</span>
           <span>{step.title}</span>
