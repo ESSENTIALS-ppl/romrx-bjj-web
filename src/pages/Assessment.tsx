@@ -36,16 +36,16 @@ const STEPS: Step[] = [
   {
     id: 'hip_er',
     title: 'Hip External Rotation',
-    bjjWhy: 'Opens your guard game — triangles, De La Riva, and seated guard all need this.',
+    bjjWhy: 'Opens your guard game - triangles, De La Riva, and seated guard all need this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Firm chair',
     position: [
       'Sit in a firm chair. Both feet flat on the floor, knees at 90°.',
-      'Hold your phone against the FRONT of your shin (just below your knee). Screen faces FORWARD — away from your leg. Long edge runs along your shinbone.',
+      'Hold your phone against the FRONT of your shin (just below your knee). Screen faces FORWARD - away from your leg. Long edge runs along your shinbone.',
       'Tap to zero. The phone should read close to 0°.',
     ],
     howTo: [
-      'Keep your thigh pressed down. Slowly swing your foot INWARD — toward your other leg.',
-      'Stop when you feel a firm stretch or your thigh starts to rotate. Read the number.',
+      'Keep your thigh pressed down. Slowly swing your foot INWARD - toward your other leg.',
+      'Stop when you feel a firm stretch or your thigh starts to lift off the chair. Read the number.',
       'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
     mistake: 'Your thigh rotates instead of just your shin.',
@@ -59,19 +59,19 @@ const STEPS: Step[] = [
     id: 'hip_ir',
     title: 'Hip Internal Rotation',
     bjjWhy: 'Protects your knee in guard, drives hip escapes, key in leg entanglement defense.',
-    tool: '✓ Same chair, same phone placement — only the foot direction changes.',
+    tool: '✓ Same chair, same phone placement - only the foot direction changes.',
     position: [
       'Stay in the same chair. Do NOT move your position.',
       'Phone is still on the front of your shin, screen facing forward.',
       'Tap to re-zero at center before each leg.',
     ],
     howTo: [
-      'Keep your thigh pressed down. Slowly swing your foot OUTWARD — away from your other leg.',
+      'Keep your thigh pressed down. Slowly swing your foot OUTWARD - away from your other leg.',
       'Stop when you feel a firm stretch or one butt cheek starts to lift. Read the number.',
       'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
     mistake: 'One butt cheek lifts off the chair.',
-    mistakeFix: 'You must stay sitting evenly on both sides. The moment one side lifts — that is your endpoint. Record it.',
+    mistakeFix: 'You must stay sitting evenly on both sides. The moment one side lifts - that is your endpoint. Record it.',
     fields: [
       { key: 'hip_ir_l', label: 'Left', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
       { key: 'hip_ir_r', label: 'Right', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
@@ -83,17 +83,17 @@ const STEPS: Step[] = [
     bjjWhy: 'Kimura defense, shoulder frames, and posting your hand to avoid the sweep all require this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
-      'Sit upright. Raise your right arm out to the side at shoulder height — arm makes a T with your body.',
+      'Sit upright. Raise your right arm out to the side at shoulder height - arm makes a T with your body.',
       'Bend your elbow to 90°. Forearm points straight UP toward the ceiling.',
-      'Hold your phone against the INNER side of your forearm — the side facing your body, palm-facing side. Screen faces toward your body.',
+      'Hold your phone against the INNER side of your forearm - the side facing your body, palm-facing side. Screen faces toward your body.',
       'Tap to zero with your forearm pointing straight up.',
     ],
     howTo: [
-      'Let your forearm fall slowly BACKWARD — away from your face. Keep your upper arm still and elbow at shoulder height.',
-      'Stop at the end of comfortable range. Have a partner read the angle — or say "Hey Siri, take a screenshot."',
+      'Let your forearm fall slowly BACKWARD - away from your face. Keep your upper arm still and elbow at shoulder height.',
+      'Stop at the end of comfortable range. Have a partner read the angle - or say "Hey Siri, take a screenshot."',
       'Record the number. Return to start. Re-zero. Repeat on the other side.',
     ],
-    mistake: 'Elbow drops or your upper arm rotates — your body compensates.',
+    mistake: 'Elbow drops or your upper arm rotates - your body compensates.',
     mistakeFix: 'Keep the elbow level with your shoulder throughout. Only the forearm should move backward.',
     fields: [
       { key: 'shoulder_er_l', label: 'Left', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
@@ -106,8 +106,8 @@ const STEPS: Step[] = [
     bjjWhy: 'Overhead frames, kimura defense, and spider guard all require full shoulder lift.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated, back against wall',
     position: [
-      'Sit in a chair with your back flat against the wall — or sit very upright if no wall is available.',
-      'Hold your phone against the OUTER (lateral) side of your upper arm — the surface facing away from your body. Screen faces outward.',
+      'Sit in a chair with your back flat against the wall - or sit very upright if no wall is available.',
+      'Hold your phone against the OUTER (lateral) side of your upper arm - the surface facing away from your body. Screen faces outward.',
       'Tap to zero with your arm hanging straight down.',
     ],
     howTo: [
@@ -116,7 +116,7 @@ const STEPS: Step[] = [
       'Record it. Return to zero. Re-zero. Repeat on the other side.',
     ],
     mistake: 'Arching your lower back or shrugging your shoulder to reach higher.',
-    mistakeFix: 'Keep your back flat. The instant your back arches off the wall — that is your real end range. Record it there.',
+    mistakeFix: 'Keep your back flat. The instant your back arches off the wall - that is your real end range. Record it there.',
     fields: [
       { key: 'shoulder_flex_l', label: 'Left', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
       { key: 'shoulder_flex_r', label: 'Right', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
@@ -129,18 +129,18 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
       'Sit in a chair with your back straight. Feet flat on the floor.',
-      'Hold your phone UPRIGHT on top of your head like a fin — bottom edge rests on your skull. Screen faces FORWARD (toward the wall in front of you).',
+      'Hold your phone UPRIGHT on top of your head like a fin - bottom edge rests on your skull. Screen faces FORWARD (toward the wall in front of you).',
       'Hold it lightly in place with one hand on the bottom edge. Tap to zero while looking straight ahead.',
     ],
     howTo: [
-      'Slowly turn your head LEFT. Keep your chin level — do not dip it toward your shoulder.',
+      'Slowly turn your head LEFT. Keep your chin level - do not dip it toward your shoulder.',
       'Stop when you cannot turn further without moving your shoulder. Have a partner read the angle or say "Hey Siri, take a screenshot."',
       'Record it. Return to center. Tap to re-zero. Turn RIGHT. Repeat.',
     ],
     mistake: 'Tipping your chin down toward your shoulder instead of rotating.',
-    mistakeFix: 'Think of turning your NOSE to the side — like looking over your shoulder at traffic. Chin stays parallel to the floor.',
+    mistakeFix: 'Think of turning your NOSE to the side - like looking over your shoulder at traffic. Chin stays parallel to the floor.',
     videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-    videoLabel: 'Cervical Rotation — Inclinometer Method (reference video)',
+    videoLabel: 'Cervical Rotation - Inclinometer Method (reference video)',
     fields: [
       { key: 'cervical_rot_l', label: 'Left', unit: '°', normalLow: 70, normalHigh: 90, riskBelow: 60 },
       { key: 'cervical_rot_r', label: 'Right', unit: '°', normalLow: 70, normalHigh: 90, riskBelow: 60 },
@@ -153,8 +153,8 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated, lean forward first',
     position: [
       'Sit at the edge of a chair. Feet flat, hip-width apart.',
-      'Cross your arms over your chest — hands on opposite shoulders.',
-      'LEAN FORWARD about 45° — halfway between sitting straight and bowing to the floor. Hold this lean throughout the measurement.',
+      'Cross your arms over your chest - hands on opposite shoulders.',
+      'LEAN FORWARD about 45° - halfway between sitting straight and bowing to the floor. Hold this lean throughout the measurement.',
       'Have a partner place the phone flat against your upper back (between shoulder blades), screen facing the side wall. Tap to zero. No partner: hold phone on your chest and record the absolute number.',
       'Optional: squeeze a small towel between your knees to prevent hip cheating.',
     ],
@@ -166,7 +166,7 @@ const STEPS: Step[] = [
     mistake: 'Spinning your hips to get more rotation.',
     mistakeFix: 'Watch your knees. If either knee shifts, your hips moved. Stop and record that angle.',
     videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-    videoLabel: 'Thoracic Rotation — Bent-Forward Inclinometer Method (reference video)',
+    videoLabel: 'Thoracic Rotation - Bent-Forward Inclinometer Method (reference video)',
     fields: [
       { key: 'thoracic_rot', label: 'Avg L+R', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 30 },
     ],
@@ -176,7 +176,7 @@ const STEPS: Step[] = [
   {
     id: 'hip_flex',
     title: 'Hip Flexion',
-    bjjWhy: 'How deep your closed guard is — closed guard, rubber guard, and armbar position all need this.',
+    bjjWhy: 'How deep your closed guard is - closed guard, rubber guard, and armbar position all need this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Lying on the floor',
     position: [
       'Lie flat on your back on the floor. Both legs straight.',
@@ -189,7 +189,7 @@ const STEPS: Step[] = [
       'Record it. Lower the leg. Re-zero. Repeat on the other side.',
     ],
     mistake: 'Letting your low back peel up from the floor too early.',
-    mistakeFix: 'Keep your opposite leg completely flat on the ground. When your low back peels up — that is your real endpoint.',
+    mistakeFix: 'Keep your opposite leg completely flat on the ground. When your low back peels up - that is your real endpoint.',
     fields: [
       { key: 'hip_flex_l', label: 'Left', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
       { key: 'hip_flex_r', label: 'Right', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
@@ -204,16 +204,16 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Standing with wall support',
     position: [
       'Stand upright. Hold onto a wall or doorframe with one hand for balance.',
-      'Hold your phone against the OUTER (lateral) side of your thigh — the side facing away from your other leg. Screen faces outward.',
+      'Hold your phone against the OUTER (lateral) side of your thigh - the side facing away from your other leg. Screen faces outward.',
       'Tap to zero while standing straight with weight even on both feet.',
     ],
     howTo: [
-      'Slowly lift your test leg SIDEWAYS — away from your other leg. Keep your toes pointing forward, not toward the ceiling.',
+      'Slowly lift your test leg SIDEWAYS - away from your other leg. Keep your toes pointing forward, not toward the ceiling.',
       'Stop when your hip starts to hike up or your body leans to the side. Read the number.',
       'Record it. Return to standing. Re-zero. Repeat on the other side.',
     ],
     mistake: 'Your hip hikes up or your whole body leans sideways to compensate.',
-    mistakeFix: 'The hip of the leg you are standing on must stay level. If you feel yourself leaning — stop there. That is your real end range.',
+    mistakeFix: 'The hip of the leg you are standing on must stay level. If you feel yourself leaning - stop there. That is your real end range.',
     fields: [
       { key: 'hip_abd_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
       { key: 'hip_abd_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
@@ -235,7 +235,7 @@ const STEPS: Step[] = [
       'EXTENSION: Place your free hand on your lower back. Lean backward slowly. Stop before your knees bend or your hips shoot forward. Read and record the number.',
     ],
     mistake: 'Bending your knees during flexion, or pushing your hips forward during extension.',
-    mistakeFix: 'Flexion: keep legs straight. Extension: hips stay directly over your heels — do not let them drift forward.',
+    mistakeFix: 'Flexion: keep legs straight. Extension: hips stay directly over your heels - do not let them drift forward.',
     fields: [
       { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
       { key: 'lumbar_ext', label: 'Extension', unit: '°', normalLow: 20, normalHigh: 30, riskBelow: 15 },
@@ -246,7 +246,7 @@ const STEPS: Step[] = [
   {
     id: 'ankle_df',
     title: 'Ankle Dorsiflexion',
-    bjjWhy: 'Your base and balance in every standing position — takedowns, sprawls, and passing guard.',
+    bjjWhy: 'Your base and balance in every standing position - takedowns, sprawls, and passing guard.',
     tool: 'Tape measure or ruler  ·  Standing knee-to-wall test (measure in centimeters)',
     position: [
       'Stand facing a wall. Put a tape measure on the floor pointing straight away from the wall.',
@@ -260,7 +260,7 @@ const STEPS: Step[] = [
       'Repeat on the other side.',
     ],
     mistake: 'Your heel lifts off the floor as your knee comes forward.',
-    mistakeFix: 'Watch your heel the whole time. If it lifts — move your foot back in closer. The heel must stay flat for the measurement to count.',
+    mistakeFix: 'Watch your heel the whole time. If it lifts - move your foot back in closer. The heel must stay flat for the measurement to count.',
     fields: [
       { key: 'ankle_df_l', label: 'Left', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
       { key: 'ankle_df_r', label: 'Right', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
@@ -269,10 +269,10 @@ const STEPS: Step[] = [
 ]
 
 const SETUP_STEPS = [
-  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app (pre-installed on all iPhones). Tap Level at the bottom. You will see a number in degrees that changes as you tilt the phone — that is your angle.' },
-  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps — free on Google Play. Open it and you will see your angle in degrees, just like a digital level.' },
-  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier — they hold the phone and read the angle while you focus on moving. You can do it solo using the screenshot tip on each step.' },
-  { icon: '🔄', label: 'Warm up first — 5 minutes', detail: '1) Walk or march in place for 2 minutes.  2) Arm circles — 10 forward, 10 backward.  3) Hip circles — big loops with your hips like a hula hoop, 10 each way.  4) Leg swings — hold a wall, swing each leg front-to-back 10 times then side-to-side 10 times.  5) Slow neck turns — look left and right, 5 times each way.  Wear shorts and a t-shirt.' },
+  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app (pre-installed on all iPhones). Tap Level at the bottom. You will see a number in degrees that changes as you tilt the phone - that is your angle.' },
+  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps - free on Google Play. Open it and you will see your angle in degrees, just like a digital level.' },
+  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier - they hold the phone and read the angle while you focus on moving. You can do it solo using the screenshot tip on each step.' },
+  { icon: '🔄', label: 'Warm up first - 5 minutes', detail: '1) Walk or march in place for 2 minutes.  2) Arm circles - 10 forward, 10 backward.  3) Hip circles - big loops with your hips like a hula hoop, 10 each way.  4) Leg swings - hold a wall, swing each leg front-to-back 10 times then side-to-side 10 times.  5) Slow neck turns - look left and right, 5 times each way.  Wear shorts and a t-shirt.' },
   { icon: '📸', label: 'Solo tip', detail: 'When you cannot tap the screen: say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Read the number right after.' },
   { icon: '⏭️', label: 'Skip is always OK', detail: 'If a position is too difficult or you need a partner for a step and do not have one, tap Skip. Your score is based on what you completed. You can always come back and fill in any skipped measurements later.' },
 ]
@@ -302,7 +302,7 @@ function MeasureInput({ field, value, onChange }: {
           type="number" min="0" max="360" step="0.5"
           value={value}
           onChange={e => onChange(field.key, e.target.value)}
-          placeholder="—"
+          placeholder=""
           className={cn(
             'w-24 px-3 py-2.5 rounded-xl border text-sm text-center font-mono font-bold transition-all focus:outline-none',
             score === 'risk'       ? 'border-red-300 bg-red-50 text-red-700 focus:border-red-400' :
@@ -358,7 +358,7 @@ export function Assessment() {
   }
 
   const submit = async () => {
-    if (!session) { setError('Session expired — please sign in again.'); return }
+    if (!session) { setError('Session expired - please sign in again.'); return }
     setLoading(true); setError('')
     const payload: Record<string, number | null> = {}
     for (const [k, v] of Object.entries(values)) {
@@ -409,14 +409,14 @@ export function Assessment() {
               <div>
                 <p className="text-sm font-semibold text-teal">The method in 4 words: Place. Zero. Move. Read.</p>
                 <p className="text-xs text-teal/80 mt-1 leading-relaxed">
-                  Hold phone flat against the body part. Tap screen to zero it. Move slowly to your end range. Read the number — ignore any minus sign. Each step tells you exactly where to hold the phone and which direction to move.
+                  Hold phone flat against the body part. Tap screen to zero it. Move slowly to your end range. Read the number - ignore any minus sign. Each step tells you exactly where to hold the phone and which direction to move.
                 </p>
               </div>
             </div>
           </div>
 
           <button onClick={() => setPhase('measure')} className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3">
-            I'm ready — Start assessment <ChevronRight size={18} />
+            I'm ready - Start assessment <ChevronRight size={18} />
           </button>
           <p className="text-center text-xs text-charcoal-light">You can skip any measurement you can't do and retest later.</p>
         </div>
