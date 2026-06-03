@@ -178,16 +178,16 @@ const STEPS: Step[] = [
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Lying on the floor',
     position: [
       'Lie flat on your back on the floor. Both legs straight.',
-      'Hold your phone flat on TOP of your thigh, midway between your hip and your knee. Screen faces the ceiling. Keep one hand on the phone the whole time.',
+      'Hold your phone flat against the SIDE of your thigh (the outer surface facing away from your other leg), midway between your hip and your knee. Screen faces the wall beside you.',
       'Tap to zero with your leg flat on the ground.',
     ],
     howTo: [
-      'Use your free hand to guide your knee toward your chest. The phone hand keeps the phone flat on your thigh as it rises.',
-      'Stop when your low back peels off the floor or your opposite leg lifts. Read the number.',
+      'Keep your knee completely straight. Raise your leg up toward the ceiling as high as you can WITHOUT bending your knee.',
+      'Keep the phone aligned with your thigh as it rises. Stop when your low back peels off the floor. Read the number.',
       'Record it. Lower the leg slowly. Re-zero. Repeat on the other side.',
     ],
-    mistake: 'Your low back peeling off the floor before you reach your true end range.',
-    mistakeFix: 'Keep your opposite leg pressed flat on the ground. The moment your low back lifts - that is your real endpoint, not how far you pulled the knee.',
+    mistake: 'Bending your knee as you raise your leg, or letting your low back arch off the floor.',
+    mistakeFix: 'Your leg must stay completely straight the whole time - no bending at the knee. The moment your low back lifts off the floor, that is your real endpoint.',
     fields: [
       { key: 'hip_flex_l', label: 'Left', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
       { key: 'hip_flex_r', label: 'Right', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
