@@ -269,12 +269,12 @@ const STEPS: Step[] = [
 ]
 
 const SETUP_STEPS = [
-  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app → tap Level at the bottom. This is your inclinometer.' },
-  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps (free, Google Play Store).' },
-  { icon: '⚖️', label: 'Calibrate', detail: 'Place phone flat on a table — confirm it reads 0°. Tap the screen to zero if it does not.' },
-  { icon: '🏃', label: 'Warm up', detail: '8–10 minutes of light movement first. Wear shorts and a t-shirt.' },
-  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier — they hold the phone and read the numbers while you move. You can do it solo if needed.' },
-  { icon: '📸', label: 'Solo tip', detail: 'When you cannot tap the screen: say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Read the number afterward.' },
+  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app (pre-installed on all iPhones). Tap Level at the bottom. You will see a number in degrees that changes as you tilt the phone — that is your angle.' },
+  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps — free on Google Play. Open it and you will see your angle in degrees, just like a digital level.' },
+  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier — they hold the phone and read the angle while you focus on moving. You can do it solo using the screenshot tip on each step.' },
+  { icon: '🔄', label: 'Warm up first — 5 minutes', detail: '1) Walk or march in place for 2 minutes.  2) Arm circles — 10 forward, 10 backward.  3) Hip circles — big loops with your hips like a hula hoop, 10 each way.  4) Leg swings — hold a wall, swing each leg front-to-back 10 times then side-to-side 10 times.  5) Slow neck turns — look left and right, 5 times each way.  Wear shorts and a t-shirt.' },
+  { icon: '📸', label: 'Solo tip', detail: 'When you cannot tap the screen: say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Read the number right after.' },
+  { icon: '⏭️', label: 'Skip is always OK', detail: 'If a position is too difficult or you need a partner for a step and do not have one, tap Skip. Your score is based on what you completed. You can always come back and fill in any skipped measurements later.' },
 ]
 
 // ── Live scoring helper ───────────────────────────────────────────────────────
@@ -407,9 +407,9 @@ export function Assessment() {
             <div className="flex gap-2 items-start">
               <Info size={16} className="text-teal mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-teal">How to use your phone as a measuring tool</p>
+                <p className="text-sm font-semibold text-teal">The method in 4 words: Place. Zero. Move. Read.</p>
                 <p className="text-xs text-teal/80 mt-1 leading-relaxed">
-                  Place phone FLAT against the body part. Tap screen to zero. Move to end range. Pause 1 second. Read the number (ignore any minus sign). This is the same method validated in 4 peer-reviewed clinical studies.
+                  Hold phone flat against the body part. Tap screen to zero it. Move slowly to your end range. Read the number — ignore any minus sign. Each step tells you exactly where to hold the phone and which direction to move.
                 </p>
               </div>
             </div>
