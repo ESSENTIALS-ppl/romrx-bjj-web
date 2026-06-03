@@ -32,27 +32,24 @@ interface Step {
 
 // ── Measurement steps (one per joint group) ──────────────────────────────────
 const STEPS: Step[] = [
+  // ── SEATED CLUSTER ────────────────────────────────────────────────────────
   {
     id: 'hip_er',
     title: 'Hip External Rotation',
     bjjWhy: 'Opens your guard game — triangles, De La Riva, and seated guard all need this.',
-    tool: 'Phone flat on your shin · Seated on a firm chair',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Firm chair',
     position: [
-      'Sit on the edge of a chair or bench. Let your feet hang off the floor. Hip and knee are each bent at 90°.',
-      'Place your phone FLAT on your shin, just below your knee. Long edge of the phone runs along your shinbone.',
-      'Tap once to zero. The phone should read 0° with your shin pointing straight down.',
-      'Hold your thigh still with one hand — it should NOT move during the test.',
+      'Sit in a firm chair. Both feet flat on the floor, knees at 90°.',
+      'Hold your phone against the FRONT of your shin (just below your knee). Screen faces FORWARD — away from your leg. Long edge runs along your shinbone.',
+      'Tap to zero. The phone should read close to 0°.',
     ],
     howTo: [
-      'Slowly swing your foot INWARD (toward your other leg). Your shin moves — your thigh stays still.',
+      'Keep your thigh pressed down. Slowly swing your foot INWARD — toward your other leg.',
       'Stop when you feel a firm stretch or your thigh starts to rotate. Read the number.',
-      'Write it down. Return to center. Tap to re-zero.',
-      'Do the other leg.',
+      'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
     mistake: 'Your thigh rotates instead of just your shin.',
-    mistakeFix: 'Press your hand firmly on the TOP of your thigh. If you feel it move, you went too far.',
-    videoUrl: 'https://www.youtube.com/watch?v=HKYVJHnrReU',
-    videoLabel: 'Hip IR & ER — Seated Shin Method (John Hancock OTD)',
+    mistakeFix: 'Press one hand gently on your thigh to hold it still. Only the lower leg moves.',
     fields: [
       { key: 'hip_er_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 40 },
       { key: 'hip_er_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 40 },
@@ -62,100 +59,42 @@ const STEPS: Step[] = [
     id: 'hip_ir',
     title: 'Hip Internal Rotation',
     bjjWhy: 'Protects your knee in guard, drives hip escapes, key in leg entanglement defense.',
-    tool: 'Phone flat on your shin · Same seated position as Hip ER',
+    tool: '✓ Same chair, same phone placement — only the foot direction changes.',
     position: [
-      'Stay seated on the edge of the chair. Feet off the floor. Hip and knee at 90°.',
-      'Phone flat on your shin, just below the knee. Long edge runs along your shinbone.',
-      'Tap to zero. Shin points straight down = 0°.',
-      'Hold your thigh still — it does NOT move.',
+      'Stay in the same chair. Do NOT move your position.',
+      'Phone is still on the front of your shin, screen facing forward.',
+      'Tap to re-zero at center before each leg.',
     ],
     howTo: [
-      'Slowly swing your foot OUTWARD (away from your other leg). Your shin moves out — that IS internal rotation of the hip.',
-      'Stop when your butt starts to lift off the chair or your thigh rolls. Read the number.',
-      'Write it down. Return to center. Tap to re-zero.',
-      'Do the other leg.',
+      'Keep your thigh pressed down. Slowly swing your foot OUTWARD — away from your other leg.',
+      'Stop when you feel a firm stretch or one butt cheek starts to lift. Read the number.',
+      'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
-    mistake: 'Leaning your whole body sideways to get the foot higher.',
-    mistakeFix: 'Stay sitting evenly on both sides. If one butt cheek lifts, stop right there.',
-    videoUrl: 'https://www.youtube.com/watch?v=-EyAIpwhBWA',
-    videoLabel: 'Hip Internal Rotation Solo Test',
+    mistake: 'One butt cheek lifts off the chair.',
+    mistakeFix: 'You must stay sitting evenly on both sides. The moment one side lifts — that is your endpoint. Record it.',
     fields: [
       { key: 'hip_ir_l', label: 'Left', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
       { key: 'hip_ir_r', label: 'Right', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
     ],
   },
   {
-    id: 'hip_abd',
-    title: 'Hip Abduction',
-    bjjWhy: 'How wide your guard opens — butterfly, open guard, and side control base all need this.',
-    tool: 'Phone on outside of thigh · Standing next to a wall',
-    position: [
-      'Stand next to a wall. Rest one hand on the wall for balance — do not lean on it.',
-      'Stand tall. Feet together. Toes pointing straight forward.',
-      'Place your phone flat on the OUTSIDE of your thigh, above the knee.',
-      'Tap to zero while you stand straight.',
-    ],
-    howTo: [
-      'Lift your test leg straight out to the side. Keep your toes pointing forward — NOT up at the ceiling.',
-      'Stop when your hip starts to hike up or your body leans to the side. Read the number.',
-      'Write it down. Return to standing. Tap to re-zero.',
-      'Do the other leg.',
-    ],
-    mistake: 'Tilting your whole body sideways to get the leg higher.',
-    mistakeFix: 'Watch your opposite hip in a mirror. If it drops or rises, stop right there.',
-    videoUrl: 'https://www.youtube.com/watch?v=Ho3mfhDaA_g',
-    videoLabel: 'Hip Mobility Self-Assessment incl. Abduction (Dr. Mitch Israel)',
-    fields: [
-      { key: 'hip_abd_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
-      { key: 'hip_abd_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
-    ],
-  },
-  {
-    id: 'hip_flex',
-    title: 'Hip Flexion',
-    bjjWhy: 'How deep your closed guard is — closed guard, rubber guard, and armbar position all need this.',
-    tool: 'Phone on top of your thigh · Lying on your back',
-    position: [
-      'Lie flat on your back on the floor. Both legs straight.',
-      'Place your phone flat on the TOP of your thigh, midway between your hip and your knee.',
-      'Tap to zero with your leg flat on the ground.',
-    ],
-    howTo: [
-      'Pull one knee toward your chest using both hands. The phone rides along on your thigh.',
-      'Stop when your lower back peels off the floor OR your other leg lifts. Read the number.',
-      'Write it down. Lay your leg back down. Tap to re-zero.',
-      'Do the other leg.',
-    ],
-    mistake: 'Curling your whole lower back off the floor to get the knee closer.',
-    mistakeFix: 'Keep your opposite leg flat on the ground. When your low back peels up — that is your real endpoint.',
-    videoUrl: 'https://www.youtube.com/watch?v=tdYjpTQ0AQY',
-    videoLabel: 'Hip Flexion Self-Assessment (The Ready State)',
-    fields: [
-      { key: 'hip_flex_l', label: 'Left', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
-      { key: 'hip_flex_r', label: 'Right', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
-    ],
-  },
-  {
     id: 'shoulder_er',
     title: 'Shoulder External Rotation',
-    bjjWhy: 'Protects you from Kimuras and Americanas — this range is your joint safety zone.',
-    tool: 'Phone on your forearm · Lying on your back',
+    bjjWhy: 'Kimura defense, shoulder frames, and posting your hand to avoid the sweep all require this.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
-      'Lie flat on your back. Stretch one arm straight out to the side so it makes a T shape with your body.',
-      'Bend your elbow to 90°. Your forearm now points straight up at the ceiling.',
-      'Place your phone flat on your forearm. Tap to zero.',
-      'Press your elbow down to the floor with your other hand before you start.',
+      'Sit upright. Raise your right arm out to the side at shoulder height — arm makes a T with your body.',
+      'Bend your elbow to 90°. Forearm points straight UP toward the ceiling.',
+      'Hold your phone against the INNER side of your forearm — the side facing your body, palm-facing side. Screen faces toward your body.',
+      'Tap to zero with your forearm pointing straight up.',
     ],
     howTo: [
-      'Let your forearm fall BACKWARD toward your head. Your upper arm stays flat on the floor — elbow must not lift.',
-      'Stop when your elbow starts to peel off the floor or you feel a firm stretch. Read the number.',
-      'Write it down. Return forearm to straight up. Tap to re-zero.',
-      'Do the other arm.',
+      'Let your forearm fall slowly BACKWARD — away from your face. Keep your upper arm still and elbow at shoulder height.',
+      'Stop at the end of comfortable range. Have a partner read the angle — or say "Hey Siri, take a screenshot."',
+      'Record the number. Return to start. Re-zero. Repeat on the other side.',
     ],
-    mistake: 'The elbow lifts off the floor to fake more range.',
-    mistakeFix: 'Press your elbow down with your other hand before you start, and keep it there the whole time.',
-    videoUrl: 'https://www.youtube.com/watch?v=ucw-RsD5sEE',
-    videoLabel: 'Shoulder ER & IR Self-Assessment — Lying Method (Athletes\' Potential)',
+    mistake: 'Elbow drops or your upper arm rotates — your body compensates.',
+    mistakeFix: 'Keep the elbow level with your shoulder throughout. Only the forearm should move backward.',
     fields: [
       { key: 'shoulder_er_l', label: 'Left', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
       { key: 'shoulder_er_r', label: 'Right', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
@@ -164,98 +103,44 @@ const STEPS: Step[] = [
   {
     id: 'shoulder_flex',
     title: 'Shoulder Flexion',
-    bjjWhy: 'Overhead reach for spider guard, frames, and posting when taken down.',
-    tool: 'Phone on your upper arm · Standing flat against a wall',
+    bjjWhy: 'Overhead frames, kimura defense, and spider guard all require full shoulder lift.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated, back against wall',
     position: [
-      'Stand with your back flat against a wall. Heels, butt, and shoulders all touch the wall.',
-      'Let one arm hang straight at your side.',
-      'Place your phone against your upper arm (between shoulder and elbow). Use your other hand to hold it steady while you zero, then let go.',
-      'Tap to zero with your arm pointing down.',
+      'Sit in a chair with your back flat against the wall — or sit very upright if no wall is available.',
+      'Hold your phone against the OUTER (lateral) side of your upper arm — the surface facing away from your body. Screen faces outward.',
+      'Tap to zero with your arm hanging straight down.',
     ],
     howTo: [
-      'Raise your arm straight forward and up — like a slow front raise going all the way overhead.',
-      'Keep your elbow straight. Stop when your low back peels off the wall or your shoulder shrugs up toward your ear. Read the number.',
-      'Write it down. Return arm to your side. Tap to re-zero.',
-      'Do the other arm.',
+      'Keep your elbow straight. Raise your arm FORWARD, in front of your body.',
+      'Stop the moment your low back peels away from the wall or your shoulder shrugs toward your ear. Read the number.',
+      'Record it. Return to zero. Re-zero. Repeat on the other side.',
     ],
-    mistake: 'Arching your back off the wall to get your arm higher.',
-    mistakeFix: 'Keep your low back touching the wall the whole time. The moment it peels off — that is your real endpoint.',
-    videoUrl: 'https://www.youtube.com/watch?v=fnc01OxSh-s',
-    videoLabel: 'Shoulder Flexion Self-Test Against Wall (Upright Health)',
+    mistake: 'Arching your lower back or shrugging your shoulder to reach higher.',
+    mistakeFix: 'Keep your back flat. The instant your back arches off the wall — that is your real end range. Record it there.',
     fields: [
       { key: 'shoulder_flex_l', label: 'Left', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
       { key: 'shoulder_flex_r', label: 'Right', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
     ],
   },
   {
-    id: 'ankle_df',
-    title: 'Ankle Dorsiflexion',
-    bjjWhy: 'Your base and balance in every standing position — takedowns, sprawls, and passing guard.',
-    tool: 'Tape measure or ruler · Standing knee-to-wall test (measure in cm)',
-    position: [
-      'Stand facing a wall. Put a tape measure on the floor pointing straight away from the wall.',
-      'Place the big toe of your test foot on the tape measure, right at the wall.',
-      'Put your other foot back for balance.',
-    ],
-    howTo: [
-      'Lunge your knee forward until it just touches the wall. Keep your heel FLAT on the floor.',
-      'If it was easy: move your foot back 1 cm and try again. Keep moving back until your knee can just barely touch the wall with your heel still flat.',
-      'Record that distance from your big toe to the wall in centimeters.',
-      'Do the other foot.',
-    ],
-    mistake: 'Your heel lifts off the floor to make the knee reach the wall.',
-    mistakeFix: 'Watch your heel the whole time. It must stay flat. If it lifts — move your foot back closer and try again.',
-    videoUrl: 'https://www.youtube.com/watch?v=u3NbKOXl75k',
-    videoLabel: 'Knee-to-Wall Ankle Test — Exact Solo Method (Aleks Physio)',
-    fields: [
-      { key: 'ankle_df_l', label: 'Left', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
-      { key: 'ankle_df_r', label: 'Right', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
-    ],
-  },
-  {
-    id: 'lumbar',
-    title: 'Lumbar Flexion + Extension',
-    bjjWhy: 'Bridging, guard recovery, back escapes, and protecting your lower back when stacked.',
-    tool: 'Phone tucked in your waistband at belt level · Standing',
-    position: [
-      'Stand straight, feet shoulder-width apart, toes pointing forward.',
-      'Tuck your phone into the back of your waistband at belt level. Screen against your back.',
-      'Tap to zero while standing tall.',
-    ],
-    howTo: [
-      'FLEXION: Bend forward slowly, letting your hands drop toward the floor. Keep your knees straight. Stop when you cannot go further. Read and record the number.',
-      'Come back to standing. Tap to re-zero.',
-      'EXTENSION: Place your hands on your lower back. Lean backward slowly. Stop before your knees bend or your hips shoot forward. Read and record the number.',
-    ],
-    mistake: 'During extension: bending your knees and pushing your hips forward — that is hip movement, not back movement.',
-    mistakeFix: 'Keep your knees locked straight. Move only from the belt line up.',
-    videoUrl: 'https://www.youtube.com/watch?v=FlNXMZ_cUGM',
-    videoLabel: 'Lumbar Flexion & Extension — Phone Inclinometer Method (Dr. Bryan PT)',
-    fields: [
-      { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
-      { key: 'lumbar_ext', label: 'Extension', unit: '°', normalLow: 20, normalHigh: 30, riskBelow: 15 },
-    ],
-  },
-  {
     id: 'cervical_rot',
     title: 'Cervical Rotation',
     bjjWhy: 'Neck safety in scrambles, defending collar ties, and situational awareness on the mat.',
-    tool: 'Phone flat on TOP of your head · Seated in a chair',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
       'Sit in a chair with your back straight. Feet flat on the floor.',
-      'Set your phone FLAT on top of your head. Screen up, like a little hat.',
-      'Tap to zero while looking straight ahead. Do not tilt your chin up or down.',
+      'Hold your phone UPRIGHT on top of your head like a fin — bottom edge rests on your skull. Screen faces FORWARD (toward the wall in front of you).',
+      'Hold it lightly in place with one hand on the bottom edge. Tap to zero while looking straight ahead.',
     ],
     howTo: [
-      'Turn your head slowly to the LEFT. Keep your chin level — do not dip it toward your shoulder.',
-      'Stop when you cannot turn further without your shoulder moving. Read the number.',
-      'Write it down. Return to center. Tap to re-zero.',
-      'Turn to the RIGHT. Repeat.',
+      'Slowly turn your head LEFT. Keep your chin level — do not dip it toward your shoulder.',
+      'Stop when you cannot turn further without moving your shoulder. Have a partner read the angle or say "Hey Siri, take a screenshot."',
+      'Record it. Return to center. Tap to re-zero. Turn RIGHT. Repeat.',
     ],
     mistake: 'Tipping your chin down toward your shoulder instead of rotating.',
-    mistakeFix: 'Keep your chin parallel to the floor the whole time. Turn your nose to the side — do not dip it.',
+    mistakeFix: 'Think of turning your NOSE to the side — like looking over your shoulder at traffic. Chin stays parallel to the floor.',
     videoUrl: 'https://www.youtube.com/watch?v=wLuRF70zrLg',
-    videoLabel: 'Cervical Rotation — Inclinometer on Head Method (Dr. Syed Ali Hussain PT)',
+    videoLabel: 'Cervical Rotation — Inclinometer Method (reference video)',
     fields: [
       { key: 'cervical_rot_l', label: 'Left', unit: '°', normalLow: 70, normalHigh: 90, riskBelow: 60 },
       { key: 'cervical_rot_r', label: 'Right', unit: '°', normalLow: 70, normalHigh: 90, riskBelow: 60 },
@@ -264,37 +149,132 @@ const STEPS: Step[] = [
   {
     id: 'thoracic_rot',
     title: 'Thoracic Rotation',
-    bjjWhy: 'Hip escapes, guard passing hip drive, and arm bar rotation all start here.',
-    tool: 'Phone flat on your chest · Seated on a stool or chair edge',
+    bjjWhy: 'Hip escapes, guard passing hip drive, and armbar rotation all start here.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated, lean forward first',
     position: [
-      'Sit on a stool or the edge of a chair. Feet flat on the floor, hip-width apart.',
+      'Sit at the edge of a chair. Feet flat, hip-width apart.',
       'Cross your arms over your chest — hands on opposite shoulders.',
-      'Set your phone flat on your sternum (chest bone, in the middle of your chest).',
-      'Tap to zero while sitting tall, looking straight ahead.',
-      'Squeeze a rolled towel or small ball between your knees — this keeps your hips from cheating.',
+      'LEAN FORWARD about 45° — halfway between sitting straight and bowing to the floor. Hold this lean throughout the measurement.',
+      'Have a partner place the phone flat against your upper back (between shoulder blades), screen facing the side wall. Tap to zero. No partner: hold phone on your chest and record the absolute number.',
+      'Optional: squeeze a small towel between your knees to prevent hip cheating.',
     ],
     howTo: [
-      'Rotate your upper body to the LEFT. Keep your hips facing forward — your knees should NOT move.',
-      'Stop when your hips start to turn. Read the number.',
-      'Write it down. Return to center. Tap to re-zero.',
-      'Rotate to the RIGHT. Repeat.',
+      'From the leaned-forward position, rotate your upper body to the LEFT. Knees must not move.',
+      'Stop when your hips start to turn. Have a partner read the angle or screenshot it.',
+      'Record it. Return to center. Re-zero. Rotate RIGHT. Repeat.',
     ],
-    mistake: 'Spinning your hips to get more rotation — this fakes the number.',
-    mistakeFix: 'Watch your knees. If one knee moves or drifts, your hips moved. Stop and record that angle.',
+    mistake: 'Spinning your hips to get more rotation.',
+    mistakeFix: 'Watch your knees. If either knee shifts, your hips moved. Stop and record that angle.',
     videoUrl: 'https://www.youtube.com/watch?v=HeGIMZU6EnQ',
-    videoLabel: 'Thoracic Rotation — Inclinometer Method (OrthoNugs)',
+    videoLabel: 'Thoracic Rotation — Bent-Forward Inclinometer Method (reference video)',
     fields: [
       { key: 'thoracic_rot', label: 'Avg L+R', unit: '°', normalLow: 40, normalHigh: 60, riskBelow: 30 },
+    ],
+  },
+
+  // ── FLOOR CLUSTER ──────────────────────────────────────────────────────────
+  {
+    id: 'hip_flex',
+    title: 'Hip Flexion',
+    bjjWhy: 'How deep your closed guard is — closed guard, rubber guard, and armbar position all need this.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Lying on the floor',
+    position: [
+      'Lie flat on your back on the floor. Both legs straight.',
+      'Hold your phone flat on the TOP of your thigh, midway between hip and knee. Screen faces the ceiling.',
+      'Tap to zero with your leg flat on the ground.',
+    ],
+    howTo: [
+      'Pull one knee toward your chest using both hands. The phone rides along on your thigh as it rises.',
+      'Stop when your low back peels up from the floor or your opposite leg lifts. Read the number.',
+      'Record it. Lower the leg. Re-zero. Repeat on the other side.',
+    ],
+    mistake: 'Letting your low back peel up from the floor too early.',
+    mistakeFix: 'Keep your opposite leg completely flat on the ground. When your low back peels up — that is your real endpoint.',
+    fields: [
+      { key: 'hip_flex_l', label: 'Left', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
+      { key: 'hip_flex_r', label: 'Right', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
+    ],
+  },
+
+  // ── STANDING CLUSTER ───────────────────────────────────────────────────────
+  {
+    id: 'hip_abd',
+    title: 'Hip Abduction',
+    bjjWhy: 'Wide guard base, guard recovery, and De La Riva hook depth all depend on this.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Standing with wall support',
+    position: [
+      'Stand upright. Hold onto a wall or doorframe with one hand for balance.',
+      'Hold your phone against the OUTER (lateral) side of your thigh — the side facing away from your other leg. Screen faces outward.',
+      'Tap to zero while standing straight with weight even on both feet.',
+    ],
+    howTo: [
+      'Slowly lift your test leg SIDEWAYS — away from your other leg. Keep your toes pointing forward, not toward the ceiling.',
+      'Stop when your hip starts to hike up or your body leans to the side. Read the number.',
+      'Record it. Return to standing. Re-zero. Repeat on the other side.',
+    ],
+    mistake: 'Your hip hikes up or your whole body leans sideways to compensate.',
+    mistakeFix: 'The hip of the leg you are standing on must stay level. If you feel yourself leaning — stop there. That is your real end range.',
+    fields: [
+      { key: 'hip_abd_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
+      { key: 'hip_abd_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 50, riskBelow: 30 },
+    ],
+  },
+  {
+    id: 'lumbar',
+    title: 'Lumbar Flexion + Extension',
+    bjjWhy: 'Guard recovery, hip escapes, and surviving pin pressure all load your lumbar spine.',
+    tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Standing',
+    position: [
+      'Stand straight, feet shoulder-width apart, toes pointing forward.',
+      'Hold your phone flat against your LOWER BACK at belt level, screen facing behind you. Hold it in place with your hand.',
+      'Tap to zero while standing tall.',
+    ],
+    howTo: [
+      'FLEXION: Keep your legs straight. Bend forward slowly, reaching toward the floor. Stop when the movement feels like it is coming from your hips rather than your back. Read and record the number.',
+      'Return to standing. Re-zero.',
+      'EXTENSION: Place your free hand on your lower back. Lean backward slowly. Stop before your knees bend or your hips shoot forward. Read and record the number.',
+    ],
+    mistake: 'Bending your knees during flexion, or pushing your hips forward during extension.',
+    mistakeFix: 'Flexion: keep legs straight. Extension: hips stay directly over your heels — do not let them drift forward.',
+    fields: [
+      { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
+      { key: 'lumbar_ext', label: 'Extension', unit: '°', normalLow: 20, normalHigh: 30, riskBelow: 15 },
+    ],
+  },
+
+  // ── WALL CLUSTER ───────────────────────────────────────────────────────────
+  {
+    id: 'ankle_df',
+    title: 'Ankle Dorsiflexion',
+    bjjWhy: 'Your base and balance in every standing position — takedowns, sprawls, and passing guard.',
+    tool: 'Tape measure or ruler  ·  Standing knee-to-wall test (measure in centimeters)',
+    position: [
+      'Stand facing a wall. Put a tape measure on the floor pointing straight away from the wall.',
+      'Place the big toe of your test foot directly at the start of the tape (closest to the wall).',
+      'Keep your heel completely flat on the floor throughout the test.',
+    ],
+    howTo: [
+      'Drive your knee forward to touch the wall without lifting your heel. If it easily touches: move your foot back 1 cm and try again.',
+      'Keep moving back 1 cm at a time until your knee can JUST barely touch the wall with the heel still flat.',
+      'The distance from the wall to your big toe at that last successful rep = your ankle dorsiflexion. Record it in cm.',
+      'Repeat on the other side.',
+    ],
+    mistake: 'Your heel lifts off the floor as your knee comes forward.',
+    mistakeFix: 'Watch your heel the whole time. If it lifts — move your foot back in closer. The heel must stay flat for the measurement to count.',
+    fields: [
+      { key: 'ankle_df_l', label: 'Left', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
+      { key: 'ankle_df_r', label: 'Right', unit: 'cm', normalLow: 10, normalHigh: 20, riskBelow: 10 },
     ],
   },
 ]
 
 const SETUP_STEPS = [
-  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app → tap Level at the bottom' },
-  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps (free, Play Store)' },
-  { icon: '⚖️', label: 'Calibrate', detail: 'Place phone on a flat surface — confirm it reads 0°. Tap to zero if not.' },
-  { icon: '🏃', label: 'Warm up', detail: '8–10 min light movement first. Wear shorts and a t-shirt.' },
-  { icon: '📸', label: 'Hands-free screenshot', detail: 'When the phone is on your body, you can\'t tap the screen. Just say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Then read the number after.' },
+  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app → tap Level at the bottom. This is your inclinometer.' },
+  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps (free, Google Play Store).' },
+  { icon: '⚖️', label: 'Calibrate', detail: 'Place phone flat on a table — confirm it reads 0°. Tap the screen to zero if it does not.' },
+  { icon: '🏃', label: 'Warm up', detail: '8–10 minutes of light movement first. Wear shorts and a t-shirt.' },
+  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier — they hold the phone and read the numbers while you move. You can do it solo if needed.' },
+  { icon: '📸', label: 'Solo tip', detail: 'When you cannot tap the screen: say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Read the number afterward.' },
 ]
 
 // ── Live scoring helper ───────────────────────────────────────────────────────
@@ -472,6 +452,14 @@ export function Assessment() {
           </div>
           <span className="text-xs text-charcoal-light whitespace-nowrap">{stepIdx + 1} / {totalMeasureSteps}</span>
         </div>
+        {/* Cluster label */}
+        <div className="flex items-center gap-1.5 text-xs text-charcoal-light">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-teal/70">
+            {stepIdx <= 5 ? '🪑 Seated' : stepIdx === 6 ? '🛏 Floor' : stepIdx <= 8 ? '🧍 Standing' : '🧱 Wall'}
+          </span>
+          <span className="text-teal-light">·</span>
+          <span>{step.title}</span>
+        </div>
 
         {/* Joint card */}
         <div className="bg-white rounded-2xl border border-teal-light shadow-sm overflow-hidden">
@@ -482,11 +470,18 @@ export function Assessment() {
           </div>
 
           <div className="p-5 space-y-5">
-            {/* Tool */}
-            <div className="flex items-center gap-2 text-xs text-charcoal-light bg-surface rounded-xl px-3 py-2">
-              <span className="text-base">📐</span>
-              <span className="font-medium">{step.tool}</span>
-            </div>
+            {/* Tool / continuation badge */}
+            {step.tool.startsWith('✓') ? (
+              <div className="flex items-center gap-2 text-xs text-teal font-semibold bg-teal/8 border border-teal/20 rounded-xl px-3 py-2">
+                <CheckCircle2 size={14} className="text-teal shrink-0" />
+                <span>{step.tool}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-charcoal-light bg-surface rounded-xl px-3 py-2">
+                <span className="text-base">📐</span>
+                <span className="font-medium">{step.tool}</span>
+              </div>
+            )}
 
             {/* Video reference */}
             {step.videoUrl && (
