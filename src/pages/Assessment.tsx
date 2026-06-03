@@ -88,9 +88,9 @@ const STEPS: Step[] = [
       'Tap to zero.',
     ],
     howTo: [
-      'Slowly raise your forearm upward toward the ceiling as far as you comfortably can. Keep your upper arm still and elbow at shoulder height.',
-      'Read the number on the screen - or have a partner read it.',
-      'Record the number. Return to starting position. Re-zero. Repeat on the other side.',
+      'Keep your elbow in the same spot. Rotate your forearm upward, allowing your shoulder to turn until you feel a strong stretch.',
+      'Read the number or have a partner read it.',
+      'Record the number. Re-zero and follow the same directions with the opposite arm.',
     ],
     mistake: 'Your elbow drops or your whole upper arm rotates to help.',
     mistakeFix: 'Keep the elbow at shoulder height the whole time. Only the forearm moves - everything above the elbow stays still.',
