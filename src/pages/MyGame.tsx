@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import html2canvas from 'html2canvas'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -58,10 +59,12 @@ const ONBOTTOM_SEQ = ['Guards', 'Sweeps', 'Controls', 'Submissions'] as const
 
 type PathMode       = 'offense' | 'defense'
 type GenMode        = 'quick' | 'custom' | 'ai' | 'competition'
-type Tab            = 'gameplan' | 'myflows' | 'library'
+type Tab            = 'gameplan' | 'myflows' | 'library' | 'myplan'
 type AIStart        = 'standing' | 'ontop' | 'onbottom'
 type AIFinish       = 'chokes' | 'arm' | 'legs'
 type AIStyle        = 'explosive' | 'technical'
+type AIOpponent     = 'wrestler' | 'guard' | 'leglock' | 'pressure'
+type GiMode         = 'both' | 'gi' | 'nogi'
 
 // Competition mode types
 type CompFormat   = 'points' | 'submission' | 'mma'
@@ -682,11 +685,15 @@ function SavedPlanCard({
   userId,
   onLoad,
   onDelete,
+  onShare,
+  shareActive,
 }: {
   plan: SavedPlan
   userId: string
   onLoad: (plan: SavedPlan) => void
   onDelete: (id: string) => void
+  onShare?: (id: string) => void
+  shareActive?: boolean
 }) {
   const [copied, setCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -733,11 +740,15 @@ function SavedPlanCard({
   const r = plan.techniques.filter(t => t.tier === 'RED' || t.flag === 'DELAY_TECHNIQUE').length
 
   const handleShare = () => {
-    const url = window.location.href + '#plan=' + btoa(JSON.stringify(plan))
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    if (onShare) {
+      onShare(plan.id)
+    } else {
+      const url = window.location.href + '#plan=' + btoa(JSON.stringify(plan))
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+    }
   }
 
   const dateStr = new Date(plan.createdAt).toLocaleDateString('en-US', {
@@ -769,7 +780,7 @@ function SavedPlanCard({
             className="p-1.5 rounded-lg text-charcoal-light hover:text-teal hover:bg-teal-light transition-colors"
             title="Copy share link"
           >
-            {copied ? <Check size={14} className="text-teal" /> : <Share2 size={14} />}
+            {(copied || shareActive) ? <Check size={14} className="text-teal" /> : <Share2 size={14} />}
           </button>
           {confirmDelete ? (
             <div className="flex gap-1 items-center">
@@ -1070,7 +1081,7 @@ interface CoachVideoFeedback {
   created_at: string
 }
 
-function CoachPicksTab({ userId }: { userId: string | null }) {
+export function CoachPicksTab({ userId }: { userId: string | null }) {
   const [assignments, setAssignments] = useState<CoachAssignment[]>([])
   const [videos, setVideos] = useState<CoachVideoFeedback[]>([])
   const [loading, setLoading] = useState(false)
@@ -1245,6 +1256,116 @@ function CoachPicksTab({ userId }: { userId: string | null }) {
   )
 }
 
+
+// ── F2: Opponent selector accordion ──────────────────────────────────────────
+function OpponentSelector({
+  aiOpponent,
+  setAiOpponent,
+}: {
+  aiOpponent: AIOpponent | null
+  setAiOpponent: (o: AIOpponent | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const opponents: { value: AIOpponent; label: string; sub: string }[] = [
+    { value: 'wrestler',  label: 'Wrestler / Takedown',  sub: 'Prioritizes clinch & shots' },
+    { value: 'guard',     label: 'Guard Puller',          sub: 'Immediately pulls guard' },
+    { value: 'leglock',   label: 'Leg Locker',            sub: 'Attacks legs from any position' },
+    { value: 'pressure',  label: 'Pressure Passer',       sub: 'Heavy top pressure, grinds' },
+  ]
+
+  return (
+    <div className="rounded-2xl border border-teal-light overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm text-charcoal-light hover:bg-surface transition-colors"
+      >
+        <span className="text-xs font-medium">
+          {aiOpponent
+            ? `Opponent: ${opponents.find(o => o.value === aiOpponent)?.label}`
+            : 'Rolling against someone specific? (optional)'}
+        </span>
+        <ChevronDown size={13} className={cn('transition-transform text-charcoal-light', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <div className="px-4 pb-3 grid grid-cols-2 gap-2">
+          {opponents.map(({ value, label, sub }) => (
+            <button
+              key={value}
+              onClick={() => {
+                setAiOpponent(aiOpponent === value ? null : value)
+                setOpen(false)
+              }}
+              className={cn(
+                'flex flex-col items-start px-3 py-2 rounded-xl text-xs text-left border transition-all',
+                aiOpponent === value
+                  ? 'border-teal bg-teal/10 font-semibold text-teal'
+                  : 'border-teal-light bg-white text-charcoal-light hover:border-teal/40'
+              )}
+            >
+              <span className="font-semibold text-charcoal text-[11px]">{label}</span>
+              <span className="text-[10px] text-charcoal-light mt-0.5">{sub}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── F3: Position Plan Tab ─────────────────────────────────────────────────────
+function PositionPlanTab({ eligibility }: { eligibility: TechniqueEligibility[] }) {
+  const positions = [
+    { name: 'Standing', cats: ['Throws'], icon: '🥋', description: 'Takedowns & throws to get the fight to the ground' },
+    { name: 'Guard Passing', cats: ['Passes'], icon: '⬆️', description: 'Break and pass the guard from top' },
+    { name: 'Guard Playing', cats: ['Guards', 'Sweeps'], icon: '⬇️', description: 'Control, sweep, and attack from bottom' },
+    { name: 'Dominant Control', cats: ['Controls'], icon: '🔒', description: 'Hold and advance from dominant positions' },
+    { name: 'Submissions', cats: ['Submissions'], icon: '✅', description: 'Your available finishing attacks' },
+  ]
+  return (
+    <div className="space-y-4">
+      <PageHeader title="My Full Game Plan" subtitle="Your available techniques by position, filtered to what your body is ready for" />
+      {positions.map(pos => {
+        const techs = eligibility.filter(e => {
+          const t = e.techniques as { category: string }
+          return pos.cats.some(c => t.category.toLowerCase() === c.toLowerCase()) && !e.flag
+        }).sort((a, b) => (a.tier === 'GREEN' ? -1 : b.tier === 'GREEN' ? 1 : 0))
+        const green = techs.filter(e => e.tier === 'GREEN')
+        const yellow = techs.filter(e => e.tier === 'YELLOW')
+        if (techs.length === 0) return null
+        return (
+          <SectionCard key={pos.name} title={`${pos.icon} ${pos.name}`}>
+            <p className="text-xs text-charcoal-light mb-3">{pos.description}</p>
+            <div className="space-y-1">
+              {green.slice(0, 5).map(e => {
+                const t = e.techniques as { name: string; category: string }
+                return (
+                  <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl bg-green-50">
+                    <span className="text-sm font-medium text-charcoal">{t.name}</span>
+                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">READY</span>
+                  </div>
+                )
+              })}
+              {yellow.slice(0, 3).map(e => {
+                const t = e.techniques as { name: string; category: string }
+                return (
+                  <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl bg-yellow-50">
+                    <span className="text-sm font-medium text-charcoal">{t.name}</span>
+                    <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">DEVELOPING</span>
+                  </div>
+                )
+              })}
+              {techs.length > 8 && (
+                <p className="text-xs text-charcoal-light text-center pt-1">+{techs.length - 8} more</p>
+              )}
+            </div>
+          </SectionCard>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function MyGame() {
   const navigate = useNavigate()
@@ -1269,9 +1390,20 @@ export function MyGame() {
   const [aiStart, setAiStart]         = useState<AIStart | null>(null)
   const [aiFinish, setAiFinish]       = useState<AIFinish | null>(null)
   const [aiStyle, setAiStyle]         = useState<AIStyle | null>(null)
+  const [aiOpponent, setAiOpponent]   = useState<AIOpponent | null>(null)
   const [aiFlow, setAiFlow]           = useState<FlowTech[]>([])
   const [aiPlanName, setAiPlanName]   = useState<string>('')
   const [aiDescription, setAiDescription] = useState<string>('')
+
+  // F4: GREEN only / F7: Gi-NoGi
+  const [greenOnly, setGreenOnly]     = useState(false)
+  const [giMode, setGiMode]           = useState<GiMode>('both')
+
+  // F6: Share state
+  const [_shareSlug, setShareSlug]    = useState<string | null>(null)
+  const [shareCopied, setShareCopied] = useState(false)
+  const [sharingId, setSharingId]     = useState<string | null>(null)
+  void _shareSlug
 
   // Competition wizard state
   const [compStep, setCompStep]       = useState<number>(0) // 0,1,2 = questions; 3 = result
@@ -1346,21 +1478,59 @@ export function MyGame() {
     }
   }, [tab, loadPlans])
 
+  // F4+F7: Effective eligibility respecting GREEN-only and Gi/No-Gi filters
+  const effectiveEligibility = useMemo(() => {
+    let result = eligibility
+    if (greenOnly) result = result.filter(e => e.tier === 'GREEN' && !e.flag)
+    if (giMode !== 'both') {
+      result = result.filter(e => {
+        const t = e.techniques as { ruleset?: string }
+        return !t.ruleset || t.ruleset === 'both' || t.ruleset === giMode
+      })
+    }
+    return result
+  }, [eligibility, greenOnly, giMode])
+
+  // F5: Export as image
+  const downloadFlowImage = useCallback(async (elementId: string, filename: string) => {
+    const el = document.getElementById(elementId)
+    if (!el) return
+    try {
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false })
+      const link = document.createElement('a')
+      link.download = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.png'
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (e) { console.error('Export failed:', e) }
+  }, [])
+
+  // F6: Share saved plan via DB slug
+  const handleShareSavedPlan = useCallback(async (planId: string) => {
+    setSharingId(planId)
+    const slug = crypto.randomUUID().slice(0, 8)
+    await supabase.from('game_plans').update({ is_public: true, share_slug: slug }).eq('id', planId)
+    const url = `${window.location.origin}/game/${slug}`
+    await navigator.clipboard.writeText(url)
+    setShareSlug(slug)
+    setShareCopied(true)
+    setTimeout(() => { setShareCopied(false); setSharingId(null) }, 3000)
+  }, [])
+
   const sequence = useCallback((p: PathMode) =>
     p === 'offense' ? [...OFFENSE_SEQ] : [...DEFENSE_SEQ], [])
 
   // Quick generate
   const quickGenerate = useCallback((p: PathMode) => {
     setPathMode(p)
-    setQuickFlow(sequence(p).map(cat => pick(eligibleInCat(eligibility, cat)) as TechniqueEligibility))
+    setQuickFlow(sequence(p).map(cat => pick(eligibleInCat(effectiveEligibility, cat)) as TechniqueEligibility))
     setLoadedPlan(null)
-  }, [eligibility, sequence])
+  }, [effectiveEligibility, sequence])
 
   const quickRegenerate = useCallback(() => {
     if (!pathMode) return
-    setQuickFlow(sequence(pathMode).map(cat => pick(eligibleInCat(eligibility, cat)) as TechniqueEligibility))
+    setQuickFlow(sequence(pathMode).map(cat => pick(eligibleInCat(effectiveEligibility, cat)) as TechniqueEligibility))
     setLoadedPlan(null)
-  }, [pathMode, eligibility, sequence])
+  }, [pathMode, effectiveEligibility, sequence])
 
   // Custom: when path changes, reset picks + branches
   const setCustomPath = useCallback((p: PathMode) => {
@@ -1386,7 +1556,7 @@ export function MyGame() {
     const seq = seqMap[start]
 
     const flow: FlowTech[] = seq.map((cat, i) => {
-      const eligible = eligibleInCat(eligibility, cat)
+      const eligible = eligibleInCat(effectiveEligibility, cat)
       const isLastStep = i === seq.length - 1
       let chosen: TechniqueEligibility | null = null
       if (isLastStep) {
@@ -1401,9 +1571,9 @@ export function MyGame() {
 
     const planName = getAIPlanName(start, finish, style)
 
-    const g = eligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
-    const y = eligibility.filter(e => e.tier === 'YELLOW' && !e.flag).length
-    const hipNote = eligibility.some(e => (e.limiting_joints ?? []).some(j => j.startsWith('hip')))
+    const g = effectiveEligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
+    const y = effectiveEligibility.filter(e => e.tier === 'YELLOW' && !e.flag).length
+    const hipNote = effectiveEligibility.some(e => (e.limiting_joints ?? []).some(j => j.startsWith('hip')))
       ? ' Hip mobility is a key area to address to expand your options further.'
       : ''
 
@@ -1422,7 +1592,15 @@ export function MyGame() {
       technical: 'a patient, technical approach',
     }
 
-    const desc = `Based on your ROM profile (${g} GREEN, ${y} YELLOW techniques available), this game plan is built around ${startLabels[start]}, targeting ${finishLabels[finish]} with ${styleLabels[style]}.${hipNote} Focus on drilling the GREEN-tier moves first and work toward the YELLOW techniques as your mobility improves.`
+    const opponentLabels: Record<AIOpponent, string> = {
+      wrestler: 'wrestler / takedown-heavy',
+      guard: 'guard puller',
+      leglock: 'leg locker',
+      pressure: 'pressure passer',
+    }
+    const opponentNote = aiOpponent ? ` Built to counter a ${opponentLabels[aiOpponent]} opponent.` : ''
+
+    const desc = `Based on your ROM profile (${g} GREEN, ${y} YELLOW techniques available), this game plan is built around ${startLabels[start]}, targeting ${finishLabels[finish]} with ${styleLabels[style]}.${hipNote}${opponentNote} Focus on drilling the GREEN-tier moves first and work toward the YELLOW techniques as your mobility improves.`
 
     setAiFlow(flow)
     setAiPlanName(planName)
@@ -1430,14 +1608,16 @@ export function MyGame() {
     setSavingPlanName(planName)
     setAiStep(3)
     setLoadedPlan(null)
-  }, [eligibility])
+  }, [effectiveEligibility, aiOpponent])
 
   const resetAIWizard = () => {
     setAiStep(0)
     setAiStart(null)
     setAiFinish(null)
     setAiStyle(null)
+    setAiOpponent(null)
     setAiFlow([])
+    setBranches([])
     setShowSaveInput(false)
     setSavedConfirm(false)
   }
@@ -1452,8 +1632,8 @@ export function MyGame() {
       : ['Throws', 'Passes', 'Submissions'] as const
 
     const flow: FlowTech[] = seq.map((cat, i) => {
-      // Competition: GREEN-only
-      const eligible = greenOnlyInCat(eligibility, cat)
+      // Competition: GREEN-only from effectiveEligibility
+      const eligible = greenOnlyInCat(effectiveEligibility, cat)
       const isLast = i === seq.length - 1
       let chosen: TechniqueEligibility | null = null
       if (isLast) {
@@ -1474,7 +1654,7 @@ export function MyGame() {
     }
 
     const name = `Comp Plan - ${formatShort[format]}`
-    const greenCount = eligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
+    const greenCount = effectiveEligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
     const durationLabels: Record<CompDuration, string> = {
       under5: 'under 5 minutes',
       '5to8': '5–8 minutes',
@@ -1494,7 +1674,7 @@ export function MyGame() {
     setSavingPlanName(name)
     setCompStep(3)
     setLoadedPlan(null)
-  }, [eligibility])
+  }, [effectiveEligibility])
 
   const resetCompWizard = () => {
     setCompStep(0)
@@ -1507,7 +1687,7 @@ export function MyGame() {
   }
 
   // Handle save to Supabase
-  const handleSavePlan = async (name: string, description: string, pathModeStr: string, techniques: FlowTech[]) => {
+  const handleSavePlan = async (name: string, description: string, pathModeStr: string, techniques: FlowTech[], planBranches?: BranchPoint[]) => {
     if (!user?.id) return
     setSavingToDb(true)
     try {
@@ -1519,6 +1699,7 @@ export function MyGame() {
           description,
           path_mode: pathModeStr,
           techniques,
+          branches: planBranches ?? [],
         })
         .select()
         .single()
@@ -1625,10 +1806,11 @@ export function MyGame() {
         {([
           ['gameplan',   'Game Plan'],
           ['myflows',    'My Flows'],
-          ['library',    'Technique Library'],
-        ] as const).map(([t, label]) => (
+          ['library',    'Library'],
+          ['myplan',     'My Full Plan'],
+        ] as [Tab, string][]).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
-            className={cn('flex-1 text-sm font-semibold py-2 rounded-xl transition-all',
+            className={cn('flex-1 text-xs font-semibold py-2 rounded-xl transition-all',
               tab === t ? 'bg-white text-charcoal shadow-sm' : 'text-charcoal-light hover:text-charcoal'
             )}>{label}</button>
         ))}
@@ -1659,16 +1841,31 @@ export function MyGame() {
             <div className="space-y-3">
               <div className="flex items-center justify-between no-print">
                 <div />
-                <PrintButton planName={loadedPlan.name} />
+                <div className="flex items-center gap-2">
+                  {/* F5: Export Image (loaded) */}
+                  <button
+                    onClick={() => downloadFlowImage('loaded-flow-export', loadedPlan.name)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface transition-colors"
+                  >
+                    <Share2 size={14} /> Download
+                  </button>
+                  <PrintButton planName={loadedPlan.name} />
+                </div>
               </div>
-              <VisualFlow
-                steps={loadedFlowSteps}
-                eligibility={eligibility}
-                planId={loadedPlan.id}
-                planName={loadedPlan.name}
-                planDescription={loadedPlan.description}
-                isCompetition={loadedPlan.pathMode === 'competition'}
-              />
+              <div id="loaded-flow-export">
+                <div className="flex items-center gap-3 pb-3 mb-1">
+                  <span className="font-bold text-sm text-teal">ROMRxBJJ™</span>
+                  <span className="text-charcoal-light text-xs">· {profile?.belt ?? 'white'} Belt · {loadedPlan.name}</span>
+                </div>
+                <VisualFlow
+                  steps={loadedFlowSteps}
+                  eligibility={eligibility}
+                  planId={loadedPlan.id}
+                  planName={loadedPlan.name}
+                  planDescription={loadedPlan.description}
+                  isCompetition={loadedPlan.pathMode === 'competition'}
+                />
+              </div>
             </div>
           )}
 
@@ -1706,6 +1903,43 @@ export function MyGame() {
                   </button>
                 ))}
               </div>
+
+              {/* F4: GREEN Only Toggle + F7: Gi/No-Gi — show for ai and quick modes */}
+              {(genMode === 'ai' || genMode === 'quick') && (
+                <div className="flex flex-wrap items-center gap-3 no-print">
+                  {/* GREEN only toggle */}
+                  <button
+                    onClick={() => setGreenOnly(o => !o)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border',
+                      greenOnly
+                        ? 'bg-teal text-white border-teal'
+                        : 'bg-white text-charcoal-light border-teal-light hover:border-teal/50'
+                    )}
+                  >
+                    <span className={cn('w-2 h-2 rounded-full inline-block', greenOnly ? 'bg-white' : 'bg-teal')} />
+                    GREEN only (competition ready)
+                  </button>
+
+                  {/* Gi/No-Gi segmented control */}
+                  <div className="flex rounded-xl border border-teal-light overflow-hidden">
+                    {(['gi', 'both', 'nogi'] as const).map(g => (
+                      <button
+                        key={g}
+                        onClick={() => setGiMode(g)}
+                        className={cn(
+                          'px-2.5 py-1 text-[11px] font-semibold transition-colors',
+                          giMode === g
+                            ? 'bg-teal text-white'
+                            : 'bg-white text-charcoal-light hover:bg-surface'
+                        )}
+                      >
+                        {g === 'gi' ? 'Gi' : g === 'nogi' ? 'No-Gi' : 'Both'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* ── AI BUILD ── */}
               {genMode === 'ai' && (
@@ -1845,6 +2079,9 @@ export function MyGame() {
                           {/* Generate button appears after selecting style */}
                           {aiStyle !== null && (
                             <div className="space-y-2">
+                              {/* F2: Opponent selector accordion */}
+                              <OpponentSelector aiOpponent={aiOpponent} setAiOpponent={setAiOpponent} />
+
                               <button
                                 onClick={() => {
                                   if (aiStart && aiFinish && aiStyle) {
@@ -1859,7 +2096,7 @@ export function MyGame() {
                               <button
                                 onClick={() => {
                                   if (aiStart && aiFinish && aiStyle) {
-                                    navigate(`/dashboard/chat?gameplan=1&start=${aiStart}&finish=${aiFinish}&style=${aiStyle}`)
+                                    navigate(`/dashboard/chat?gameplan=1&start=${aiStart}&finish=${aiFinish}&style=${aiStyle}${aiOpponent ? '&opponent=' + aiOpponent : ''}`)
                                   }
                                 }}
                                 className="w-full py-2.5 rounded-2xl border-2 border-teal text-teal font-semibold text-sm hover:bg-teal-light transition-colors flex items-center justify-center gap-2"
@@ -1884,6 +2121,13 @@ export function MyGame() {
                           <p className="text-xs text-charcoal-light mt-0.5">AI-generated game plan</p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {/* F5: Export Image */}
+                          <button
+                            onClick={() => downloadFlowImage('ai-flow-export', aiPlanName)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface transition-colors"
+                          >
+                            <Share2 size={14} /> Download
+                          </button>
                           <PrintButton planName={aiPlanName} />
                           <button
                             onClick={resetAIWizard}
@@ -1899,12 +2143,26 @@ export function MyGame() {
                         <p className="text-xs text-charcoal-light leading-relaxed">{aiDescription}</p>
                       </div>
 
-                      {/* Visual flow */}
-                      <VisualFlow
+                      {/* Visual flow wrapped for export */}
+                      <div id="ai-flow-export">
+                        <div className="flex items-center gap-3 pb-3 mb-1">
+                          <span className="font-bold text-sm text-teal">ROMRxBJJ™</span>
+                          <span className="text-charcoal-light text-xs">· {profile?.belt ?? 'white'} Belt · {aiPlanName}</span>
+                        </div>
+                        <VisualFlow
+                          steps={aiFlowSteps}
+                          eligibility={eligibility}
+                          planName={aiPlanName}
+                          planDescription={aiDescription}
+                        />
+                      </div>
+
+                      {/* F1: Branch Builder for AI mode */}
+                      <BranchBuilder
                         steps={aiFlowSteps}
                         eligibility={eligibility}
-                        planName={aiPlanName}
-                        planDescription={aiDescription}
+                        branches={branches}
+                        onBranchesChange={setBranches}
                       />
 
                       {/* Action buttons */}
@@ -1929,7 +2187,8 @@ export function MyGame() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => {
-                                  handleSavePlan(savingPlanName || aiPlanName, aiDescription, 'ai', aiFlow)
+                                  const branchDesc = branches.length > 0 ? ` With ${branches.length} contingency ${branches.length === 1 ? 'branch' : 'branches'} set.` : ''
+                                  handleSavePlan(savingPlanName || aiPlanName, aiDescription + branchDesc, 'ai', aiFlow, branches)
                                 }}
                                 disabled={savingToDb}
                                 className="flex-1 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 disabled:opacity-60"
@@ -1961,15 +2220,15 @@ export function MyGame() {
                           >
                             <RefreshCw size={13} /> Regenerate
                           </button>
-                          <button
-                            onClick={() => {
-                              const url = window.location.href + '#plan=' + btoa(JSON.stringify({ name: aiPlanName, techniques: aiFlow }))
-                              navigator.clipboard.writeText(url)
-                            }}
-                            className="flex-1 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
-                          >
-                            <Share2 size={13} /> Share
-                          </button>
+                          {savedConfirm && savedPlans.length > 0 && (
+                            <button
+                              onClick={() => handleShareSavedPlan(savedPlans[0].id)}
+                              className="flex-1 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface flex items-center justify-center gap-2"
+                            >
+                              {shareCopied ? <Check size={13} /> : <Share2 size={13} />}
+                              {shareCopied ? 'Link copied!' : 'Share'}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2014,6 +2273,13 @@ export function MyGame() {
                           <p className="text-xs text-charcoal-light">GREEN + YELLOW only</p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {/* F5: Export Image (quick) */}
+                          <button
+                            onClick={() => downloadFlowImage('quick-flow-export', pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow')}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface transition-colors"
+                          >
+                            <Share2 size={14} /> Download
+                          </button>
                           <PrintButton />
                           <button onClick={quickRegenerate}
                             className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors">
@@ -2022,11 +2288,17 @@ export function MyGame() {
                         </div>
                       </div>
 
-                      <VisualFlow
-                        steps={quickFlowSteps}
-                        eligibility={eligibility}
-                        planName={pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow'}
-                      />
+                      <div id="quick-flow-export">
+                        <div className="flex items-center gap-3 pb-3 mb-1">
+                          <span className="font-bold text-sm text-teal">ROMRxBJJ™</span>
+                          <span className="text-charcoal-light text-xs">· {profile?.belt ?? 'white'} Belt · {pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow'}</span>
+                        </div>
+                        <VisualFlow
+                          steps={quickFlowSteps}
+                          eligibility={eligibility}
+                          planName={pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow'}
+                        />
+                      </div>
 
                       {/* Save quick flow */}
                       <div className="no-print space-y-2">
@@ -2116,7 +2388,7 @@ export function MyGame() {
                   {pathMode && (
                     <div className="space-y-3">
                       {seq.map((cat, i) => {
-                        const eligible = eligibleInCat(eligibility, cat)
+                        const eligible = eligibleInCat(effectiveEligibility, cat)
                         const fromPos = CAT_FROM[cat]
                         const toPos   = CAT_TO[cat]
                         const prevToPos = i > 0 ? CAT_TO[seq[i - 1]] : null
@@ -2406,6 +2678,13 @@ export function MyGame() {
                           <p className="text-xs text-charcoal-light mt-0.5">GREEN-only competition plan</p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {/* F5: Export Image (comp) */}
+                          <button
+                            onClick={() => downloadFlowImage('comp-flow-export', compPlanName)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-light text-sm font-semibold text-charcoal hover:bg-surface transition-colors"
+                          >
+                            <Share2 size={14} /> Download
+                          </button>
                           <PrintButton planName={compPlanName} />
                           <button
                             onClick={resetCompWizard}
@@ -2431,13 +2710,19 @@ export function MyGame() {
                         </div>
                       ) : (
                         <>
-                          <VisualFlow
-                            steps={compFlowSteps}
-                            eligibility={eligibility}
-                            planName={compPlanName}
-                            planDescription={compDescription}
-                            isCompetition
-                          />
+                          <div id="comp-flow-export">
+                            <div className="flex items-center gap-3 pb-3 mb-1">
+                              <span className="font-bold text-sm text-teal">ROMRxBJJ™</span>
+                              <span className="text-charcoal-light text-xs">· {profile?.belt ?? 'white'} Belt · {compPlanName}</span>
+                            </div>
+                            <VisualFlow
+                              steps={compFlowSteps}
+                              eligibility={eligibility}
+                              planName={compPlanName}
+                              planDescription={compDescription}
+                              isCompetition
+                            />
+                          </div>
 
                           <div className="flex flex-col gap-2 no-print">
                             {!showSaveInput && !savedConfirm && (
@@ -2535,12 +2820,17 @@ export function MyGame() {
                   userId={user.id}
                   onLoad={handleLoadPlan}
                   onDelete={handleDeletePlan}
+                  onShare={handleShareSavedPlan}
+                  shareActive={shareCopied && sharingId === plan.id}
                 />
               ))}
             </div>
           )}
         </div>
       )}
+
+      {/* ── MY FULL PLAN ── */}
+      {tab === 'myplan' && <PositionPlanTab eligibility={eligibility} />}
 
       {/* ── TECHNIQUE LIBRARY ── */}
       {tab === 'library' && (

@@ -149,15 +149,25 @@ export function Chat() {
       }, 600)
     } else {
       // Standard game plan mode
-      const start  = params.get('start')  ?? ''
-      const finish = params.get('finish') ?? ''
-      const style  = params.get('style')  ?? ''
+      const start    = params.get('start')    ?? ''
+      const finish   = params.get('finish')   ?? ''
+      const style    = params.get('style')    ?? ''
+      const opponent = params.get('opponent') ?? ''
       if (!start || !finish || !style) return
       const startLabel  = START_LABELS[start]  ?? start
       const finishLabel = FINISH_LABELS[finish] ?? finish
       const styleLabel  = STYLE_LABELS[style]  ?? style
+      const opponentLabels: Record<string, string> = {
+        wrestler: 'wrestler / takedown-heavy player',
+        guard: 'guard puller',
+        leglock: 'leg locker',
+        pressure: 'pressure passer',
+      }
+      const opponentNote = opponent && opponentLabels[opponent]
+        ? ` My training partner tends to be a ${opponentLabels[opponent]} — help me build a plan that counters their tendencies while staying within my GREEN and YELLOW technique library.`
+        : ''
       setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
-      const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}. Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
+      const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}.${opponentNote} Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
       setTimeout(async () => {
         setMessages(p => [...p, { role: 'user', content: msg }])
         setBusy(true); setError('')

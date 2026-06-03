@@ -17,6 +17,7 @@ import { MyCoach } from './pages/MyCoach'
 import { MySchool } from './pages/MySchool'
 import { ResultsPreview } from './pages/ResultsPreview'
 import { Unsubscribe } from './pages/Unsubscribe'
+import { ShareView } from './pages/ShareView'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/onboarding/assessment" element={<Assessment />} />
         <Route path="/onboarding/results"    element={<ResultsPreview />} />
         <Route path="/unsubscribe"     element={<Unsubscribe />} />
+        <Route path="/game/:slug"       element={<ShareView />} />
 
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />
