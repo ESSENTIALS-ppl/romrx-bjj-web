@@ -92,8 +92,8 @@ const STEPS: Step[] = [
       'Read the number or have a partner read it.',
       'Record the number. Re-zero and follow the same directions with the opposite arm.',
     ],
-    mistake: 'Your elbow drops or your whole upper arm rotates to help.',
-    mistakeFix: 'Keep the elbow at shoulder height the whole time. Only the forearm moves - everything above the elbow stays still.',
+    mistake: 'Your shoulder shrugs up or your elbow drops below shoulder height.',
+    mistakeFix: 'Keep your shoulder pressed down and your elbow at the same height the whole time. From the elbow to the shoulder, the arm only rotates - it does not lift up or drop down.',
     fields: [
       { key: 'shoulder_er_l', label: 'Left', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
       { key: 'shoulder_er_r', label: 'Right', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
