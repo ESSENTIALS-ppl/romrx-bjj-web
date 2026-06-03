@@ -90,7 +90,7 @@ const STEPS: Step[] = [
     howTo: [
       'Keep your elbow in the same spot. Rotate your forearm upward, allowing your shoulder to turn until you feel a strong stretch.',
       'Read the number or have a partner read it.',
-      'Record the number. Re-zero and follow the same directions with the opposite arm.',
+      'Record the number. Re-zero and repeat with the opposite arm.',
     ],
     mistake: 'Your shoulder shrugs up or your elbow drops below shoulder height.',
     mistakeFix: 'Keep your shoulder pressed down and your elbow at the same height the whole time. From the elbow to the shoulder, the arm only rotates - it does not lift up or drop down.',
