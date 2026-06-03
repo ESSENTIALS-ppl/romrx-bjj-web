@@ -225,13 +225,13 @@ const STEPS: Step[] = [
     position: [
       'Flexion is standing. Extension is on the floor face down.',
       'Flexion setup: Stand straight, feet shoulder-width apart. Hold your phone at your side, screen facing away. Make sure to zero before you start.',
-      'Extension setup: Lie face down on the floor. Tuck your phone into the back of your waistband, screen facing up. Zero lying flat. Both hands go under your shoulders.',
+      'Extension setup: Lie face down on the floor. Place one hand under your shoulder for the press-up. Hold your phone at your side with your other hand, screen facing away. Zero lying flat.',
     ],
     howTo: [
       'Flexion: Keep your legs straight. Slowly bend forward with your back flat. Stop when you feel a strong stretch in the back of your legs. Read the number.',
-      'Extension: Press up into a cobra position, keeping your hips on the floor. Say "Hey Siri, take a screenshot" or "Hey Google, take a screenshot" at your end range. Record the number.',
+      'Extension: Press up on one arm into a cobra, keeping your hips flat on the floor. Read the number at your end range.',
     ],
-    mistake: 'Rounding the back to get lower on flexion, or lifting your hips off the floor during the cobra press.',
+    mistake: 'Rounding the back to get lower on flexion, or letting your hips lift off the floor during the cobra.',
     mistakeFix: 'For flexion, the stretch in the back of your legs is your true stopping point. For extension, your hips stay flat on the floor the entire time - only your chest rises.',
     fields: [
       { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
