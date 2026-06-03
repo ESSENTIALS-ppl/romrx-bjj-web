@@ -66,18 +66,24 @@ const OPTIMAL: Record<string, number> = {
   'Cervical Lat': 45, 'Cervical Flex': 55, 'Cervical Ext': 65,
 }
 
+function norm(val: number, optimal: number) {
+  return Math.min(100, Math.round((val / optimal) * 100))
+}
+
 function buildRadar(a: Assessment) {
   return [
-    { joint: 'Hip ER',       value: Math.max(a.hip_er_l ?? 0, a.hip_er_r ?? 0) },
-    { joint: 'Hip IR',       value: Math.max(a.hip_ir_l ?? 0, a.hip_ir_r ?? 0) },
-    { joint: 'Hip Abd',      value: Math.max(a.hip_abd_l ?? 0, a.hip_abd_r ?? 0) },
-    { joint: 'Hip Flex',     value: Math.max(a.hip_flex_l ?? 0, a.hip_flex_r ?? 0) },
-    { joint: 'Shoulder ER',  value: Math.max(a.shoulder_er_l ?? 0, a.shoulder_er_r ?? 0) },
-    { joint: 'Shoulder Flex',value: Math.max(a.shoulder_flex_l ?? 0, a.shoulder_flex_r ?? 0) },
-    { joint: 'Ankle DF',     value: Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0) },
-    { joint: 'Lumbar Flex',  value: a.lumbar_flex ?? 0 },
-    { joint: 'Lumbar Ext',   value: a.lumbar_ext ?? 0 },
-    { joint: 'Cervical Lat', value: Math.max(a.cervical_lat_l ?? 0, a.cervical_lat_r ?? 0) },
+    { joint: 'Hip ER',       value: norm(Math.max(a.hip_er_l ?? 0, a.hip_er_r ?? 0), OPTIMAL['Hip ER']) },
+    { joint: 'Hip IR',       value: norm(Math.max(a.hip_ir_l ?? 0, a.hip_ir_r ?? 0), OPTIMAL['Hip IR']) },
+    { joint: 'Hip Abd',      value: norm(Math.max(a.hip_abd_l ?? 0, a.hip_abd_r ?? 0), OPTIMAL['Hip Abd']) },
+    { joint: 'Hip Flex',     value: norm(Math.max(a.hip_flex_l ?? 0, a.hip_flex_r ?? 0), OPTIMAL['Hip Flex']) },
+    { joint: 'Shoulder ER',  value: norm(Math.max(a.shoulder_er_l ?? 0, a.shoulder_er_r ?? 0), OPTIMAL['Shoulder ER']) },
+    { joint: 'Shoulder Flex',value: norm(Math.max(a.shoulder_flex_l ?? 0, a.shoulder_flex_r ?? 0), OPTIMAL['Shoulder Flex']) },
+    { joint: 'Ankle DF',     value: norm(Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0), OPTIMAL['Ankle DF']) },
+    { joint: 'Lumbar Flex',  value: norm(a.lumbar_flex ?? 0, OPTIMAL['Lumbar Flex']) },
+    { joint: 'Lumbar Ext',   value: norm(a.lumbar_ext ?? 0, OPTIMAL['Lumbar Ext']) },
+    { joint: 'Cerv Lat',     value: norm(Math.max(a.cervical_lat_l ?? 0, a.cervical_lat_r ?? 0), OPTIMAL['Cervical Lat']) },
+    { joint: 'Cerv Flex',    value: norm(a.cervical_flex ?? 0, OPTIMAL['Cervical Flex']) },
+    { joint: 'Cerv Ext',     value: norm(a.cervical_ext ?? 0, OPTIMAL['Cervical Ext']) },
   ]
 }
 
@@ -186,7 +192,7 @@ export function MyBody() {
               <Radar dataKey="value" stroke="#008080" fill="#008080" fillOpacity={0.2} dot={{ fill: '#008080', r: 3 }} />
               <Tooltip
                 contentStyle={{ fontSize: 12, borderRadius: 10, border: '1px solid #e0ecec', fontFamily: 'Inter' }}
-                formatter={(v) => [`${v}°`, 'ROM']}
+                formatter={(v) => [`${v}%`, '% of optimal']}
               />
             </RadarChart>
           </ResponsiveContainer>
