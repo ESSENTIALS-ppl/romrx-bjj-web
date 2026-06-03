@@ -59,11 +59,13 @@ function getPRSTier(s: number) {
   return              { label: 'AT RISK',    color: 'text-red-tier',   bg: 'bg-red-tier-bg',     ring: 'border-red-tier/40' }
 }
 
+// Elite BJJ athlete targets - scoring against these gives meaningful differentiation
+// Most well-trained athletes score 70-85%, restrictions show clearly below 65%
 const OPTIMAL: Record<string, number> = {
-  'Hip ER': 55, 'Hip IR': 40, 'Hip Abd': 45, 'Hip Flex': 110,
-  'Shoulder ER': 80, 'Shoulder Flex': 165, 'Ankle DF': 15,
-  'Lumbar Flex': 50, 'Lumbar Ext': 25,
-  'Cervical Lat': 45, 'Cervical Flex': 55, 'Cervical Ext': 65,
+  'Hip ER': 80,  'Hip IR': 50,  'Hip Abd': 60,  'Hip Flex': 130,
+  'Shoulder ER': 95, 'Shoulder Flex': 180, 'Ankle DF': 20,
+  'Lumbar Flex': 70, 'Lumbar Ext': 35,
+  'Cervical Lat': 50, 'Cervical Flex': 65, 'Cervical Ext': 75,
 }
 
 function norm(val: number, optimal: number) {
