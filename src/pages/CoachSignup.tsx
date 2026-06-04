@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { recordConsent } from '../lib/terms'
 import { Loader2, Users } from 'lucide-react'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
@@ -56,6 +57,10 @@ export function CoachSignup() {
         subscription_tier: 'coach',
         platforms: ['bjj'],
       }, { onConflict: 'id' })
+
+      // Record a timestamped, versioned consent to the ROMRx LLC agreement
+      // before redirecting to checkout.
+      await recordConsent({ userId: data.user.id, signedName: fullName })
 
       // Notify Jim of new coach account creation (pre-payment)
       // Fire-and-forget — don't block checkout on this
@@ -206,9 +211,9 @@ export function CoachSignup() {
             <span className="text-xs text-charcoal-light leading-relaxed">
               I have read and agree to the{' '}
               <a href="/legal" target="_blank" rel="noopener noreferrer" className="text-teal underline font-medium">
-                Terms of Service, Privacy Policy &amp; Refund Policy
+                ROMRx LLC Terms of Service, Privacy Policy &amp; Refund Policy
               </a>
-              . All sales are final.
+              {' '}&mdash; a company-wide agreement with ROMRx LLC (parent of ROMRxBJJ, ROMRxBodyBuilding, and other ROMRx products). All sales are final.
             </span>
           </label>
 
