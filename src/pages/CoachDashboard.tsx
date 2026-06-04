@@ -13,7 +13,7 @@ import {
   Zap, GraduationCap, BookOpen, ChevronRight,
   Award, Video, Dumbbell, NotebookPen, Plus, CheckCircle2,
   Syringe, ShieldPlus, ChevronLeft, ChevronRight as ChevronR,
-  Trophy, Target, Calendar, Scale, Check,
+  Trophy, Target, Calendar, Scale, Check, Info,
 } from 'lucide-react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -1792,18 +1792,87 @@ function RoadmapPreviewTab({ icon: Icon, title, description, phases }: {
 }
 
 // ── My Injury Tab ─────────────────────────────────────────────────────────────
-const STAGE_LABELS: Record<number, { name: string; description: string; color: string }> = {
-  0: { name: 'Off Mat',            description: 'Complete rest — no physical activity affecting injury.', color: 'text-red-tier' },
-  1: { name: 'Cardio Only',        description: 'Bike, swim, walk — no grappling contact.',              color: 'text-red-tier' },
-  2: { name: 'Solo Movement',      description: 'Individual movement patterns, no contact.',             color: 'text-gold' },
-  3: { name: 'Technical Solo',     description: 'Solo drilling of non-affected techniques only.',       color: 'text-gold' },
-  4: { name: 'Technical Drilling', description: 'Compliant partner, zero resistance.',                  color: 'text-gold' },
-  5: { name: 'Positional (Protected)', description: 'Sparring avoiding the injury area.',             color: 'text-teal' },
-  6: { name: 'Flow Rolling',       description: 'Light intensity, injury-aware partner only.',         color: 'text-teal' },
-  7: { name: 'Modified Training',  description: 'Full class with specific technique restrictions.',    color: 'text-teal' },
-  8: { name: 'Full Training',      description: 'No modifications — full intensity.',                  color: 'text-green-tier' },
-  9: { name: 'Competition Ready',  description: 'Competition cleared — coach sign-off required.',     color: 'text-green-tier' },
+// Return-to-Mat protocol. Each stage has a coach-facing why / what / how so a coach
+// can always explain to an athlete WHY they're at a stage, WHAT they're allowed to
+// do, and HOW they earn the next stage. `description` kept as the short summary.
+const STAGE_GUIDE: Record<number, {
+  name: string; description: string; color: string; band: string
+  why: string; what: string; how: string
+}> = {
+  0: {
+    name: 'Off Mat', color: 'text-red-tier', band: 'Protect',
+    description: 'Complete rest — no physical activity affecting injury.',
+    why: 'Tissue is in the acute/inflammatory phase. Loading it now risks re-injury and a longer total layoff.',
+    what: 'Complete rest from anything that loads the injury. Off the mat entirely. Manage pain and swelling.',
+    how: 'Pain at rest is gone and daily-life movement is pain-free before moving to Stage 1.',
+  },
+  1: {
+    name: 'Cardio Only', color: 'text-red-tier', band: 'Protect',
+    description: 'Bike, swim, walk — no grappling contact.',
+    why: 'Keep the engine and uninjured body conditioned without stressing the healing tissue.',
+    what: 'Low-impact cardio that does not involve the injured area — bike, swim, walk. Zero grappling contact.',
+    how: 'Cardio is pain-free and the athlete can move the injured area through a basic range without pain.',
+  },
+  2: {
+    name: 'Solo Movement', color: 'text-gold', band: 'Reintroduce',
+    description: 'Individual movement patterns, no contact.',
+    why: 'Restore range of motion and reawaken movement patterns before adding any external load.',
+    what: 'Solo mobility and BJJ movement patterns — shrimps, bridges, rolls — at the athlete\'s own pace. Still no contact.',
+    how: 'Full or near-full range restored, solo movements pain-free at normal speed.',
+  },
+  3: {
+    name: 'Technical Solo', color: 'text-gold', band: 'Reintroduce',
+    description: 'Solo drilling of non-affected techniques only.',
+    why: 'Rebuild technical sharpness and confidence on movements that don\'t challenge the injury.',
+    what: 'Solo technique drilling (sprawls, guard retention shadow-drills) that avoids the injured area.',
+    how: 'Solo technique reps are crisp and confident with no compensation or guarding.',
+  },
+  4: {
+    name: 'Technical Drilling', color: 'text-gold', band: 'Reintroduce',
+    description: 'Compliant partner, zero resistance.',
+    why: 'First reintroduction of a partner — controlled load to test tolerance without unpredictability.',
+    what: 'Drilling with a fully compliant partner at zero resistance. Partner gives no surprises.',
+    how: 'Controlled partner drilling is pain-free with no swelling or soreness the next day.',
+  },
+  5: {
+    name: 'Positional (Protected)', color: 'text-teal', band: 'Rebuild',
+    description: 'Sparring avoiding the injury area.',
+    why: 'Reintroduce live resistance in a contained way while still shielding the injury.',
+    what: 'Positional sparring with rules that protect the injured area (e.g. no leg attacks for a knee).',
+    how: 'Protected live rounds feel stable and confident, no pain during or after.',
+  },
+  6: {
+    name: 'Flow Rolling', color: 'text-teal', band: 'Rebuild',
+    description: 'Light intensity, injury-aware partner only.',
+    why: 'Bridge from positional to full rolling at an intensity the tissue can handle.',
+    what: 'Light, continuous flow rolling with a trusted, injury-aware partner. No spikes in intensity.',
+    how: 'Flow rolling is comfortable and the athlete trusts the area under light unpredictability.',
+  },
+  7: {
+    name: 'Modified Training', color: 'text-teal', band: 'Rebuild',
+    description: 'Full class with specific technique restrictions.',
+    why: 'Return to the room with the team while keeping a few guardrails on the riskiest positions.',
+    what: 'Full class participation with a short list of specific restrictions (named positions/submissions to avoid).',
+    how: 'Full class with restrictions causes no setbacks across a full week of training.',
+  },
+  8: {
+    name: 'Full Training', color: 'text-green-tier', band: 'Return',
+    description: 'No modifications — full intensity.',
+    why: 'Tissue tolerates full training load; restrictions are no longer needed.',
+    what: 'Normal training — full intensity, no restrictions. Train like everyone else.',
+    how: 'Sustained full training with zero symptoms qualifies the athlete for competition clearance.',
+  },
+  9: {
+    name: 'Competition Ready', color: 'text-green-tier', band: 'Return',
+    description: 'Competition cleared — coach sign-off required.',
+    why: 'Athlete has proven full tolerance and is cleared for the demands of competition.',
+    what: 'Cleared for competition prep and competing. Coach has signed off on full readiness.',
+    how: 'This is the final stage — clear the injury to take the athlete off the protocol.',
+  },
 }
+
+// Backward-compatible alias (older references expect STAGE_LABELS)
+const STAGE_LABELS = STAGE_GUIDE
 
 interface InjuryRecord {
   id: string; athlete_user_id: string; body_part: string; injury_type: string
@@ -1860,19 +1929,42 @@ function InjuryCard({
         </span>
       </div>
 
-      {/* Stage progress bar */}
+      {/* Stage progress bar + always-visible quick stage controls */}
       {!isCleared && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
             <p className={cn('text-xs font-bold', stageInfo.color)}>Stage {injury.stage}/9 — {stageInfo.name}</p>
-            <button onClick={() => setExpanded(o => !o)} className="text-[11px] text-charcoal-light hover:text-charcoal transition-colors">
-              {expanded ? 'Less' : 'Advance'}
-            </button>
+            {/* Quick − / + stage steppers, always visible */}
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => advance(injury.stage - 1)} disabled={saving || injury.stage <= 0}
+                title="Move back a stage"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface text-charcoal-light hover:text-charcoal hover:bg-teal-light transition-colors disabled:opacity-30">
+                <ChevronLeft size={14} />
+              </button>
+              <span className="text-[11px] font-bold text-charcoal tabular-nums w-4 text-center">{injury.stage}</span>
+              <button onClick={() => advance(injury.stage + 1)} disabled={saving || injury.stage >= 9}
+                title="Advance a stage"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-teal text-white hover:bg-teal/90 transition-colors disabled:opacity-30">
+                <ChevronR size={14} />
+              </button>
+            </div>
           </div>
           <div className="w-full bg-teal-light rounded-full h-1.5">
             <div className="bg-teal h-1.5 rounded-full transition-all duration-500" style={{ width: `${(injury.stage / 9) * 100}%` }} />
           </div>
           <p className="text-[11px] text-charcoal-light">{stageInfo.description}</p>
+          {/* Action row: details toggle + heal/clear */}
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <button onClick={() => setExpanded(o => !o)}
+              className="text-[11px] font-semibold text-teal hover:text-teal/80 transition-colors flex items-center gap-1">
+              <Info size={12} /> {expanded ? 'Hide details' : 'Stage details + notes'}
+            </button>
+            <button onClick={() => advance(injury.stage, 'cleared')} disabled={saving}
+              title="Heal: clear this injury and remove from protocol"
+              className="flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-xl bg-green-tier text-white hover:bg-green-tier/90 transition-colors disabled:opacity-50">
+              <CheckCircle2 size={12} /> Heal &amp; Clear
+            </button>
+          </div>
         </div>
       )}
 
@@ -1895,32 +1987,9 @@ function InjuryCard({
             </div>
           </div>
           <textarea value={stageNote} onChange={e => setStageNote(e.target.value)} rows={2}
-            placeholder="Advancement notes (optional)..."
+            placeholder="Advancement notes (saved with next stage change)..."
             className="w-full text-xs rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none" />
-          <div className="flex gap-2 flex-wrap">
-            {injury.stage > 0 && (
-              <button onClick={() => advance(injury.stage - 1)} disabled={saving}
-                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-surface text-charcoal-light hover:text-charcoal transition-colors disabled:opacity-50">
-                <ChevronLeft size={12} /> Back a Stage
-              </button>
-            )}
-            {injury.stage < 9 && (
-              <button onClick={() => advance(injury.stage + 1)} disabled={saving}
-                className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1 disabled:opacity-50">
-                Advance to Stage {injury.stage + 1} <ChevronR size={12} />
-              </button>
-            )}
-            {injury.stage === 9 && (
-              <button onClick={() => advance(9, 'cleared')} disabled={saving}
-                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-green-tier text-white hover:bg-green-tier/90 transition-colors disabled:opacity-50">
-                <CheckCircle2 size={12} /> Clear Injury
-              </button>
-            )}
-            <button onClick={() => advance(injury.stage, 'cleared')} disabled={saving}
-              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-surface text-charcoal-light hover:text-charcoal transition-colors disabled:opacity-50">
-              Clear Now
-            </button>
-          </div>
+          <p className="text-[10px] text-charcoal-light">Use the <span className="font-semibold">− / +</span> steppers above to move stages, or <span className="font-semibold text-green-tier">Heal &amp; Clear</span> to remove from protocol. Notes here save with the next change.</p>
         </div>
       )}
 
@@ -1964,28 +2033,19 @@ function MyInjuryTab({ session, roster }: { session: { access_token: string } | 
 
   if (injuries.length === 0) {
     return (
-      <EmptyState
-        icon={ShieldPlus}
-        title="No active injuries"
-        description="Injuries logged from athlete cards will appear here. Use the Injury button on any athlete card to log a new injury."
-      />
+      <div className="space-y-5">
+        <EmptyState
+          icon={ShieldPlus}
+          title="No active injuries"
+          description="Injuries logged from athlete cards will appear here. Use the Injury button on any athlete card to log a new injury."
+        />
+        <StageCheatSheet />
+      </div>
     )
   }
 
   return (
     <div className="space-y-5">
-      {/* Stage reference */}
-      <SectionCard title="Return-to-Mat Protocol">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {Object.entries(STAGE_LABELS).map(([stage, info]) => (
-            <div key={stage} className="text-center">
-              <p className={cn('text-[10px] font-bold', info.color)}>Stage {stage}</p>
-              <p className="text-[10px] text-charcoal-light leading-snug">{info.name}</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
       {/* Active injuries */}
       {active.length > 0 && (
         <div className="space-y-3">
@@ -2019,7 +2079,68 @@ function MyInjuryTab({ session, roster }: { session: { access_token: string } | 
           )}
         </div>
       )}
+
+      {/* Return-to-Mat cheat sheet — full why/what/how reference, placed at bottom */}
+      <StageCheatSheet />
     </div>
+  )
+}
+
+// Full coach-facing reference: why each stage exists, what the athlete can do, and
+// how they earn the next stage. Lives at the bottom of the My Injury tab so a coach
+// can always explain a stage to an athlete instead of just naming a number.
+function StageCheatSheet() {
+  const [open, setOpen] = useState(true)
+  const bandColor: Record<string, string> = {
+    Protect: 'bg-red-50 text-red-tier',
+    Reintroduce: 'bg-gold/15 text-gold',
+    Rebuild: 'bg-teal-light text-teal',
+    Return: 'bg-green-tier-bg text-green-tier',
+  }
+  return (
+    <SectionCard title="">
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-2 text-left">
+        <span className="flex items-center gap-2">
+          <BookOpen size={15} className="text-teal" />
+          <span className="text-sm font-bold text-charcoal">Return-to-Mat Protocol — Coach Cheat Sheet</span>
+        </span>
+        <ChevronDown size={16} className={cn('text-charcoal-light transition-transform', open && 'rotate-180')} />
+      </button>
+      <p className="text-[11px] text-charcoal-light mt-1">
+        What each stage means, what the athlete is cleared to do, and how they earn the next stage.
+      </p>
+
+      {open && (
+        <div className="mt-4 space-y-3">
+          {Object.entries(STAGE_GUIDE).map(([stage, info]) => (
+            <div key={stage} className="rounded-2xl border border-teal-light bg-surface/60 p-3">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <span className={cn('text-xs font-bold', info.color)}>Stage {stage}</span>
+                <span className="text-sm font-bold text-charcoal">{info.name}</span>
+                <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide', bandColor[info.band] ?? 'bg-surface text-charcoal-light')}>
+                  {info.band}
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-2.5">
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wide">Why</p>
+                  <p className="text-[11px] text-charcoal leading-snug">{info.why}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wide">What they can do</p>
+                  <p className="text-[11px] text-charcoal leading-snug">{info.what}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wide">How to progress</p>
+                  <p className="text-[11px] text-charcoal leading-snug">{info.how}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </SectionCard>
   )
 }
 
