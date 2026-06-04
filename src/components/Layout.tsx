@@ -71,7 +71,7 @@ function buildCoachNav(sport: SportConfig): NavItem[] {
   const items: NavItem[] = [
     { to: '/dashboard/coach', icon: Users, label: 'My Team', end: true },
     { to: '/dashboard/coach-coaching', icon: GraduationCap, label: 'My Coaching' },
-    { to: '/dashboard/coach-competitions', icon: Trophy, label: 'My Competitions' },
+    { to: '/dashboard/coach-competitions', icon: Trophy, label: 'My Competitors' },
     { to: '/dashboard/coach-injury', icon: Syringe, label: 'My Injury' },
   ]
   if (sport.has_schools) {

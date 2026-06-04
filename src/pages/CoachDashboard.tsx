@@ -13,6 +13,7 @@ import {
   Zap, GraduationCap, BookOpen, ChevronRight,
   Award, Video, Dumbbell, NotebookPen, Plus, CheckCircle2,
   Syringe, ShieldPlus, ChevronLeft, ChevronRight as ChevronR,
+  Trophy, Target, Calendar, Scale, Check,
 } from 'lucide-react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -83,6 +84,19 @@ interface TechniqueReadinessItem {
 interface TeachingEntry {
   id: string; technique_code: string; technique_name: string; technique_type: string; notes: string | null; taught_at: string
 }
+interface CompetitorRecord {
+  id: string; athlete_user_id: string; is_ready: boolean
+  next_comp_name: string | null; next_comp_date: string | null
+  weight_class: string | null; weight_unit: string
+  current_weight: number | null; target_weight: number | null
+  marked_ready_at: string
+}
+interface ActiveInjury { body_part: string; stage: number; status: string }
+interface AttendanceInfo {
+  lastSeen: string | null      // ISO date of most recent class_date
+  presentToday: boolean        // checked in for CURRENT_DATE
+  classes30d: number           // distinct class_dates in last 30 days
+}
 
 type Tab = 'team' | 'coaching' | 'competitions' | 'injury' | 'school'
 type TeamSubTab = 'roster' | 'notes'
@@ -140,6 +154,57 @@ function getReadiness(t: { green: number; yellow: number; red: number; total: nu
   if (greenPct > 0.55) return { label: 'READY',     color: 'green' }
   return { label: 'DEVELOPING', color: 'yellow' }
 }
+// ── Attendance ────────────────────────────────────────────────────────────────
+const AT_RISK_DAYS = 14   // no attendance in this many days => at-risk
+function daysSince(iso: string | null): number | null {
+  if (!iso) return null
+  const then = new Date(iso + 'T00:00:00')
+  const now = new Date()
+  const ms = now.setHours(0, 0, 0, 0) - then.setHours(0, 0, 0, 0)
+  return Math.max(0, Math.round(ms / 86_400_000))
+}
+function lastSeenLabel(iso: string | null): string {
+  const d = daysSince(iso)
+  if (d === null) return 'Never checked in'
+  if (d === 0) return 'Last seen today'
+  if (d === 1) return 'Last seen yesterday'
+  return `Last seen ${d}d ago`
+}
+function isAtRisk(info: AttendanceInfo | undefined): boolean {
+  if (!info) return false
+  const d = daysSince(info.lastSeen)
+  return d === null || d >= AT_RISK_DAYS
+}
+function AtRiskBadge() {
+  return (
+    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide bg-red-tier-bg text-red-tier flex items-center gap-1">
+      <AlertTriangle size={9} /> At Risk
+    </span>
+  )
+}
+// Local YYYY-MM-DD (matches what the coach sees, avoids UTC drift)
+function localDateStr(d: Date = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+// Optimistic state updaters for attendance map
+function applyCheckIn(prev: Record<string, AttendanceInfo>, uid: string, today: string): Record<string, AttendanceInfo> {
+  const cur = prev[uid]
+  if (cur?.presentToday) return prev
+  const lastSeen = cur && (cur.lastSeen ?? '') > today ? cur.lastSeen : today
+  return { ...prev, [uid]: { lastSeen, presentToday: true, classes30d: (cur?.classes30d ?? 0) + 1 } }
+}
+function applyCheckOut(prev: Record<string, AttendanceInfo>, uid: string, today: string): Record<string, AttendanceInfo> {
+  const cur = prev[uid]
+  if (!cur?.presentToday) return prev
+  // We don't know the previous lastSeen without a refetch; conservatively clear today's flag.
+  const classes30d = Math.max(0, cur.classes30d - 1)
+  const lastSeen = cur.lastSeen === today ? null : cur.lastSeen
+  return { ...prev, [uid]: { lastSeen, presentToday: false, classes30d } }
+}
+
 function readinessSortKey(item: AthleteRosterItem): number {
   const r = getReadiness(item.techniques)
   if (r.label === 'AT RISK') return 0
@@ -244,14 +309,28 @@ function InlineNoteEditor({ athleteId, initialNote, session, onClose, onSaved }:
 }
 
 // ── Promote Dialog ─────────────────────────────────────────────────────────────
-function PromoteDialog({ athlete, onPromote, onClose }: {
-  athlete: AthleteRosterItem; onPromote: (belt: string) => Promise<void>; onClose: () => void
+function PromoteDialog({ athlete, attendance, onPromote, onClose }: {
+  athlete: AthleteRosterItem; attendance: AttendanceInfo | undefined
+  onPromote: (belt: string) => Promise<void>; onClose: () => void
 }) {
   const currentIdx = BELT_ORDER.indexOf(athlete.belt.toLowerCase())
   const options = BELT_ORDER.slice(currentIdx + 1)
   const [selected, setSelected] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  // Eligibility signals (informational only — coach always decides)
+  const classes30d = attendance?.classes30d ?? 0
+  const seenDays = daysSince(attendance?.lastSeen ?? null)
+  const readiness = getReadiness(athlete.techniques)
+  const matActive = seenDays !== null && seenDays < AT_RISK_DAYS
+  const consistentMat = classes30d >= 8           // ~2x/wk over a month
+  const romReady = readiness.label === 'READY'
+  const signals = [
+    { ok: matActive,      label: matActive ? `On the mat (${lastSeenLabel(attendance?.lastSeen ?? null).replace('Last seen ', '')})` : 'Inactive on the mat' },
+    { ok: consistentMat,  label: `${classes30d} class${classes30d !== 1 ? 'es' : ''} in last 30d` },
+    { ok: romReady,       label: `ROM readiness: ${readiness.label}` },
+  ]
 
   async function handlePromote() {
     if (!selected) return
@@ -273,6 +352,21 @@ function PromoteDialog({ athlete, onPromote, onClose }: {
   )
   return (
     <div className="mt-3 border-t border-teal-light pt-3 space-y-2">
+      {/* Eligibility hint — informational, never blocks */}
+      <div className="rounded-xl bg-surface px-3 py-2 space-y-1">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-charcoal-light">Readiness signals</p>
+        <div className="flex flex-col gap-1">
+          {signals.map((s, i) => (
+            <div key={i} className="flex items-center gap-1.5 text-[11px]">
+              {s.ok
+                ? <CheckCircle2 size={12} className="text-green-tier shrink-0" />
+                : <AlertTriangle size={12} className="text-gold shrink-0" />}
+              <span className={cn(s.ok ? 'text-charcoal' : 'text-charcoal-light')}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-charcoal-light italic pt-0.5">Signals are guidance only — your call as the coach.</p>
+      </div>
       <p className="text-xs font-semibold text-charcoal">Promote to:</p>
       <div className="flex gap-1.5 flex-wrap">
         {options.map(b => (
@@ -497,10 +591,12 @@ function AthleteGamePlans({ athleteUserId, session }: { athleteUserId: string; s
 }
 
 // ── Athlete Card ───────────────────────────────────────────────────────────────
-function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onBeltUpdate, noteText, onNoteUpdated }: {
+function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onBeltUpdate, noteText, onNoteUpdated, isCompReady, compSaving, onToggleCompReady, attendance, attSaving, onToggleAttendance }: {
   athlete: AthleteRosterItem; session: { access_token: string } | null; coachId: string | null
   drillCount: number; protocolCount: number; onBeltUpdate: (userId: string, newBelt: string) => void
   noteText: string; onNoteUpdated: (athleteId: string, note: string) => void
+  isCompReady: boolean; compSaving: boolean; onToggleCompReady: (athlete: AthleteRosterItem, next: boolean) => void
+  attendance: AttendanceInfo | undefined; attSaving: boolean; onToggleAttendance: (athlete: AthleteRosterItem, present: boolean) => void
 }) {
   const [noteOpen, setNoteOpen]           = useState(false)
   const [promoteOpen, setPromoteOpen]     = useState(false)
@@ -510,7 +606,10 @@ function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onB
 
   const visibleJoints = athlete.priorityJoints.slice(0, 3)
   const readiness = getReadiness(athlete.techniques)
+  const atRisk = isAtRisk(attendance)
+  const presentToday = attendance?.presentToday ?? false
   const borderClass =
+    atRisk                       ? 'border-red-tier/70' :
     readiness.color === 'red'    ? 'border-red-tier/70' :
     readiness.color === 'green'  ? 'border-green-tier/60' :
     readiness.color === 'yellow' ? 'border-gold/60' :
@@ -535,7 +634,7 @@ function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onB
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <BeltBadge belt={athlete.belt} />
-          <ReadinessPill t={athlete.techniques} />
+          {atRisk ? <AtRiskBadge /> : <ReadinessPill t={athlete.techniques} />}
         </div>
       </div>
 
@@ -550,6 +649,10 @@ function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onB
         <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium',
           protocolCount >= 5 ? 'bg-green-tier-bg text-green-tier' : protocolCount >= 3 ? 'bg-yellow-tier-bg text-yellow-tier' : 'bg-surface text-charcoal-light')}>
           {protocolCount}/7 ROM this wk
+        </span>
+        <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1',
+          atRisk ? 'bg-red-tier-bg text-red-tier' : 'bg-surface text-charcoal-light')}>
+          <Calendar size={9} /> {lastSeenLabel(attendance?.lastSeen ?? null)}
         </span>
       </div>
 
@@ -605,8 +708,55 @@ function AthleteCard({ athlete, session, coachId, drillCount, protocolCount, onB
         </>)}
       </div>
 
+      {/* One-tap check-in */}
+      {coachId && athlete.user_id && (
+        <button
+          onClick={() => onToggleAttendance(athlete, !presentToday)}
+          disabled={attSaving}
+          aria-pressed={presentToday}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 text-xs font-bold px-3 py-2 rounded-xl transition-all border-2 disabled:opacity-60',
+            presentToday
+              ? 'border-green-tier/60 bg-green-tier-bg text-green-tier'
+              : 'border-dashed border-teal-light bg-surface text-charcoal-light hover:border-teal hover:text-teal'
+          )}>
+          {attSaving ? 'Saving…' : presentToday
+            ? <><CheckCircle2 size={13} /> Present Today</>
+            : <><Calendar size={13} /> Check In Today</>}
+        </button>
+      )}
+
+      {/* Ready for Competition — highlight moment */}
+      {coachId && athlete.user_id && (
+        <button
+          onClick={() => onToggleCompReady(athlete, !isCompReady)}
+          disabled={compSaving}
+          aria-pressed={isCompReady}
+          className={cn(
+            'group w-full flex items-center gap-2.5 rounded-2xl px-3 py-2.5 transition-all border-2 disabled:opacity-60',
+            isCompReady
+              ? 'border-gold bg-gradient-to-r from-gold/15 to-gold/5 shadow-sm'
+              : 'border-dashed border-teal-light bg-surface hover:border-gold/50 hover:bg-gold/5'
+          )}>
+          <span className={cn(
+            'w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all',
+            isCompReady ? 'bg-gold text-white' : 'bg-white border-2 border-teal-light text-transparent group-hover:border-gold/60'
+          )}>
+            <Check size={15} strokeWidth={3} />
+          </span>
+          <span className="min-w-0 text-left">
+            <span className={cn('flex items-center gap-1.5 text-xs font-bold leading-tight', isCompReady ? 'text-gold' : 'text-charcoal')}>
+              {isCompReady ? <><Trophy size={12} /> Ready for Competition</> : 'Mark Ready for Competition'}
+            </span>
+            <span className="text-[10px] text-charcoal-light leading-tight">
+              {compSaving ? 'Saving…' : isCompReady ? 'Showing in My Competitors' : 'Add to your competitors'}
+            </span>
+          </span>
+        </button>
+      )}
+
       {noteOpen && <InlineNoteEditor athleteId={athlete.id} initialNote={noteText} session={session} onClose={() => setNoteOpen(false)} onSaved={n => onNoteUpdated(athlete.id, n)} />}
-      {promoteOpen && coachId && <PromoteDialog athlete={athlete} onPromote={handlePromote} onClose={() => setPromoteOpen(false)} />}
+      {promoteOpen && coachId && <PromoteDialog athlete={athlete} attendance={attendance} onPromote={handlePromote} onClose={() => setPromoteOpen(false)} />}
       {assignDrillOpen && coachId && <AssignDrillForm athlete={athlete} coachId={coachId} onClose={() => setAssignDrillOpen(false)} />}
       {addVideoOpen && coachId && <AddVideoForm athlete={athlete} coachId={coachId} onClose={() => setAddVideoOpen(false)} />}
       {injuryOpen && <InjuryForm athlete={athlete} session={session} onClose={() => setInjuryOpen(false)} />}
@@ -772,11 +922,17 @@ function TechniqueReadinessPanel({ session, code }: {
 }
 
 // ── TAB: ROSTER ────────────────────────────────────────────────────────────────
-function RosterTab({ roster, setRoster, loading, session, coachId, drillCounts, protocolCounts, noteMap, onNoteUpdated }: {
+function RosterTab({ roster, setRoster, loading, session, coachId, drillCounts, protocolCounts, noteMap, onNoteUpdated, compReadySet, compSavingSet, onToggleCompReady, attendanceMap, attendanceLoading, attSavingSet, onToggleAttendance, onMarkAllPresent }: {
   roster: AthleteRosterItem[]; setRoster: React.Dispatch<React.SetStateAction<AthleteRosterItem[]>>
   loading: boolean; session: { access_token: string } | null; coachId: string | null
   drillCounts: Record<string, number>; protocolCounts: Record<string, number>
   noteMap: Record<string, string>; onNoteUpdated: (athleteId: string, note: string) => void
+  compReadySet: Set<string>; compSavingSet: Set<string>
+  onToggleCompReady: (athlete: AthleteRosterItem, next: boolean) => void
+  attendanceMap: Record<string, AttendanceInfo>; attendanceLoading: boolean
+  attSavingSet: Set<string>
+  onToggleAttendance: (athlete: AthleteRosterItem, present: boolean) => void
+  onMarkAllPresent: (athletes: AthleteRosterItem[]) => void
 }) {
   const [search, setSearch] = useState('')
   const sorted = [...roster].sort((a, b) => readinessSortKey(a) - readinessSortKey(b))
@@ -786,9 +942,46 @@ function RosterTab({ roster, setRoster, loading, session, coachId, drillCounts, 
     setRoster(prev => prev.map(a => a.user_id === userId ? { ...a, belt: newBelt } : a))
   }
 
+  // Attendance summary across the full roster (not filtered by search)
+  const withUid = roster.filter(a => a.user_id)
+  const presentToday = withUid.filter(a => attendanceMap[a.user_id!]?.presentToday).length
+  const atRiskCount  = withUid.filter(a => isAtRisk(attendanceMap[a.user_id!])).length
+  const allPresent   = withUid.length > 0 && presentToday === withUid.length
+  const notYetPresent = filtered.filter(a => a.user_id && !attendanceMap[a.user_id]?.presentToday)
+
   if (loading) return <Spinner />
   return (
     <div className="space-y-4">
+      {/* Attendance summary */}
+      {coachId && withUid.length > 0 && (
+        <div className="bg-white rounded-2xl border border-teal-light p-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="w-9 h-9 rounded-full bg-green-tier-bg text-green-tier flex items-center justify-center shrink-0"><CheckCircle2 size={17} /></span>
+                <div className="leading-tight">
+                  <p className="text-lg font-bold text-charcoal">{presentToday}<span className="text-sm text-charcoal-light font-medium">/{withUid.length}</span></p>
+                  <p className="text-[10px] uppercase tracking-wide text-charcoal-light font-semibold">Present today</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={cn('w-9 h-9 rounded-full flex items-center justify-center shrink-0', atRiskCount > 0 ? 'bg-red-tier-bg text-red-tier' : 'bg-surface text-charcoal-light')}><AlertTriangle size={16} /></span>
+                <div className="leading-tight">
+                  <p className={cn('text-lg font-bold', atRiskCount > 0 ? 'text-red-tier' : 'text-charcoal')}>{atRiskCount}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-charcoal-light font-semibold">At risk ({AT_RISK_DAYS}d+)</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => onMarkAllPresent(notYetPresent)}
+              disabled={attendanceLoading || allPresent || notYetPresent.length === 0}
+              className="btn-primary text-xs px-3.5 py-2 flex items-center gap-1.5 disabled:opacity-50">
+              <CheckCircle2 size={13} /> {allPresent ? 'All present' : `Mark all present${notYetPresent.length ? ` (${notYetPresent.length})` : ''}`}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="relative">
         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-light" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search athletes..."
@@ -805,6 +998,12 @@ function RosterTab({ roster, setRoster, loading, session, coachId, drillCounts, 
               onBeltUpdate={handleBeltUpdate}
               noteText={noteMap[a.id] ?? ''}
               onNoteUpdated={onNoteUpdated}
+              isCompReady={a.user_id ? compReadySet.has(a.user_id) : false}
+              compSaving={a.user_id ? compSavingSet.has(a.user_id) : false}
+              onToggleCompReady={onToggleCompReady}
+              attendance={a.user_id ? attendanceMap[a.user_id] : undefined}
+              attSaving={a.user_id ? attSavingSet.has(a.user_id) : false}
+              onToggleAttendance={onToggleAttendance}
             />
           ))}
         </div>
@@ -1262,29 +1461,332 @@ function NotesTab({ roster, session }: { roster: AthleteRosterItem[]; session: {
   )
 }
 
+// ── Competition helpers ────────────────────────────────────────────────────
+function weeksUntil(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const target = new Date(dateStr + 'T00:00:00')
+  const now = new Date()
+  const ms = target.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Math.round(ms / (1000 * 60 * 60 * 24 * 7))
+}
+// 8-week periodized prep phases (week-of-prep → focus)
+function prepPhaseForWeeksOut(weeksOut: number): { phase: string; focus: string; color: string } {
+  if (weeksOut >= 7) return { phase: 'Base',        focus: 'Volume, conditioning, mobility correction', color: 'bg-teal/15 text-teal' }
+  if (weeksOut >= 5) return { phase: 'Build',        focus: 'Position sparring, gameplan reps',          color: 'bg-teal/15 text-teal' }
+  if (weeksOut >= 3) return { phase: 'Sharpen',      focus: 'Hard rounds, competition simulation',        color: 'bg-gold/20 text-gold' }
+  if (weeksOut >= 1) return { phase: 'Taper',        focus: 'Reduce volume, sharpen timing, recover',      color: 'bg-gold/20 text-gold' }
+  return                     { phase: 'Comp Week',   focus: 'Rest, weight check, RAMP day-of',             color: 'bg-red-tier-bg text-red-tier' }
+}
+// ROM clearance signal: green light unless red-heavy ROM or active injury
+function romClearance(t: { green: number; yellow: number; red: number; total: number }, hasActiveInjury: boolean):
+  { label: string; color: string; cleared: boolean; reason: string } {
+  if (t.total === 0) return { label: 'No ROM Data', color: 'bg-surface text-charcoal-light', cleared: false, reason: 'Athlete has not been assessed yet.' }
+  if (hasActiveInjury) return { label: 'Hold — Active Injury', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: 'Active injury on return-to-mat protocol. Clear injury before competing.' }
+  const redPct = t.red / t.total
+  const greenPct = t.green / t.total
+  if (redPct > 0.3) return { label: 'Not Cleared', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: `${t.red} technique${t.red !== 1 ? 's' : ''} in red ROM tier — mobility gaps to address.` }
+  if (greenPct < 0.5) return { label: 'Cleared w/ Caution', color: 'bg-yellow-tier-bg text-yellow-tier', cleared: true, reason: 'Developing ROM — cleared to compete, monitor flagged joints.' }
+  return { label: 'ROM Cleared', color: 'bg-green-tier-bg text-green-tier', cleared: true, reason: 'Mobility supports full competition readiness.' }
+}
+
+// ── Competitor Tile ─────────────────────────────────────────────────────────
+function CompetitorTile({ athlete, record, activeInjuries, onUpdateRecord, onRemove }: {
+  athlete: AthleteRosterItem; record: CompetitorRecord
+  activeInjuries: ActiveInjury[]
+  onUpdateRecord: (athleteUserId: string, patch: Partial<CompetitorRecord>) => Promise<void>
+  onRemove: (athlete: AthleteRosterItem) => void
+}) {
+  const [editOpen, setEditOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [compName, setCompName] = useState(record.next_comp_name ?? '')
+  const [compDate, setCompDate] = useState(record.next_comp_date ?? '')
+  const [weightClass, setWeightClass] = useState(record.weight_class ?? '')
+  const [weightUnit, setWeightUnit] = useState(record.weight_unit ?? 'lb')
+  const [currentWeight, setCurrentWeight] = useState(record.current_weight?.toString() ?? '')
+  const [targetWeight, setTargetWeight] = useState(record.target_weight?.toString() ?? '')
+
+  const readiness = getReadiness(athlete.techniques)
+  const hasActiveInjury = activeInjuries.length > 0
+  const clearance = romClearance(athlete.techniques, hasActiveInjury)
+  const weeksOut = weeksUntil(record.next_comp_date)
+  const prep = weeksOut !== null ? prepPhaseForWeeksOut(weeksOut) : null
+  const cutKg = record.current_weight != null && record.target_weight != null
+    ? Math.max(0, record.current_weight - record.target_weight) : null
+
+  const readinessColor =
+    readiness.color === 'red'    ? 'bg-red-tier-bg text-red-tier' :
+    readiness.color === 'green'  ? 'bg-green-tier-bg text-green-tier' :
+    readiness.color === 'yellow' ? 'bg-yellow-tier-bg text-yellow-tier' :
+                                   'bg-surface text-charcoal-light'
+
+  async function save() {
+    setSaving(true)
+    try {
+      await onUpdateRecord(record.athlete_user_id, {
+        next_comp_name: compName.trim() || null,
+        next_comp_date: compDate || null,
+        weight_class: weightClass.trim() || null,
+        weight_unit: weightUnit,
+        current_weight: currentWeight ? Number(currentWeight) : null,
+        target_weight: targetWeight ? Number(targetWeight) : null,
+      })
+      setEditOpen(false)
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-gold/40 overflow-hidden">
+      {/* Header band */}
+      <div className="bg-gradient-to-r from-gold/15 to-gold/5 px-4 py-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-sm font-bold text-charcoal leading-tight truncate">
+            <Trophy size={14} className="text-gold shrink-0" /> {athlete.name}
+          </p>
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <BeltBadge belt={athlete.belt} />
+            <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide', readinessColor)}>{readiness.label}</span>
+          </div>
+        </div>
+        <button onClick={() => onRemove(athlete)} title="Remove from competitors"
+          className="shrink-0 text-charcoal-light hover:text-red-tier transition-colors" aria-label="Remove from competitors">
+          <X size={15} />
+        </button>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {/* ROM clearance */}
+        <div className="rounded-xl border border-teal-light p-3 space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-charcoal-light uppercase tracking-wide">
+              <ShieldPlus size={11} className="text-teal" /> Pre-Comp ROM Clearance
+            </span>
+            <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-bold', clearance.color)}>{clearance.label}</span>
+          </div>
+          <p className="text-[11px] text-charcoal-light leading-snug">{clearance.reason}</p>
+          <div className="flex gap-1.5 pt-0.5">
+            <span className="tier-green text-[10px] px-2 py-0.5 rounded-full">{athlete.techniques.green} G</span>
+            <span className="tier-yellow text-[10px] px-2 py-0.5 rounded-full">{athlete.techniques.yellow} Y</span>
+            <span className="tier-red text-[10px] px-2 py-0.5 rounded-full">{athlete.techniques.red} R</span>
+          </div>
+        </div>
+
+        {/* Active injury flag */}
+        {hasActiveInjury && (
+          <div className="rounded-xl bg-red-50 border border-red-200 p-3 space-y-1">
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-red-tier uppercase tracking-wide">
+              <Syringe size={11} /> Active Injury — Return-to-Mat
+            </span>
+            {activeInjuries.map((inj, i) => (
+              <p key={i} className="text-[11px] text-charcoal leading-snug">
+                {inj.body_part} — Stage {inj.stage}/9 {(STAGE_LABELS[inj.stage]?.name) ? `(${STAGE_LABELS[inj.stage].name})` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* 8-week periodized prep countdown */}
+        <div className="rounded-xl border border-teal-light p-3 space-y-2">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-charcoal-light uppercase tracking-wide">
+            <Calendar size={11} className="text-teal" /> Periodized Prep
+          </span>
+          {weeksOut === null ? (
+            <p className="text-[11px] text-charcoal-light italic">Set a competition date to start the 8-week prep countdown.</p>
+          ) : weeksOut < 0 ? (
+            <p className="text-[11px] text-charcoal-light">{record.next_comp_name || 'Competition'} was {Math.abs(weeksOut)} week{Math.abs(weeksOut) !== 1 ? 's' : ''} ago.</p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-charcoal truncate">{record.next_comp_name || 'Competition'}</p>
+                <span className="text-[11px] font-bold text-teal shrink-0">{weeksOut === 0 ? 'This week' : `${weeksOut} wk out`}</span>
+              </div>
+              <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+                <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${Math.max(4, Math.min(100, ((8 - Math.min(weeksOut, 8)) / 8) * 100))}%` }} />
+              </div>
+              {prep && (
+                <div className="flex items-center gap-2">
+                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide', prep.color)}>{prep.phase}</span>
+                  <span className="text-[11px] text-charcoal-light leading-snug">{prep.focus}</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Weight class & cut */}
+        <div className="rounded-xl border border-teal-light p-3 space-y-1.5">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-charcoal-light uppercase tracking-wide">
+            <Scale size={11} className="text-teal" /> Weight Class & Cut
+          </span>
+          {record.weight_class || cutKg !== null ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              {record.weight_class && <span className="text-xs font-semibold text-charcoal">{record.weight_class}</span>}
+              {record.current_weight != null && (
+                <span className="text-[11px] text-charcoal-light">Now: <span className="font-semibold text-charcoal">{record.current_weight}{record.weight_unit}</span></span>
+              )}
+              {record.target_weight != null && (
+                <span className="text-[11px] text-charcoal-light">Target: <span className="font-semibold text-charcoal">{record.target_weight}{record.weight_unit}</span></span>
+              )}
+              {cutKg !== null && cutKg > 0 && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-gold/20 text-gold">Cut {cutKg.toFixed(1)}{record.weight_unit}</span>
+              )}
+            </div>
+          ) : (
+            <p className="text-[11px] text-charcoal-light italic">No weight class set.</p>
+          )}
+        </div>
+
+        {/* Day-of RAMP */}
+        <div className="rounded-xl bg-teal/5 border border-teal-light p-3 space-y-1">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-teal uppercase tracking-wide">
+            <Flame size={11} /> Day-of RAMP Warmup
+          </span>
+          <p className="text-[11px] text-charcoal-light leading-snug">
+            Raise · Activate · Mobilize · Potentiate — prioritize this athlete's flagged joints
+            {athlete.priorityJoints.length > 0
+              ? `: ${athlete.priorityJoints.slice(0, 3).map(j => formatJointName(j.joint)).join(', ')}.`
+              : '.'}
+          </p>
+        </div>
+
+        {/* Edit comp details */}
+        <button onClick={() => setEditOpen(o => !o)}
+          className={cn('w-full flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all',
+            editOpen ? 'bg-charcoal text-white' : 'bg-surface text-charcoal-light hover:text-charcoal hover:bg-gray-100')}>
+          <Target size={12} /> {editOpen ? 'Close' : 'Edit Competition Details'}
+        </button>
+
+        {editOpen && (
+          <div className="space-y-2 pt-1">
+            <input value={compName} onChange={e => setCompName(e.target.value)} placeholder="Competition name (e.g. IBJJF Pan)"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white" />
+            <input type="date" value={compDate} onChange={e => setCompDate(e.target.value)}
+              className="w-full px-3 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white" />
+            <input value={weightClass} onChange={e => setWeightClass(e.target.value)} placeholder="Weight class (e.g. Middleweight)"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white" />
+            <div className="flex gap-2">
+              <input value={currentWeight} onChange={e => setCurrentWeight(e.target.value)} placeholder="Current" inputMode="decimal"
+                className="flex-1 min-w-0 px-3 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white" />
+              <input value={targetWeight} onChange={e => setTargetWeight(e.target.value)} placeholder="Target" inputMode="decimal"
+                className="flex-1 min-w-0 px-3 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white" />
+              <select value={weightUnit} onChange={e => setWeightUnit(e.target.value)}
+                className="px-2 py-2 text-xs rounded-xl border border-teal-light bg-surface focus:outline-none focus:border-teal focus:bg-white">
+                <option value="lb">lb</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+            <button onClick={save} disabled={saving}
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-teal text-white hover:bg-teal-dark transition-all disabled:opacity-60">
+              <Save size={12} /> {saving ? 'Saving…' : 'Save Details'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── TAB: MY COMPETITORS (live) ──────────────────────────────────────────────
+function CompetitorsTab({ roster, competitors, injuriesByAthlete, loading, onUpdateRecord, onRemove }: {
+  roster: AthleteRosterItem[]
+  competitors: Record<string, CompetitorRecord>
+  injuriesByAthlete: Record<string, ActiveInjury[]>
+  loading: boolean
+  onUpdateRecord: (athleteUserId: string, patch: Partial<CompetitorRecord>) => Promise<void>
+  onRemove: (athlete: AthleteRosterItem) => void
+}) {
+  if (loading) return <Spinner />
+  const readyAthletes = roster.filter(a => a.user_id && competitors[a.user_id]?.is_ready)
+  // soonest competition first, then athletes with no date
+  const sorted = [...readyAthletes].sort((a, b) => {
+    const da = competitors[a.user_id!]?.next_comp_date
+    const db = competitors[b.user_id!]?.next_comp_date
+    if (da && db) return da.localeCompare(db)
+    if (da) return -1
+    if (db) return 1
+    return 0
+  })
+
+  return (
+    <div className="space-y-4">
+      {/* Intro banner */}
+      <div className="rounded-2xl border border-gold/40 bg-gradient-to-br from-gold/10 to-teal/5 p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gold/15 flex items-center justify-center shrink-0">
+            <Trophy size={20} className="text-gold" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="font-display font-bold text-charcoal text-lg leading-tight">My Competitors</h2>
+            <p className="text-sm text-charcoal-light leading-relaxed">
+              Athletes you've marked <span className="font-semibold text-gold">Ready for Competition</span> on the roster appear here — with ROM clearance, periodized prep, weight cut, and day-of warmup. Uncheck an athlete and they leave this list.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {sorted.length === 0 ? (
+        <EmptyState icon={Trophy} title="No competitors yet"
+          description="Go to My Team → Roster and tap 'Mark Ready for Competition' on any athlete. They'll show up here, ready to prep." />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {sorted.map(a => (
+            <CompetitorTile key={a.id} athlete={a} record={competitors[a.user_id!]}
+              activeInjuries={injuriesByAthlete[a.user_id!] ?? []}
+              onUpdateRecord={onUpdateRecord} onRemove={onRemove} />
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-charcoal-light text-center pt-1">
+        Readiness and clearance are computed from the same ROM and injury data on your dashboard — intelligence no other platform offers.
+      </p>
+    </div>
+  )
+}
+
 // ── In Development Placeholder ───────────────────────────────────────────────
-function InDevelopmentTab({ title, description, features }: {
-  title: string; description: string; features: string[]
+function RoadmapPreviewTab({ icon: Icon, title, description, phases }: {
+  icon: typeof Users
+  title: string
+  description: string
+  phases: Array<{ tag: string; tagColor: string; heading: string; items: string[] }>
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mb-5">
-        <span className="text-3xl">🚧</span>
+    <div className="space-y-5">
+      {/* Intro banner */}
+      <div className="rounded-2xl border border-teal-light bg-gradient-to-br from-teal/5 to-gold/5 p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-teal/10 flex items-center justify-center shrink-0">
+            <Icon size={20} className="text-teal" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="font-display font-bold text-charcoal text-lg leading-tight">{title}</h2>
+            <p className="text-sm text-charcoal-light leading-relaxed">{description}</p>
+          </div>
+        </div>
       </div>
-      <h2 className="font-display font-bold text-charcoal text-xl mb-2">{title}</h2>
-      <p className="text-sm text-charcoal-light max-w-sm mb-6 leading-relaxed">{description}</p>
-      <div className="bg-surface rounded-2xl p-5 max-w-sm w-full text-left">
-        <p className="text-xs font-bold text-charcoal uppercase tracking-wide mb-3">Coming Features</p>
-        <ul className="space-y-2">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs text-charcoal-light">
-              <span className="text-teal mt-0.5">•</span>
-              {f}
-            </li>
-          ))}
-        </ul>
+
+      {/* Phased roadmap */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {phases.map((phase, i) => (
+          <div key={i} className="rounded-2xl border border-teal-light bg-white p-4 space-y-3">
+            <span className={cn('inline-block text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide', phase.tagColor)}>
+              {phase.tag}
+            </span>
+            <p className="text-sm font-semibold text-charcoal leading-snug">{phase.heading}</p>
+            <ul className="space-y-1.5">
+              {phase.items.map((f, j) => (
+                <li key={j} className="flex items-start gap-2 text-xs text-charcoal-light leading-snug">
+                  <ChevronRight size={12} className="text-teal mt-0.5 shrink-0" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
-      <span className="mt-6 text-[11px] font-bold bg-gold/20 text-gold px-3 py-1 rounded-full uppercase tracking-wide">In Development</span>
+
+      <p className="text-[11px] text-charcoal-light text-center pt-1">
+        Built on the same ROM, readiness, and injury data already powering your dashboard.
+      </p>
     </div>
   )
 }
@@ -1537,6 +2039,13 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
   const [drillCounts, setDrillCounts]       = useState<Record<string, number>>({})
   const [protocolCounts, setProtocolCounts] = useState<Record<string, number>>({})
   const [noteMap, setNoteMap]               = useState<Record<string, string>>({})
+  const [competitors, setCompetitors]       = useState<Record<string, CompetitorRecord>>({})
+  const [competitorsLoading, setCompetitorsLoading] = useState(true)
+  const [compSavingSet, setCompSavingSet]   = useState<Set<string>>(new Set())
+  const [injuriesByAthlete, setInjuriesByAthlete] = useState<Record<string, ActiveInjury[]>>({})
+  const [attendanceMap, setAttendanceMap]   = useState<Record<string, AttendanceInfo>>({})
+  const [attendanceLoading, setAttendanceLoading] = useState(true)
+  const [attSavingSet, setAttSavingSet]     = useState<Set<string>>(new Set())
 
   // Lifted coaching tab state (persists across tab switches)
   const [coachingTechs, setCoachingTechs]         = useState<TechniqueItem[]>([])
@@ -1618,6 +2127,169 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
     setNoteMap(prev => ({ ...prev, [athleteId]: note }))
   }
 
+  // Load competitor rows for this coach
+  useEffect(() => {
+    if (!coachId) return
+    setCompetitorsLoading(true)
+    supabase.from('coach_competitors').select('*').eq('coach_id', coachId)
+      .then(({ data }) => {
+        const map: Record<string, CompetitorRecord> = {}
+        for (const r of (data ?? []) as CompetitorRecord[]) map[r.athlete_user_id] = r
+        setCompetitors(map)
+      })
+      .then(undefined, () => setCompetitors({}))
+      .then(() => setCompetitorsLoading(false))
+  }, [coachId])
+
+  // Load active injuries grouped by athlete (coach-scoped via RLS)
+  useEffect(() => {
+    if (!coachId) return
+    supabase.from('athlete_injuries')
+      .select('athlete_user_id, body_part, stage, status')
+      .eq('coach_id', coachId).neq('status', 'cleared')
+      .then(({ data }) => {
+        const map: Record<string, ActiveInjury[]> = {}
+        for (const inj of (data ?? []) as Array<ActiveInjury & { athlete_user_id: string }>) {
+          if (!map[inj.athlete_user_id]) map[inj.athlete_user_id] = []
+          map[inj.athlete_user_id].push({ body_part: inj.body_part, stage: inj.stage, status: inj.status })
+        }
+        setInjuriesByAthlete(map)
+      })
+      .then(undefined, () => setInjuriesByAthlete({}))
+  }, [coachId])
+
+  // Toggle 'Ready for Competition' — upsert (true) or update is_ready=false
+  async function handleToggleCompReady(athlete: AthleteRosterItem, next: boolean) {
+    if (!coachId || !athlete.user_id) return
+    const uid = athlete.user_id
+    setCompSavingSet(prev => new Set(prev).add(uid))
+    try {
+      if (next) {
+        const { data, error } = await supabase.from('coach_competitors')
+          .upsert({ coach_id: coachId, athlete_user_id: uid, is_ready: true, marked_ready_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { onConflict: 'coach_id,athlete_user_id' })
+          .select().single()
+        if (error) throw error
+        if (data) setCompetitors(prev => ({ ...prev, [uid]: data as CompetitorRecord }))
+      } else {
+        const { data, error } = await supabase.from('coach_competitors')
+          .update({ is_ready: false, updated_at: new Date().toISOString() })
+          .eq('coach_id', coachId).eq('athlete_user_id', uid)
+          .select().maybeSingle()
+        if (error) throw error
+        setCompetitors(prev => {
+          const copy = { ...prev }
+          if (data) copy[uid] = data as CompetitorRecord
+          else delete copy[uid]
+          return copy
+        })
+      }
+    } catch { /* keep UI state; surfaced via no change */ }
+    finally {
+      setCompSavingSet(prev => { const s = new Set(prev); s.delete(uid); return s })
+    }
+  }
+
+  // Update competition details on a competitor record
+  async function handleUpdateCompetitorRecord(athleteUserId: string, patch: Partial<CompetitorRecord>) {
+    if (!coachId) return
+    const { data, error } = await supabase.from('coach_competitors')
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('coach_id', coachId).eq('athlete_user_id', athleteUserId)
+      .select().single()
+    if (error) throw error
+    if (data) setCompetitors(prev => ({ ...prev, [athleteUserId]: data as CompetitorRecord }))
+  }
+
+  // Remove from competitors (X on tile) — sets is_ready=false
+  function handleRemoveCompetitor(athlete: AthleteRosterItem) {
+    if (athlete.user_id) handleToggleCompReady(athlete, false)
+  }
+
+  // Load attendance for this coach (last 30 days) -> per-athlete summary
+  useEffect(() => {
+    if (!coachId) return
+    setAttendanceLoading(true)
+    const since = new Date()
+    since.setDate(since.getDate() - 30)
+    const sinceStr = since.toISOString().slice(0, 10)
+    const todayStr = localDateStr()
+    supabase.from('attendance')
+      .select('athlete_user_id, class_date')
+      .eq('coach_id', coachId).gte('class_date', sinceStr)
+      .then(({ data }) => {
+        const map: Record<string, AttendanceInfo> = {}
+        for (const row of (data ?? []) as Array<{ athlete_user_id: string; class_date: string }>) {
+          const uid = row.athlete_user_id
+          const existing = map[uid]
+          if (!existing) {
+            map[uid] = { lastSeen: row.class_date, presentToday: row.class_date === todayStr, classes30d: 1 }
+          } else {
+            existing.classes30d += 1
+            if (row.class_date > (existing.lastSeen ?? '')) existing.lastSeen = row.class_date
+            if (row.class_date === todayStr) existing.presentToday = true
+          }
+        }
+        setAttendanceMap(map)
+      })
+      .then(undefined, () => setAttendanceMap({}))
+      .then(() => setAttendanceLoading(false))
+  }, [coachId])
+
+  // Toggle one athlete's check-in for today (insert / delete today's row)
+  async function handleToggleAttendance(athlete: AthleteRosterItem, present: boolean) {
+    if (!coachId || !athlete.user_id) return
+    const uid = athlete.user_id
+    const todayStr = localDateStr()
+    setAttSavingSet(prev => new Set(prev).add(uid))
+    try {
+      if (present) {
+        const { error } = await supabase.from('attendance')
+          .upsert({ coach_id: coachId, athlete_user_id: uid, class_date: todayStr, checked_in_by: user?.id ?? null },
+            { onConflict: 'coach_id,athlete_user_id,class_date' })
+        if (error) throw error
+        setAttendanceMap(prev => applyCheckIn(prev, uid, todayStr))
+      } else {
+        const { error } = await supabase.from('attendance')
+          .delete().eq('coach_id', coachId).eq('athlete_user_id', uid).eq('class_date', todayStr)
+        if (error) throw error
+        setAttendanceMap(prev => applyCheckOut(prev, uid, todayStr))
+      }
+    } catch { /* leave state unchanged on failure */ }
+    finally {
+      setAttSavingSet(prev => { const s = new Set(prev); s.delete(uid); return s })
+    }
+  }
+
+  // Bulk: mark a list of athletes present today
+  async function handleMarkAllPresent(athletes: AthleteRosterItem[]) {
+    if (!coachId) return
+    const todayStr = localDateStr()
+    const rows = athletes
+      .filter(a => a.user_id)
+      .map(a => ({ coach_id: coachId, athlete_user_id: a.user_id!, class_date: todayStr, checked_in_by: user?.id ?? null }))
+    if (rows.length === 0) return
+    const uids = rows.map(r => r.athlete_user_id)
+    setAttSavingSet(prev => { const s = new Set(prev); uids.forEach(u => s.add(u)); return s })
+    try {
+      const { error } = await supabase.from('attendance')
+        .upsert(rows, { onConflict: 'coach_id,athlete_user_id,class_date' })
+      if (error) throw error
+      setAttendanceMap(prev => {
+        let next = prev
+        for (const u of uids) next = applyCheckIn(next, u, todayStr)
+        return next
+      })
+    } catch { /* leave state unchanged */ }
+    finally {
+      setAttSavingSet(prev => { const s = new Set(prev); uids.forEach(u => s.delete(u)); return s })
+    }
+  }
+
+  const compReadySet = new Set(
+    Object.values(competitors).filter(c => c.is_ready).map(c => c.athlete_user_id)
+  )
+
   function handleAddToJournal(code: string, name: string, type: string, notes: string) {
     navigate('/dashboard/coach-coaching', { state: { pendingLog: { code, name, type, notes } } })
   }
@@ -1632,7 +2304,7 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
   const sectionTitle = {
     team: `My Team${!rosterLoading ? ` — ${roster.length} athlete${roster.length !== 1 ? 's' : ''}` : ''}`,
     coaching: 'My Coaching',
-    competitions: 'My Competitions',
+    competitions: 'My Competitors',
     injury: 'My Injury',
     school: 'My School',
   }[defaultSection] ?? 'Coach Dashboard'
@@ -1655,7 +2327,10 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
           </div>
           {teamSubTab === 'roster' && (
             <RosterTab roster={roster} setRoster={setRoster} loading={rosterLoading} session={session} coachId={coachId}
-              drillCounts={drillCounts} protocolCounts={protocolCounts} noteMap={noteMap} onNoteUpdated={handleNoteUpdated} />
+              drillCounts={drillCounts} protocolCounts={protocolCounts} noteMap={noteMap} onNoteUpdated={handleNoteUpdated}
+              compReadySet={compReadySet} compSavingSet={compSavingSet} onToggleCompReady={handleToggleCompReady}
+              attendanceMap={attendanceMap} attendanceLoading={attendanceLoading} attSavingSet={attSavingSet}
+              onToggleAttendance={handleToggleAttendance} onMarkAllPresent={handleMarkAllPresent} />
           )}
           {teamSubTab === 'notes' && <NotesTab roster={roster} session={session} />}
         </div>
@@ -1684,19 +2359,15 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
         </div>
       )}
 
-      {/* MY COMPETITIONS ─ In Development */}
+      {/* MY COMPETITORS ─ live */}
       {defaultSection === 'competitions' && (
-        <InDevelopmentTab
-          title="My Competitions"
-          description="Competition prep management is coming. You will be able to manage your athletes' competition calendars, track prep progress, and generate competition readiness scores."
-          features={[
-            'Competition calendar (coach-managed)',
-            '8-week periodized prep countdown',
-            'Weight class and cut tracking',
-            'Competition readiness composite score (ROM + injury + training load)',
-            'Pre-competition ROM clearance signal',
-            'Day-of RAMP warmup protocol per athlete',
-          ]}
+        <CompetitorsTab
+          roster={roster}
+          competitors={competitors}
+          injuriesByAthlete={injuriesByAthlete}
+          loading={rosterLoading || competitorsLoading}
+          onUpdateRecord={handleUpdateCompetitorRecord}
+          onRemove={handleRemoveCompetitor}
         />
       )}
 
@@ -1705,17 +2376,33 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
         <MyInjuryTab session={session} roster={roster} />
       )}
 
-      {/* MY SCHOOL ─ In Development */}
+      {/* MY SCHOOL ─ Roadmap preview */}
       {defaultSection === 'school' && (
-        <InDevelopmentTab
-          title="My School"
-          description="Administrative school connectivity is coming. Link your gym, manage athletes, and view school-wide performance data."
-          features={[
-            'Gym / school profile management',
-            'Athlete invite and onboarding system',
-            'School-wide ROM stats and trends',
-            'Multi-coach support',
-            'Coach profile and credentials',
+        <RoadmapPreviewTab
+          icon={GraduationCap}
+          title="Your School"
+          description="Connect your gym to ROMRxBJJ. Bring your whole team onto one program, invite athletes in a few taps, and see your school's mobility and readiness at a glance."
+          phases={[
+            {
+              tag: 'Coming Soon',
+              tagColor: 'bg-teal/15 text-teal',
+              heading: 'Team foundation',
+              items: [
+                'Gym / school profile',
+                'Athlete invite and onboarding',
+                'School-wide ROM readiness snapshot',
+              ],
+            },
+            {
+              tag: 'Planned',
+              tagColor: 'bg-gold/20 text-gold',
+              heading: 'Gym operations',
+              items: [
+                'Multi-coach support and roles',
+                'Coach profiles and credentials',
+                'School-wide stats and trends',
+              ],
+            },
           ]}
         />
       )}
