@@ -3,9 +3,14 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { recordConsent } from '../lib/terms'
 import { Loader2, Users } from 'lucide-react'
+import { DEFAULT_SPORT_KEY } from '../sports/registry'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
 const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
+// Sport this build serves. Single source of truth — change here (or wire to the
+// active sport) when this signup is reused for another ROMRx brand. Threaded
+// into notify-coach-signup so per-brand jim@ emails route correctly.
+const SPORT = DEFAULT_SPORT_KEY
 
 export function CoachSignup() {
   const [fullName, setFullName]   = useState('')
@@ -55,7 +60,8 @@ export function CoachSignup() {
         portal_role: 'coach',
         subscription_status: 'trialing',
         subscription_tier: 'coach',
-        platforms: ['bjj'],
+        platforms: [SPORT],
+        active_sport: SPORT,
       }, { onConflict: 'id' })
 
       // Record a timestamped, versioned consent to the ROMRx LLC agreement
@@ -67,14 +73,14 @@ export function CoachSignup() {
       fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullName, gym, paid: false }),
+        body: JSON.stringify({ email, fullName, gym, paid: false, sport: SPORT }),
       }).catch(() => {})
 
       // Send "complete your payment" email to the coach
       fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullName, gym, paid: false, sendToCoach: true }),
+        body: JSON.stringify({ email, fullName, gym, paid: false, sendToCoach: true, sport: SPORT }),
       }).catch(() => {})
 
       // Get session token for edge function call
@@ -89,7 +95,7 @@ export function CoachSignup() {
             'Authorization': `Bearer ${token}`,
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
-          body: JSON.stringify({ email, full_name: fullName, plan: 'coach', gym }),
+          body: JSON.stringify({ email, full_name: fullName, plan: 'coach', gym, sport: SPORT }),
         })
         const { url, error: checkoutErr } = await res.json()
         if (url) { window.location.href = url; return }
