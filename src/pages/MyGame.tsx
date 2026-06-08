@@ -9,6 +9,7 @@ import { SectionCard } from '../components/SectionCard'
 import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
 import { TierBadge } from '../components/ui/TierBadge'
+import { TechniqueDetailSheet } from '../components/ui/TechniqueDetailSheet'
 import { formatJoint, beltColor, cn } from '../lib/utils'
 import { supabase } from '../lib/supabase'
 import {
@@ -619,11 +620,14 @@ function StepSelector({ category, eligible, selected, onSelect }: {
 const CATEGORIES = ['All', 'Throws', 'Passes', 'Guards', 'Sweeps', 'Controls', 'Submissions', 'Submission defense']
 const TIERS = ['All', 'GREEN', 'YELLOW', 'RED'] as const
 
-function TechCard({ item }: { item: TechniqueEligibility }) {
+function TechCard({ item, onOpen }: { item: TechniqueEligibility; onOpen: (item: TechniqueEligibility) => void }) {
   const tech = item.techniques as { code: string; name: string; belt: string; category: string }
   const isDelay = item.flag === 'DELAY_TECHNIQUE'
   return (
-    <div className="bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-2.5 hover:border-teal/40 transition-colors">
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
+      className="text-left w-full bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-2.5 hover:border-teal/40 focus:outline-none focus:ring-2 focus:ring-teal/40 transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-charcoal leading-snug mt-0.5 line-clamp-2">{tech.name}</p>
@@ -654,7 +658,7 @@ function TechCard({ item }: { item: TechniqueEligibility }) {
           </p>
         </div>
       )}
-    </div>
+    </button>
   )
 }
 
@@ -1481,6 +1485,7 @@ export function MyGame() {
   const [search, setSearch]         = useState('')
   const [catFilter, setCatFilter]   = useState('All')
   const [tierFilter, setTierFilter] = useState<typeof TIERS[number]>('All')
+  const [detailTech, setDetailTech] = useState<TechniqueEligibility | null>(null)
 
   // ── Load plans from Supabase (with localStorage migration) ─────────────────
   const loadPlans = useCallback(async () => {
@@ -2913,13 +2918,15 @@ export function MyGame() {
             <p className="text-center text-charcoal-light text-sm py-10">No techniques match your filters.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filtered.map(item => <TechCard key={item.id} item={item} />)}
+              {filtered.map(item => <TechCard key={item.id} item={item} onOpen={setDetailTech} />)}
             </div>
           )}
         </div>
       )}
 
-
+      {detailTech && (
+        <TechniqueDetailSheet item={detailTech} onClose={() => setDetailTech(null)} />
+      )}
     </div>
   )
 }
