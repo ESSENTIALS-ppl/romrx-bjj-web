@@ -45,6 +45,9 @@ const ROTATION: Record<number, number> = {
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
+// Sessions per cycle: 6 weeks of daily sessions between assessments (matches the 42-day retest window).
+const CYCLE_TARGET = 42
+
 // ── Prescription library ───────────────────────────────────────────────────────
 const RX: Record<string, Prescription> = {
   hip_er: {
@@ -792,12 +795,28 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
   const [completedToday, setCompletedToday] = useState(false)
   // DB-authoritative session count (matches what coach sees)
   const [dbSessionCount, setDbSessionCount] = useState(0)
+  // Cycle anchor: the user's LATEST assessment date, from the DB (not localStorage).
+  // localStorage stays for the "completed today" checkmark only, never the numeric count.
+  const [cycleStartDate, setCycleStartDate] = useState(() => assessedAt.slice(0, 10))
 
-  const cycleStart = log.cycleStart || assessedAt
-  const cycleStartDate = cycleStart.slice(0, 10)
-
-  // Load session count from DB on mount and keep in sync
+  // Resolve the cycle anchor to the user's most recent assessment date in the DB.
+  // A new assessment starts a new cycle (count intentionally restarts).
   useEffect(() => {
+    if (!userId) return
+    supabase
+      .from('assessments')
+      .select('assessed_at')
+      .eq('user_id', userId)
+      .order('assessed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.assessed_at) setCycleStartDate(data.assessed_at.slice(0, 10))
+      })
+  }, [userId])
+
+  // Stable count query: protocol_sessions rows on/after the cycle anchor.
+  const refreshCount = useCallback(() => {
     if (!userId) return
     supabase
       .from('protocol_sessions')
@@ -806,6 +825,9 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
       .gte('session_date', cycleStartDate)
       .then(({ count }) => { if (count !== null) setDbSessionCount(count) })
   }, [userId, cycleStartDate])
+
+  // Load session count from DB on mount and whenever the cycle anchor changes.
+  useEffect(() => { refreshCount() }, [refreshCount])
 
   useEffect(() => {
     const todayIso = new Date().toISOString().slice(0, 10)
@@ -830,19 +852,14 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
       session_date: todayIso,
       protocol_day: protocolDay,
     }, { onConflict: 'user_id,session_date' }).then(({ error }) => {
-      if (!error) {
-        // Update display count from DB after successful write
-        setDbSessionCount(prev => {
-          // Only increment if this is a new day (upsert on same day = same count)
-          const todayCounted = log.sessions.includes(todayIso)
-          return todayCounted ? prev : prev + 1
-        })
-      }
+      // Re-read the count from the DB after a successful write (no stale optimistic math).
+      if (!error) refreshCount()
     })
-  }, [storageKey, userId, todayPriorityIndex, log])
+  }, [storageKey, userId, todayPriorityIndex, refreshCount])
 
-  const sessionsThisCycle = dbSessionCount  // Use DB count (matches coach view)
-  const progressPct = Math.min(100, Math.round((sessionsThisCycle / 36) * 100))
+  // Cap at the cycle target: once at 42/42, hold until reassessment resets the window.
+  const sessionsThisCycle = Math.min(dbSessionCount, CYCLE_TARGET)
+  const progressPct = Math.min(100, Math.round((sessionsThisCycle / CYCLE_TARGET) * 100))
 
   const now = new Date()
   const retestDate = new Date(new Date(assessedAt).getTime() + 42 * 24 * 60 * 60 * 1000)
@@ -867,7 +884,7 @@ function TodayCard({ ranked, assessedAt, userId }: TodayCardProps) {
           </div>
           <div className="text-right shrink-0">
             <p className="text-[10px] text-charcoal-light uppercase tracking-wide">Session</p>
-            <p className="text-lg font-bold text-teal leading-tight">{sessionsThisCycle}<span className="text-sm font-normal text-charcoal-light">/36</span></p>
+            <p className="text-lg font-bold text-teal leading-tight">{sessionsThisCycle}<span className="text-sm font-normal text-charcoal-light">/{CYCLE_TARGET}</span></p>
           </div>
         </div>
 
