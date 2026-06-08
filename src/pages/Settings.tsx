@@ -9,7 +9,9 @@ import {
   LogOut, Trash2, ChevronRight, ClipboardList, TrendingUp,
   UserCheck, UserX, School, KeyRound, CheckCircle2, Bell,
 } from 'lucide-react'
+import { MessageSquarePlus } from 'lucide-react'
 import { beltColor, cn } from '../lib/utils'
+import { FeedbackWidget } from '../components/FeedbackWidget'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
 const SIDES = ['right', 'left']
@@ -851,6 +853,14 @@ function AthleteSettings() {
               <ChevronRight size={14} className="text-charcoal-light" />
             </a>
           </div>
+        </Section>
+
+        {/* ── FEEDBACK ── */}
+        <Section title="Send Feedback" icon={<MessageSquarePlus size={14} />}>
+          <p className="text-xs text-charcoal-light -mt-2">
+            Found a bug or have an idea? Let us know — your account is attached automatically.
+          </p>
+          <FeedbackWidget />
         </Section>
 
         {/* ── NOTIFICATIONS ── */}
