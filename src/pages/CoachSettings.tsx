@@ -8,8 +8,9 @@ import { Spinner } from '../components/Spinner'
 import { cn } from '../lib/utils'
 import {
   User, Lock, CreditCard, Bell, HelpCircle, LogOut,
-  Trash2, CheckCircle2, AlertTriangle, ExternalLink,
+  Trash2, CheckCircle2, AlertTriangle, ExternalLink, MessageSquarePlus,
 } from 'lucide-react'
+import { FeedbackWidget } from '../components/FeedbackWidget'
 
 // ── Section wrapper ────────────────────────────────────────────────────────────
 function Section({ title, icon: Icon, children }: {
@@ -335,6 +336,14 @@ export function CoachSettings() {
             </a>
           </div>
         </div>
+      </Section>
+
+      {/* ── Feedback ── */}
+      <Section title="Send Feedback" icon={MessageSquarePlus}>
+        <p className="text-xs text-charcoal-light">
+          Found a bug or have an idea? Let us know — your account is attached automatically.
+        </p>
+        <FeedbackWidget />
       </Section>
 
       {/* ── Account ── */}

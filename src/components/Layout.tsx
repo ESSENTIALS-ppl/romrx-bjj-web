@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { SportSwitcher } from '../sports/SportSwitcher'
+import { FeedbackButton } from './FeedbackButton'
 import type { SportConfig } from '../sports/registry'
 
 interface NavItem {
@@ -181,6 +182,8 @@ export function Layout() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
         <Outlet />
       </main>
+
+      <FeedbackButton />
     </div>
   )
 }
