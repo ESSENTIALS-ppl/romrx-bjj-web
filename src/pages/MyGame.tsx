@@ -3084,3 +3084,4 @@ export function MyGame() {
     </div>
   )
 }
+// build: force rebuild 20260609T015013Z - competency nested-button fix
