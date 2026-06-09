@@ -620,7 +620,83 @@ function StepSelector({ category, eligible, selected, onSelect }: {
 const CATEGORIES = ['All', 'Throws', 'Passes', 'Guards', 'Sweeps', 'Controls', 'Submissions', 'Submission defense']
 const TIERS = ['All', 'GREEN', 'YELLOW', 'RED'] as const
 
-function TechCard({ item, onOpen }: { item: TechniqueEligibility; onOpen: (item: TechniqueEligibility) => void }) {
+// ── Athlete self-tracked competency ─────────────────────────────────────────────
+// Ordered low → high. 'none' = not started (no pips filled).
+type CompetencyState = 'none' | 'learning' | 'drilled' | 'rolling' | 'taught'
+const COMPETENCY_LEVELS = ['learning', 'drilled', 'rolling', 'taught'] as const
+const COMPETENCY_LABELS: Record<typeof COMPETENCY_LEVELS[number], string> = {
+  learning: 'Learning',
+  drilled:  'Drilled',
+  rolling:  'Rolling',
+  taught:   'Taught',
+}
+// Distinct from the GREEN/YELLOW/RED ROM TierBadge palette. Note: the project's
+// tailwind config overrides `teal` with a custom DEFAULT/light-only color object,
+// so teal-300/teal-600 are unavailable here — cyan is used as the teal analogue.
+const COMPETENCY_COLORS: Record<typeof COMPETENCY_LEVELS[number], string> = {
+  learning: 'bg-slate-400',
+  drilled:  'bg-cyan-300',
+  rolling:  'bg-cyan-600',
+  taught:   'bg-amber-400',
+}
+const competencyRank = (s: CompetencyState) =>
+  s === 'none' ? 0 : COMPETENCY_LEVELS.indexOf(s as typeof COMPETENCY_LEVELS[number]) + 1
+
+// 4-segment "battery" pip indicator. Clicking a segment sets that level;
+// clicking the current top segment again clears back to 'none'.
+function CompetencyPips({
+  state,
+  onSet,
+}: {
+  state: CompetencyState
+  onSet: (next: CompetencyState) => void
+}) {
+  const rank = competencyRank(state)
+  return (
+    <div className="pt-2 border-t border-teal-light/60">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] font-semibold text-charcoal-light uppercase tracking-wide">Competency</span>
+        <span className="text-[10px] text-charcoal-light">
+          {state === 'none' ? 'Not started' : COMPETENCY_LABELS[state]}
+        </span>
+      </div>
+      <div className="flex gap-1">
+        {COMPETENCY_LEVELS.map((level, i) => {
+          const filled = i < rank
+          const isTop = i + 1 === rank
+          return (
+            <button
+              key={level}
+              type="button"
+              title={`${COMPETENCY_LABELS[level]}${isTop ? ' (click to clear)' : ''}`}
+              aria-label={`Set competency to ${COMPETENCY_LABELS[level]}`}
+              onClick={e => {
+                e.stopPropagation()
+                onSet(isTop ? 'none' : level)
+              }}
+              className={cn(
+                'flex-1 h-2.5 rounded-full transition-colors',
+                filled ? COMPETENCY_COLORS[level] : 'bg-gray-200 hover:bg-gray-300',
+              )}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function TechCard({
+  item,
+  onOpen,
+  competency = 'none',
+  onSetCompetency,
+}: {
+  item: TechniqueEligibility
+  onOpen: (item: TechniqueEligibility) => void
+  competency?: CompetencyState
+  onSetCompetency?: (techniqueId: string, next: CompetencyState) => void
+}) {
   const tech = item.techniques as { code: string; name: string; belt: string; category: string }
   const isDelay = item.flag === 'DELAY_TECHNIQUE'
   return (
@@ -657,6 +733,12 @@ function TechCard({ item, onOpen }: { item: TechniqueEligibility; onOpen: (item:
             Build prerequisite mobility before attempting this technique.
           </p>
         </div>
+      )}
+      {onSetCompetency && (
+        <CompetencyPips
+          state={competency}
+          onSet={next => onSetCompetency(item.technique_id, next)}
+        />
       )}
     </button>
   )
@@ -1487,6 +1569,9 @@ export function MyGame() {
   const [tierFilter, setTierFilter] = useState<typeof TIERS[number]>('All')
   const [detailTech, setDetailTech] = useState<TechniqueEligibility | null>(null)
 
+  // Athlete self-tracked competency (technique_id -> state)
+  const [competencyMap, setCompetencyMap] = useState<Map<string, CompetencyState>>(new Map())
+
   // ── Load plans from Supabase (with localStorage migration) ─────────────────
   const loadPlans = useCallback(async () => {
     if (!user?.id) return
@@ -1532,6 +1617,51 @@ export function MyGame() {
       loadPlans()
     }
   }, [tab, loadPlans])
+
+  // ── Load athlete competency rows once when library data is ready ──────────────
+  useEffect(() => {
+    if (!user?.id || eligibility.length === 0) return
+    let cancelled = false
+    async function loadCompetency() {
+      const { data } = await supabase
+        .from('user_technique_competency')
+        .select('technique_id, state')
+        .eq('user_id', user!.id)
+      if (cancelled) return
+      const map = new Map<string, CompetencyState>()
+      for (const row of (data ?? []) as { technique_id: string; state: CompetencyState }[]) {
+        map.set(row.technique_id, row.state)
+      }
+      setCompetencyMap(map)
+    }
+    loadCompetency()
+    return () => { cancelled = true }
+  }, [user?.id, eligibility.length])
+
+  // Optimistic upsert of a single technique's competency state.
+  const setCompetency = useCallback(
+    async (techniqueId: string, next: CompetencyState) => {
+      if (!user?.id) return
+      setCompetencyMap(prev => {
+        const m = new Map(prev)
+        if (next === 'none') m.delete(techniqueId)
+        else m.set(techniqueId, next)
+        return m
+      })
+      const now = new Date().toISOString()
+      await supabase.from('user_technique_competency').upsert(
+        {
+          user_id: user.id,
+          technique_id: techniqueId,
+          state: next,
+          last_touched: now,
+          updated_at: now,
+        },
+        { onConflict: 'user_id,technique_id' },
+      )
+    },
+    [user?.id],
+  )
 
   // F4+F7: Effective eligibility respecting GREEN-only and Gi/No-Gi filters
   const effectiveEligibility = useMemo(() => {
@@ -1802,6 +1932,14 @@ export function MyGame() {
       (!search || tech.name.toLowerCase().includes(search.toLowerCase()))
     )
   })
+
+  const competencyCounts = useMemo(() => {
+    const counts = { learning: 0, drilled: 0, rolling: 0, taught: 0 }
+    for (const state of competencyMap.values()) {
+      if (state !== 'none' && state in counts) counts[state as keyof typeof counts]++
+    }
+    return counts
+  }, [competencyMap])
 
   const seq = pathMode ? sequence(pathMode) : OFFENSE_SEQ
   const customComplete = customPicks.every(p => p !== null)
@@ -2914,11 +3052,23 @@ export function MyGame() {
             </div>
           </SectionCard>
 
+          <p className="text-xs font-medium text-charcoal-light">
+            Taught {competencyCounts.taught} · Rolling {competencyCounts.rolling} · Drilled {competencyCounts.drilled} · Learning {competencyCounts.learning}
+          </p>
+
           {filtered.length === 0 ? (
             <p className="text-center text-charcoal-light text-sm py-10">No techniques match your filters.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filtered.map(item => <TechCard key={item.id} item={item} onOpen={setDetailTech} />)}
+              {filtered.map(item => (
+                <TechCard
+                  key={item.id}
+                  item={item}
+                  onOpen={setDetailTech}
+                  competency={competencyMap.get(item.technique_id) ?? 'none'}
+                  onSetCompetency={setCompetency}
+                />
+              ))}
             </div>
           )}
         </div>
