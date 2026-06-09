@@ -1680,6 +1680,16 @@ export function MyGame() {
     return result
   }, [eligibility, greenOnly, giMode])
 
+  // Competency summary counts. MUST stay above the early returns below
+  // (loading / empty-eligibility) so hook order is stable across renders.
+  const competencyCounts = useMemo(() => {
+    const counts = { learning: 0, drilled: 0, rolling: 0, taught: 0 }
+    for (const state of competencyMap.values()) {
+      if (state !== 'none' && state in counts) counts[state as keyof typeof counts]++
+    }
+    return counts
+  }, [competencyMap])
+
   // F5: Export as image
   const downloadFlowImage = useCallback(async (elementId: string, filename: string) => {
     const el = document.getElementById(elementId)
@@ -1936,14 +1946,6 @@ export function MyGame() {
       (!search || tech.name.toLowerCase().includes(search.toLowerCase()))
     )
   })
-
-  const competencyCounts = useMemo(() => {
-    const counts = { learning: 0, drilled: 0, rolling: 0, taught: 0 }
-    for (const state of competencyMap.values()) {
-      if (state !== 'none' && state in counts) counts[state as keyof typeof counts]++
-    }
-    return counts
-  }, [competencyMap])
 
   const seq = pathMode ? sequence(pathMode) : OFFENSE_SEQ
   const customComplete = customPicks.every(p => p !== null)
