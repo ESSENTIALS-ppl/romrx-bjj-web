@@ -639,6 +639,13 @@ const COMPETENCY_COLORS: Record<typeof COMPETENCY_LEVELS[number], string> = {
   rolling:  'bg-cyan-600',
   taught:   'bg-amber-400',
 }
+// One-liner meaning for each level (coaching voice, second person).
+const COMPETENCY_DESCRIPTIONS: Record<typeof COMPETENCY_LEVELS[number], string> = {
+  learning: "You've seen it and tried a few reps",
+  drilled:  'You can hit it cleanly in drilling',
+  rolling:  'You land it against resisting partners',
+  taught:   'You can break it down and teach it',
+}
 const competencyRank = (s: CompetencyState) =>
   s === 'none' ? 0 : COMPETENCY_LEVELS.indexOf(s as typeof COMPETENCY_LEVELS[number]) + 1
 
@@ -682,6 +689,47 @@ function CompetencyPips({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+// Compact, tap-to-explain legend shown above the Library grid. Works on touch
+// (no hover needed): tapping a level toggles its one-liner description inline.
+function CompetencyLegend({ counts }: { counts: Record<typeof COMPETENCY_LEVELS[number], number> }) {
+  const [active, setActive] = useState<typeof COMPETENCY_LEVELS[number] | null>(null)
+  return (
+    <div className="bg-white rounded-2xl border border-teal-light p-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-semibold text-charcoal-light uppercase tracking-wide">Competency Levels</span>
+        <span className="text-[10px] text-charcoal-light">Tap a level to see what it means</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {COMPETENCY_LEVELS.map(level => {
+          const isActive = active === level
+          return (
+            <button
+              key={level}
+              type="button"
+              onClick={() => setActive(isActive ? null : level)}
+              aria-expanded={isActive}
+              className={cn(
+                'flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs font-medium',
+                isActive ? 'border-teal/50 bg-teal-light/40 text-charcoal' : 'border-teal-light text-charcoal-light hover:bg-surface',
+              )}
+            >
+              <span className={cn('w-2.5 h-2.5 rounded-full', COMPETENCY_COLORS[level])} />
+              {COMPETENCY_LABELS[level]}
+              <span className="text-charcoal-light/70 tabular-nums">{counts[level]}</span>
+            </button>
+          )
+        })}
+      </div>
+      {active && (
+        <p className="text-xs text-charcoal-light leading-snug mt-2">
+          <span className="font-semibold text-charcoal">{COMPETENCY_LABELS[active]}:</span>{' '}
+          {COMPETENCY_DESCRIPTIONS[active]}
+        </p>
+      )}
     </div>
   )
 }
@@ -3058,9 +3106,7 @@ export function MyGame() {
             </div>
           </SectionCard>
 
-          <p className="text-xs font-medium text-charcoal-light">
-            Taught {competencyCounts.taught} · Rolling {competencyCounts.rolling} · Drilled {competencyCounts.drilled} · Learning {competencyCounts.learning}
-          </p>
+          <CompetencyLegend counts={competencyCounts} />
 
           {filtered.length === 0 ? (
             <p className="text-center text-charcoal-light text-sm py-10">No techniques match your filters.</p>
