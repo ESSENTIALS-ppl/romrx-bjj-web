@@ -699,11 +699,15 @@ function TechCard({
 }) {
   const tech = item.techniques as { code: string; name: string; belt: string; category: string }
   const isDelay = item.flag === 'DELAY_TECHNIQUE'
+  // Card is a div (not a button) because it contains interactive competency
+  // pip buttons; nested <button> inside <button> is invalid DOM and crashes React.
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpen(item)}
-      className="text-left w-full bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-2.5 hover:border-teal/40 focus:outline-none focus:ring-2 focus:ring-teal/40 transition-colors">
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(item) } }}
+      className="cursor-pointer text-left w-full bg-white rounded-2xl border border-teal-light p-4 flex flex-col gap-2.5 hover:border-teal/40 focus:outline-none focus:ring-2 focus:ring-teal/40 transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-charcoal leading-snug mt-0.5 line-clamp-2">{tech.name}</p>
@@ -740,7 +744,7 @@ function TechCard({
           onSet={next => onSetCompetency(item.technique_id, next)}
         />
       )}
-    </button>
+    </div>
   )
 }
 
