@@ -98,7 +98,12 @@ export function ResultsPreview() {
         .eq('id', user.id)
         .maybeSingle()
 
-      if (userRow?.subscription_status === 'active' || userRow?.subscription_status === 'trialing') {
+      // Only an 'active' subscription unlocks the dashboard. 'trialing' is
+      // reserved for Stripe-managed trials (set by the Stripe webhook, never
+      // by the signup form) and must also include a non-null subscription_expiry.
+      // See incident 2026-06-10 — historically 'trialing' was set client-side
+      // at signup, which bypassed checkout entirely.
+      if (userRow?.subscription_status === 'active') {
         navigate('/dashboard/my-body', { replace: true })
         return
       }
