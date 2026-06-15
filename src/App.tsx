@@ -16,6 +16,7 @@ import { CoachSignup } from './pages/CoachSignup'
 import { MyCoach } from './pages/MyCoach'
 import { MySchool } from './pages/MySchool'
 import { ResultsPreview } from './pages/ResultsPreview'
+import { PaymentSuccess } from './pages/PaymentSuccess'
 import { Unsubscribe } from './pages/Unsubscribe'
 import { ShareView } from './pages/ShareView'
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/auth/confirm"    element={<AuthConfirm />} />
         <Route path="/onboarding/assessment" element={<Assessment />} />
         <Route path="/onboarding/results"    element={<ResultsPreview />} />
+        <Route path="/onboarding/payment-success" element={<PaymentSuccess />} />
         <Route path="/unsubscribe"     element={<Unsubscribe />} />
         <Route path="/game/:slug"       element={<ShareView />} />
 

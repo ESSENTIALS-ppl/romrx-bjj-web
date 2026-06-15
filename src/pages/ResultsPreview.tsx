@@ -98,12 +98,12 @@ export function ResultsPreview() {
         .eq('id', user.id)
         .maybeSingle()
 
-      // Only an 'active' subscription unlocks the dashboard. 'trialing' is
-      // reserved for Stripe-managed trials (set by the Stripe webhook, never
-      // by the signup form) and must also include a non-null subscription_expiry.
-      // See incident 2026-06-10 — historically 'trialing' was set client-side
-      // at signup, which bypassed checkout entirely.
-      if (userRow?.subscription_status === 'active') {
+      // 'active' and 'trialing' both unlock the dashboard — same set as
+      // ProtectedRoute (PAID_STATUSES). 'trialing' is Stripe-managed and is
+      // only ever set by the Stripe webhook, never by the signup form (see
+      // incident 2026-06-10 — historically 'trialing' was seeded client-side,
+      // which bypassed checkout entirely).
+      if (userRow?.subscription_status === 'active' || userRow?.subscription_status === 'trialing') {
         navigate('/dashboard/my-body', { replace: true })
         return
       }
