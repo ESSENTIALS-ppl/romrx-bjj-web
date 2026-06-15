@@ -58,7 +58,8 @@ export function CoachSignup() {
         full_name: fullName,
         belt,
         portal_role: 'coach',
-        subscription_status: 'trialing',
+        // See Signup.tsx — 'pending' until Stripe checkout completes.
+        subscription_status: 'pending',
         subscription_tier: 'coach',
         platforms: [SPORT],
         active_sport: SPORT,

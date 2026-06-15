@@ -19,8 +19,33 @@ import {
   Flame, Brain, Zap, Footprints, CircleDot,
   Bookmark, Share2, Trash2, Check, Lock,
   ChevronLeft, Star, Dumbbell, X,
-  Printer, GitBranch, Medal, ChevronRight,
+  Printer, GitBranch, Medal, ChevronRight, MessageSquare,
 } from 'lucide-react'
+
+// ── Send-to-ROMBot handoff ────────────────────────────────────────────────────
+// Serializes a generated flow into sessionStorage and returns a token to pass
+// to /dashboard/chat?gameplan=2&flow=<token>. We use sessionStorage (not a URL
+// query param) because flows can contain 20+ techniques and would blow the URL
+// length limit on mobile Safari.
+interface RomBotHandoff {
+  label: string                              // human label, e.g. "AI Flow: Lasso Sweep to Triangle"
+  source: 'quick' | 'ai' | 'comp' | 'saved'  // which generator produced it
+  techniques: { name: string; code: string; tier: string; category: string }[]
+  branches?: { stepIndex: number; primary: string; alt: string }[]
+  context?: Record<string, string>           // free-form (start/finish/style/format/etc.)
+}
+function stashFlowForRombot(payload: RomBotHandoff): string {
+  const token = `rombot-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+  try {
+    sessionStorage.setItem(token, JSON.stringify(payload))
+  } catch {
+    // sessionStorage can throw in private mode — fall back to window global
+    // so the handoff still works for the current tab.
+    ;(window as unknown as { __romBotHandoff?: Record<string, RomBotHandoff> }).__romBotHandoff ??= {}
+    ;(window as unknown as { __romBotHandoff: Record<string, RomBotHandoff> }).__romBotHandoff[token] = payload
+  }
+  return token
+}
 
 // ── Position labels ───────────────────────────────────────────────────────────
 const POS: Record<string, string> = {
@@ -2092,6 +2117,26 @@ export function MyGame() {
                     <Share2 size={14} /> Download
                   </button>
                   <PrintButton planName={loadedPlan.name} />
+                  <button
+                    onClick={() => {
+                      const token = stashFlowForRombot({
+                        label: `Saved Plan: ${loadedPlan.name}`,
+                        source: 'saved',
+                        techniques: loadedPlan.techniques.map(t => ({
+                          name: t.name, code: t.code, tier: t.tier, category: t.category,
+                        })),
+                        context: {
+                          path_mode: loadedPlan.pathMode ?? '',
+                          description: loadedPlan.description ?? '',
+                        },
+                      })
+                      navigate(`/dashboard/chat?gameplan=2&flow=${token}`)
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors"
+                    title="Send this saved plan to ROMBot for coaching and refinement"
+                  >
+                    <MessageSquare size={14} /> Send to ROMBot
+                  </button>
                 </div>
               </div>
               <div id="loaded-flow-export">
@@ -2372,6 +2417,31 @@ export function MyGame() {
                           </button>
                           <PrintButton planName={aiPlanName} />
                           <button
+                            onClick={() => {
+                              const token = stashFlowForRombot({
+                                label: `AI Flow: ${aiPlanName}`,
+                                source: 'ai',
+                                techniques: aiFlow.map(t => ({
+                                  name: t.name, code: t.code, tier: t.tier, category: t.category,
+                                })),
+                                branches: branches.map(b => ({
+                                  stepIndex: b.stepIndex,
+                                  primary: b.primaryTech.name,
+                                  alt: b.altTech?.name ?? '—',
+                                })),
+                                context: {
+                                  start: aiStart ?? '', finish: aiFinish ?? '', style: aiStyle ?? '',
+                                  opponent: aiOpponent ?? '', description: aiDescription,
+                                },
+                              })
+                              navigate(`/dashboard/chat?gameplan=2&flow=${token}`)
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors"
+                            title="Send this flow to ROMBot for coaching and refinement"
+                          >
+                            <MessageSquare size={14} /> Send to ROMBot
+                          </button>
+                          <button
                             onClick={resetAIWizard}
                             className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors"
                           >
@@ -2523,6 +2593,27 @@ export function MyGame() {
                             <Share2 size={14} /> Download
                           </button>
                           <PrintButton />
+                          <button
+                            onClick={() => {
+                              const label = pathMode === 'offense' ? 'Offense Flow' : 'Defense Flow'
+                              const token = stashFlowForRombot({
+                                label: `Quick ${label}`,
+                                source: 'quick',
+                                techniques: quickFlow.map(t => ({
+                                  name: t.techniques.name,
+                                  code: t.technique_code,
+                                  tier: t.tier,
+                                  category: t.techniques.category,
+                                })),
+                                context: { path_mode: pathMode ?? '' },
+                              })
+                              navigate(`/dashboard/chat?gameplan=2&flow=${token}`)
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal/90 transition-colors"
+                            title="Send this flow to ROMBot for coaching and refinement"
+                          >
+                            <MessageSquare size={14} /> Send to ROMBot
+                          </button>
                           <button onClick={quickRegenerate}
                             className="flex items-center gap-1.5 text-xs font-semibold text-teal bg-teal-light px-3 py-2 rounded-xl hover:bg-teal/20 transition-colors">
                             <RefreshCw size={12} /> New Flow
@@ -2928,6 +3019,27 @@ export function MyGame() {
                             <Share2 size={14} /> Download
                           </button>
                           <PrintButton planName={compPlanName} />
+                          <button
+                            onClick={() => {
+                              const token = stashFlowForRombot({
+                                label: `Competition Plan: ${compPlanName}`,
+                                source: 'comp',
+                                techniques: compFlow.map(t => ({
+                                  name: t.name, code: t.code, tier: t.tier, category: t.category,
+                                })),
+                                context: {
+                                  format: compFormat ?? '', duration: compDuration ?? '',
+                                  threat: compThreat ?? '', description: compDescription,
+                                },
+                              })
+                              navigate(`/dashboard/chat?gameplan=2&flow=${token}`)
+                            }}
+                            disabled={compFlow.length === 0}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+                            title="Send this competition plan to ROMBot for coaching and refinement"
+                          >
+                            <MessageSquare size={14} /> Send to ROMBot
+                          </button>
                           <button
                             onClick={resetCompWizard}
                             className="flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-xl hover:bg-red-100 transition-colors"

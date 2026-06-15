@@ -47,7 +47,11 @@ export function Signup() {
         full_name: fullName,
         belt,
         portal_role: 'athlete',
-        subscription_status: 'trialing',
+        // Account is created in 'pending' state. The user must complete Stripe
+        // checkout from /onboarding/results before ProtectedRoute will admit them
+        // to any /dashboard/* page. Do NOT seed 'trialing' here — that bypasses
+        // the paywall (see incident 2026-06-10).
+        subscription_status: 'pending',
         subscription_tier: 'athlete',
         platforms: ['bjj'],
       }, { onConflict: 'id' })

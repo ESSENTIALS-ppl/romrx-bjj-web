@@ -115,9 +115,65 @@ export function Chat() {
   useEffect(() => {
     if (autoSentRef.current || profileLoading || !session || messages.length === 0) return
     const params = new URLSearchParams(location.search)
-    if (params.get('gameplan') !== '1') return
+    const gp = params.get('gameplan')
+    if (gp !== '1' && gp !== '2') return
     autoSentRef.current = true
     navigate('/dashboard/chat', { replace: true })
+
+    // ── Mode 2: refine an already-generated flow (Send to ROMBot button) ──
+    if (gp === '2') {
+      const token = params.get('flow')
+      if (!token) return
+      type RomBotHandoff = {
+        label: string
+        source: 'quick' | 'ai' | 'comp' | 'saved'
+        techniques: { name: string; code: string; tier: string; category: string }[]
+        branches?: { stepIndex: number; primary: string; alt: string }[]
+        context?: Record<string, string>
+      }
+      let payload: RomBotHandoff | null = null
+      try {
+        const raw = sessionStorage.getItem(token)
+        if (raw) payload = JSON.parse(raw) as RomBotHandoff
+      } catch { /* ignore */ }
+      if (!payload) {
+        const fallback = (window as unknown as { __romBotHandoff?: Record<string, RomBotHandoff> }).__romBotHandoff
+        payload = fallback?.[token] ?? null
+      }
+      if (!payload) return
+      sessionStorage.removeItem(token)
+
+      setGamePlanBanner(`Refining: ${payload.label}`)
+      const techList = payload.techniques
+        .map((t, i) => `${i + 1}. ${t.name} (${t.code}) — ${t.tier.toUpperCase()} • ${t.category}`)
+        .join('\n')
+      const branchList = payload.branches?.length
+        ? '\n\nBranches:\n' + payload.branches
+            .map(b => `  • At step ${b.stepIndex + 1}: ${b.primary} → backup ${b.alt}`).join('\n')
+        : ''
+      const ctxList = payload.context && Object.keys(payload.context).length
+        ? '\n\nContext:\n' + Object.entries(payload.context)
+            .filter(([, v]) => v).map(([k, v]) => `  • ${k}: ${v}`).join('\n')
+        : ''
+      const msg = `I just built this flow in the ROMRx flow generator and want your coaching on it.\n\nFlow: ${payload.label}\nSource: ${payload.source}\n\nTechniques (in order):\n${techList}${branchList}${ctxList}\n\nGiven my ROM profile, technique tiers, and what you know about my training: (1) is this sequence sound, (2) what's the weakest transition and how do I shore it up, (3) what's one technique I should consider swapping or adding, and (4) what should I drill this week to make this flow actually work in live rolls?`
+      setTimeout(async () => {
+        setMessages(p => [...p, { role: 'user', content: msg }])
+        setBusy(true); setError('')
+        try {
+          const res = await fetch(AI_CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+          })
+          const data = await res.json()
+          if (data.error) throw new Error(data.error)
+          setConvId(data.conversation_id)
+          setMessages(p => [...p, { role: 'assistant', content: data.reply }])
+        } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong') }
+        finally { setBusy(false) }
+      }, 600)
+      return
+    }
 
     const mode = params.get('mode') ?? ''
 

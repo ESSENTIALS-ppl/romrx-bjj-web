@@ -98,6 +98,11 @@ export function ResultsPreview() {
         .eq('id', user.id)
         .maybeSingle()
 
+      // 'active' and 'trialing' both unlock the dashboard — same set as
+      // ProtectedRoute (PAID_STATUSES). 'trialing' is Stripe-managed and is
+      // only ever set by the Stripe webhook, never by the signup form (see
+      // incident 2026-06-10 — historically 'trialing' was seeded client-side,
+      // which bypassed checkout entirely).
       if (userRow?.subscription_status === 'active' || userRow?.subscription_status === 'trialing') {
         navigate('/dashboard/my-body', { replace: true })
         return
