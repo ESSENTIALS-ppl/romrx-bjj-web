@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROMRxBJJ&#8482; | Performance Intelligence for Brazilian Jiu-Jitsu</title>
+  <title>ROMRx+BJJ | Performance Intelligence for Brazilian Jiu-Jitsu</title>
   <meta name="description" content="The only ROM-to-technique mapping system for BJJ. For athletes, coaches, and academies.">
-  <meta property="og:title" content="ROMRxBJJ&#8482; | Performance Intelligence for BJJ">
+  <meta property="og:title" content="ROMRx+BJJ | Performance Intelligence for BJJ">
   <meta property="og:description" content="Know what your body is ready for. Know what your athletes need. ROM assessment built for Brazilian Jiu-Jitsu.">
   <meta property="og:url" content="https://romrxbjj.com">
   <meta property="og:type" content="website">
@@ -13,17 +13,17 @@
   <meta property="og:image" content="https://romrxbjj.com/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="ROMRxBJJ">
+  <meta property="og:image:alt" content="ROMRx+BJJ">
   <!-- Twitter / X card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ROMRxBJJ | Performance Intelligence for BJJ">
+  <meta name="twitter:title" content="ROMRx+BJJ | Performance Intelligence for BJJ">
   <meta name="twitter:description" content="Know what your body is ready for. Know what your athletes need. ROM assessment built for Brazilian Jiu-Jitsu.">
   <meta name="twitter:image" content="https://romrxbjj.com/og-image.png">
   <!-- Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-  <meta name="apple-mobile-web-app-title" content="ROMRxBJJ">
+  <meta name="apple-mobile-web-app-title" content="ROMRx+BJJ">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#008080">
   <link rel="canonical" href="https://romrxbjj.com">
@@ -209,12 +209,30 @@
       .nav { padding: 0 20px; }
       .hero { padding: 80px 20px 60px; }
     }
+    /* v3.2 wordmark & universe footer additions */
+    .nav-plus { color: #FFB347; font-weight: 800; }
+    .universe-footer { border-top: 1px solid rgba(255,179,71,0.18); padding: 56px 24px 24px; text-align: center; }
+    .universe-footer .uf-eyebrow { font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; color: #FFB347; opacity: 0.9; margin-bottom: 20px; }
+    .universe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; max-width: 980px; margin: 0 auto; }
+    .uf-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,179,71,0.12); border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.2s, background 0.2s; text-align: left; }
+    .uf-row:hover { border-color: rgba(255,179,71,0.4); background: rgba(255,179,71,0.05); }
+    .uf-row.here { border-color: rgba(0,128,128,0.5); background: rgba(0,128,128,0.10); cursor: default; }
+    .uf-row.coming { opacity: 0.65; cursor: default; }
+    .uf-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .uf-plus { color: #FFB347; }
+    .uf-proto { font-size: 0.78rem; opacity: 0.65; margin-top: 2px; }
+    .uf-badge { font-family: 'Montserrat', sans-serif; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 10px; border-radius: 999px; }
+    .uf-badge.here { background: #008080; color: #fff; }
+    .uf-badge.live { background: rgba(0,220,130,0.15); color: #6EE7B7; }
+    .uf-badge.coming { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+    .universe-footer .uf-tag { margin-top: 20px; font-size: 0.82rem; opacity: 0.55; }
+    .footer-tm { max-width: 900px; margin: 16px auto 0; font-size: 0.68rem; line-height: 1.5; opacity: 0.4; padding: 0 12px; }
   </style>
 </head>
 <body>
 
   <nav class="nav">
-    <a href="/" class="nav-logo">ROMRxBJJ&#8482;</a>
+    <a href="/" class="nav-logo">ROMRx<span class="nav-plus">+BJJ</span></a>
     <a href="/login" class="nav-sign-in">Sign In &rarr;</a>
   </nav>
 
@@ -259,10 +277,10 @@
       <a href="/schools" class="path-card coming-soon" style="text-decoration:none;">
         <span class="path-icon">&#x1F3EB;</span>
         <span class="path-badge coming">In Development</span>
-        <div class="path-title">For Schools</div>
-        <p class="path-desc">Academy-level dashboards, multi-coach access, and school-wide ROM analytics for your entire program.</p>
+        <div class="path-title">For Academies</div>
+        <p class="path-desc">Academy-level dashboards, multi-coach access, and program-wide ROM analytics for your entire team.</p>
         <ul class="path-features">
-          <li>School-wide roster + analytics</li>
+          <li>Academy-wide roster + analytics</li>
           <li>Multi-coach access</li>
           <li>Curriculum planning by body readiness</li>
           <li>Competition management</li>
@@ -273,9 +291,69 @@
     </div>
   </main>
 
+  <!-- Universe Footer -->
+  <section class="universe-footer">
+    <p class="uf-eyebrow">Part of the ROMRx Universe</p>
+    <div class="universe-grid">
+      <div class="uf-row here">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+BJJ</span></div>
+          <div class="uf-proto">Position Readiness Protocol&#8482;</div>
+        </div>
+        <span class="uf-badge here">You are here</span>
+      </div>
+      <a class="uf-row" href="https://romrx.io">
+        <div>
+          <div class="uf-name">ROMRx</div>
+          <div class="uf-proto">Free assessment &amp; base protocol</div>
+        </div>
+        <span class="uf-badge live">Live</span>
+      </a>
+      <a class="uf-row" href="https://romrxbodybuilding.com">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+BodyBuilding</span></div>
+          <div class="uf-proto">Exercise Readiness Protocol&#8482;</div>
+        </div>
+        <span class="uf-badge live">Live</span>
+      </a>
+      <div class="uf-row coming">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+Powerlifting</span></div>
+          <div class="uf-proto">Lift Readiness Protocol&#8482;</div>
+        </div>
+        <span class="uf-badge coming">Coming</span>
+      </div>
+      <div class="uf-row coming">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+MMA</span></div>
+          <div class="uf-proto">Training Readiness Profile&#8482;</div>
+        </div>
+        <span class="uf-badge coming">Coming</span>
+      </div>
+      <div class="uf-row coming">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+Yoga</span></div>
+          <div class="uf-proto">Pose Readiness Protocol&#8482;</div>
+        </div>
+        <span class="uf-badge coming">Coming</span>
+      </div>
+      <div class="uf-row coming">
+        <div>
+          <div class="uf-name">ROMRx<span class="uf-plus">+FirstResponder</span></div>
+          <div class="uf-proto">Task Readiness Protocol&#8482;</div>
+        </div>
+        <span class="uf-badge coming">Coming</span>
+      </div>
+    </div>
+    <p class="uf-tag">One ROM assessment. Every sport your body plays.</p>
+  </section>
+
   <footer class="footer">
-    &copy; 2026 ROMRxBJJ&#8482; &middot; A product of ROMRx&#8482; LLC &middot;
+    &copy; 2026 ROMRx+BJJ &middot; A product of ROMRx&#8482; LLC &middot;
     <a href="mailto:ROMRxBJJ@gmail.com" style="color:inherit;">ROMRxBJJ@gmail.com</a>
+    <div class="footer-tm">
+      ROMRx&#8482;, ROMRx+BJJ&#8482;, ROM Readiness Protocol&#8482;, Position Readiness Protocol&#8482;, ROMBot&#8482;, The 6-Week Reassessment Cycle&#8482;, Top 3 Priority Joints&#8482; are trademarks of ROMRx LLC.
+    </div>
   </footer>
 
 </body>
