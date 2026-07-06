@@ -47,6 +47,22 @@ function renderGuard(requireSport?: string) {
   )
 }
 
+function renderCoachGuard() {
+  window.history.replaceState({}, '', '/dashboard/coach')
+  return render(
+    <MemoryRouter initialEntries={['/dashboard/coach']}>
+      <Routes>
+        <Route element={<ProtectedRoute requireCoach />}>
+          <Route path="/dashboard/coach" element={<div>COACH CONTENT</div>} />
+        </Route>
+        <Route path="/login" element={<div>LOGIN PAGE</div>} />
+        <Route path="/onboarding/results" element={<div>PAYWALL PAGE</div>} />
+        <Route path="/onboarding/assessment" element={<div>ASSESSMENT PAGE</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   window.history.replaceState({}, '', '/dashboard/my-body')
@@ -121,6 +137,33 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('ASSESSMENT PAGE')).not.toBeInTheDocument()
     expect(screen.queryByText('LOGIN PAGE')).not.toBeInTheDocument()
     expect(container.querySelector('.animate-spin')).toBeInTheDocument()
+  })
+
+  it('renders coach content for an active coach WITHOUT an assessment', () => {
+    useAuthMock.mockReturnValue({ session: { user: { id: 'user-1' } }, user: { id: 'user-1' }, loading: false })
+    useProfileMock.mockReturnValue({
+      profile: { ...profile, portal_role: 'coach', subscription_tier: 'coach' },
+      assessment: null,
+      loading: false,
+    })
+
+    renderCoachGuard()
+
+    expect(screen.getByText('COACH CONTENT')).toBeInTheDocument()
+  })
+
+  it('redirects a coach route to paywall when the user is not a coach', () => {
+    useAuthMock.mockReturnValue({ session: { user: { id: 'user-1' } }, user: { id: 'user-1' }, loading: false })
+    useProfileMock.mockReturnValue({
+      profile: { ...profile, portal_role: 'athlete' },
+      assessment,
+      loading: false,
+    })
+
+    renderCoachGuard()
+
+    expect(screen.getByText('PAYWALL PAGE')).toBeInTheDocument()
+    expect(screen.queryByText('COACH CONTENT')).not.toBeInTheDocument()
   })
 
   it('shows a loading spinner while auth is still resolving', () => {

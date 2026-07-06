@@ -12,7 +12,13 @@
  *      Traces back to Stripe via `profile.sports_enabled` (mirrors `platforms`,
  *      which the stripe-webhook keeps in sync).
  *
- * Base-only routes require #1 + #2; +sport routes require #1 + #2 + #3.
+ * Base-only athlete routes require #1 + #2; +sport athlete routes require
+ * #1 + #2 + #3.
+ *
+ * Coach/School CRM routes are different: they are managed by coaches/gyms who
+ * consume athlete ROM data but do NOT assess their own body. They require an
+ * active subscription + a coach entitlement (`profile.portal_role`, seeded at
+ * coach signup and backed by the coach Stripe product) but NOT #2 (assessment).
  */
 import type { Assessment, Profile } from '../hooks/useProfile'
 
@@ -80,6 +86,19 @@ export function hasSportEntitlement(
   return !!profile?.sports_enabled?.includes(sportSlug)
 }
 
+/**
+ * portal_role values that grant access to the Coach/School CRM apps. Seeded at
+ * coach signup (CoachSignup sets portal_role: 'coach') and gated behind the coach
+ * Stripe product — the stripe-webhook keeps subscription_status active for a paid
+ * coach, and RLS on the coach data tables is the real security boundary.
+ */
+export const COACH_ROLES = new Set(['coach'])
+
+/** The user holds a coach/school entitlement (CRM apps for coaches/gyms). */
+export function hasCoachEntitlement(profile: Profile | null | undefined): boolean {
+  return !!profile && COACH_ROLES.has(profile.portal_role)
+}
+
 export type AccessDecision =
   | { status: 'allow' }
   | { status: 'redirect'; to: string }
@@ -93,29 +112,52 @@ export interface AccessInput {
    * Base-only routes.
    */
   requireSport?: string
+  /**
+   * When true, this is a Coach/School CRM route: require an active subscription +
+   * a coach entitlement, but NOT a completed assessment (coaches manage athletes
+   * and do not assess their own body). Mutually exclusive with requireSport.
+   */
+  requireCoach?: boolean
 }
 
 /**
- * Compose the three-part gate into a single decision. Callers must only invoke
- * this once auth + profile have finished loading; loading is handled upstream so
- * gated content never flashes and redirects never fire prematurely.
+ * Compose the access gate into a single decision. Callers must only invoke this
+ * once auth + profile have finished loading; loading is handled upstream so gated
+ * content never flashes and redirects never fire prematurely.
  */
 export function evaluateAccess({
   profile,
   assessment,
   requireSport,
+  requireCoach,
 }: AccessInput): AccessDecision {
   if (!isBaseActive(profile)) {
     return { status: 'redirect', to: REDIRECTS.paywall }
   }
+
+  // Coach/School CRM routes: active subscription + coach entitlement, no
+  // assessment gate. The coach is not an athlete assessing their own body.
+  if (requireCoach) {
+    if (!hasCoachEntitlement(profile)) {
+      return { status: 'redirect', to: REDIRECTS.paywall }
+    }
+    return { status: 'allow' }
+  }
+
   if (!hasCompletedAssessment(assessment)) {
     return { status: 'redirect', to: REDIRECTS.assessment }
   }
 
-  const sportSlug =
-    requireSport === 'active' ? profile?.active_sport : requireSport
-  if (sportSlug && !hasSportEntitlement(profile, sportSlug)) {
-    return { status: 'redirect', to: REDIRECTS.paywall }
+  // +sport routes: a sport is required, so a valid entitled slug MUST resolve.
+  // Gate on the requirement itself — if requireSport is set but no valid slug
+  // resolves (e.g. active_sport is null/empty), DENY. Otherwise this fails open:
+  // a Base-active user with no sport pack would reach default-sport content.
+  if (requireSport) {
+    const sportSlug =
+      requireSport === 'active' ? profile?.active_sport : requireSport
+    if (!sportSlug || !hasSportEntitlement(profile, sportSlug)) {
+      return { status: 'redirect', to: REDIRECTS.paywall }
+    }
   }
 
   return { status: 'allow' }

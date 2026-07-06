@@ -12,9 +12,15 @@ interface ProtectedRouteProps {
    * assessment.
    */
   requireSport?: string
+  /**
+   * Coach/School CRM route group: require active subscription + coach entitlement,
+   * but NOT a completed assessment. Coaches/gyms manage athletes and do not assess
+   * their own body.
+   */
+  requireCoach?: boolean
 }
 
-export function ProtectedRoute({ requireSport }: ProtectedRouteProps = {}) {
+export function ProtectedRoute({ requireSport, requireCoach }: ProtectedRouteProps = {}) {
   const { session, user, loading } = useAuth()
   const { profile, assessment, loading: profileLoading } = useProfile(user?.id)
 
@@ -39,7 +45,7 @@ export function ProtectedRoute({ requireSport }: ProtectedRouteProps = {}) {
   // Three-part gate: base active + completed assessment (+ sport entitlement for
   // +sport routes). base_status and sport_entitlement both derive from
   // Stripe-synced state on the profile — never client-only flags.
-  const decision = evaluateAccess({ profile, assessment, requireSport })
+  const decision = evaluateAccess({ profile, assessment, requireSport, requireCoach })
   if (decision.status === 'redirect') {
     return <Navigate to={decision.to} replace />
   }

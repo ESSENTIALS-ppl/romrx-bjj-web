@@ -39,19 +39,28 @@ export default function App() {
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />
 
-        {/* Base-gated dashboard routes: require active Base + a completed assessment. */}
+        {/* Base-gated athlete routes: require active Base + a completed assessment.
+            my-coach / my-school are athlete-facing views of their coach/school. */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/dashboard/my-body"     element={<MyBody />} />
             <Route path="/dashboard/chat"        element={<Chat />} />
             <Route path="/dashboard/settings"    element={<Settings />} />
+            <Route path="/dashboard/my-coach"     element={<MyCoach />} />
+            <Route path="/dashboard/my-school"    element={<MySchool />} />
+          </Route>
+        </Route>
+
+        {/* Coach/School CRM routes: require active subscription + coach entitlement,
+            but NOT a completed assessment — coaches/gyms manage athletes and do not
+            assess their own body. */}
+        <Route element={<ProtectedRoute requireCoach />}>
+          <Route element={<Layout />}>
             <Route path="/dashboard/coach"             element={<CoachDashboard defaultSection="team" />} />
             <Route path="/dashboard/coach-coaching"    element={<CoachDashboard defaultSection="coaching" />} />
             <Route path="/dashboard/coach-competitions" element={<CoachDashboard defaultSection="competitions" />} />
             <Route path="/dashboard/coach-injury"      element={<CoachDashboard defaultSection="injury" />} />
             <Route path="/dashboard/coach-school"      element={<CoachDashboard defaultSection="school" />} />
-            <Route path="/dashboard/my-coach"     element={<MyCoach />} />
-            <Route path="/dashboard/my-school"    element={<MySchool />} />
           </Route>
         </Route>
 
