@@ -5,9 +5,7 @@ import { useProfile } from '../hooks/useProfile'
 import { useSport } from '../sports/SportProvider'
 import { cn } from '../lib/utils'
 import {
-  Dumbbell,
   Layers,
-  ClipboardList,
   MessageSquare,
   Settings,
   LogOut,
@@ -43,19 +41,21 @@ const ATHLETE_ONLY_ROUTES = [
  */
 function buildAthleteNav(sport: SportConfig): NavItem[] {
   const items: NavItem[] = []
-  if (sport.body_label) {
-    items.push({ to: '/dashboard/my-body', icon: Dumbbell, label: sport.body_label })
-  }
+  // Hidden: My Body + My Protocol are ROMRx Base-only now. Full cleanup tracked in Notion post-migration.
+  // if (sport.body_label) {
+  //   items.push({ to: '/dashboard/my-body', icon: Dumbbell, label: sport.body_label })
+  // }
   if (sport.game_label) {
     items.push({ to: '/dashboard/my-game', icon: Layers, label: sport.game_label })
   }
-  if (sport.protocol_label) {
-    items.push({
-      to: '/dashboard/my-protocol',
-      icon: ClipboardList,
-      label: sport.protocol_label,
-    })
-  }
+  // Hidden: My Body + My Protocol are ROMRx Base-only now. Full cleanup tracked in Notion post-migration.
+  // if (sport.protocol_label) {
+  //   items.push({
+  //     to: '/dashboard/my-protocol',
+  //     icon: ClipboardList,
+  //     label: sport.protocol_label,
+  //   })
+  // }
   if (sport.has_coach_portal) {
     items.push({ to: '/dashboard/my-coach', icon: UserCheck, label: 'My Coach' })
   }
