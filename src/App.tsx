@@ -39,12 +39,10 @@ export default function App() {
         {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
         <Route path="/" element={null} />
 
-        {/* Protected dashboard routes under /dashboard/* */}
+        {/* Base-gated dashboard routes: require active Base + a completed assessment. */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/dashboard/my-body"     element={<MyBody />} />
-            <Route path="/dashboard/my-game"     element={<MyGame />} />
-            <Route path="/dashboard/my-protocol" element={<MyProtocol />} />
             <Route path="/dashboard/chat"        element={<Chat />} />
             <Route path="/dashboard/settings"    element={<Settings />} />
             <Route path="/dashboard/coach"             element={<CoachDashboard defaultSection="team" />} />
@@ -54,6 +52,14 @@ export default function App() {
             <Route path="/dashboard/coach-school"      element={<CoachDashboard defaultSection="school" />} />
             <Route path="/dashboard/my-coach"     element={<MyCoach />} />
             <Route path="/dashboard/my-school"    element={<MySchool />} />
+          </Route>
+        </Route>
+
+        {/* +sport routes: also require the active sport's entitlement (sport pack). */}
+        <Route element={<ProtectedRoute requireSport="active" />}>
+          <Route element={<Layout />}>
+            <Route path="/dashboard/my-game"     element={<MyGame />} />
+            <Route path="/dashboard/my-protocol" element={<MyProtocol />} />
           </Route>
         </Route>
 
