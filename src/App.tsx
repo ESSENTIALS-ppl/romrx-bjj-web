@@ -41,6 +41,10 @@ export default function App() {
 
         {/* Protected dashboard routes under /dashboard/* */}
         <Route element={<ProtectedRoute />}>
+          {/* Bare /dashboard has no page of its own. Route it through the guard
+              (unauthenticated -> /login, unpaid -> onboarding) and land paid
+              users on the default section instead of rendering a blank page. */}
+          <Route path="/dashboard" element={<Navigate to="/dashboard/my-body" replace />} />
           <Route element={<Layout />}>
             <Route path="/dashboard/my-body"     element={<MyBody />} />
             <Route path="/dashboard/my-game"     element={<MyGame />} />
@@ -63,6 +67,9 @@ export default function App() {
         <Route path="/my-protocol" element={<Navigate to="/dashboard/my-protocol" replace />} />
         <Route path="/chat"        element={<Navigate to="/dashboard/chat"        replace />} />
         <Route path="/settings"    element={<Navigate to="/dashboard/settings"    replace />} />
+
+        {/* Any unmatched route redirects to login instead of rendering blank. */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
