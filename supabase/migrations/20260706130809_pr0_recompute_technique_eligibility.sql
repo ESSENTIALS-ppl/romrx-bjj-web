@@ -1,8 +1,9 @@
 -- ============================================================================
 -- PR-0 recompute-all migration : backfill technique_eligibility (R/Y/G v33)
 -- Mirrors compute-tiers v33 worst-joint rule. Idempotent (re-runnable).
--- Missing required joint => YELLOW (caution). RED dominates. GREEN only when
--- every required joint is measured AND >= its _min.
+-- Missing required joint => YELLOW (caution). RED dominates. GREEN when
+-- every required joint is measured AND >= its _min, OR the technique has NO
+-- threshold on any assessed joint (nothing we measure blocks it -> ready).
 -- ============================================================================
 
 BEGIN;
@@ -14,7 +15,17 @@ ALTER TABLE public.technique_eligibility
 UPDATE public.technique_eligibility SET flag = NULL WHERE flag IS NOT NULL;
 
 -- 2) Recompute tiers for every existing assessment (bjj + bodybuilding).
-WITH per_joint AS (
+WITH
+-- All (assessment, technique) pairs in scope. Techniques with no evaluable
+-- requirement still appear here and resolve to GREEN below.
+all_pairs AS (
+    SELECT a.id AS assessment_id, a.user_id, a.athlete_id, a.sport,
+           t.id AS technique_id, t.code AS technique_code
+    FROM assessments a
+    JOIN techniques t ON t.sport = a.sport
+    WHERE a.sport IN ('bjj','bodybuilding')
+),
+per_joint AS (
     SELECT a.id AS assessment_id, a.user_id, a.athlete_id, a.sport,
            t.id AS technique_id, t.code AS technique_code,
            'hip_er'::text AS joint,
@@ -176,19 +187,24 @@ per_tech AS (
 ),
 scored AS (
     SELECT
-        assessment_id, user_id, athlete_id, sport, technique_id, technique_code,
+        p.assessment_id, p.user_id, p.athlete_id, p.sport, p.technique_id, p.technique_code,
         CASE
-            WHEN worst_ratio IS NOT NULL AND worst_ratio < 0.9 THEN 'RED'
-            WHEN (COALESCE(array_length(yellow_joints,1),0) > 0) OR has_missing THEN 'YELLOW'
+            -- No evaluable requirement (no per_tech row) -> GREEN by rule.
+            WHEN pt.technique_id IS NULL THEN 'GREEN'
+            WHEN pt.worst_ratio IS NOT NULL AND pt.worst_ratio < 0.9 THEN 'RED'
+            WHEN (COALESCE(array_length(pt.yellow_joints,1),0) > 0) OR pt.has_missing THEN 'YELLOW'
             ELSE 'GREEN'
         END AS tier,
         CASE
-            WHEN worst_ratio IS NOT NULL AND worst_ratio < 0.9 THEN red_joints
-            WHEN (COALESCE(array_length(yellow_joints,1),0) > 0) OR has_missing
-                 THEN yellow_joints || missing_joints
+            WHEN pt.technique_id IS NULL THEN ARRAY[]::text[]
+            WHEN pt.worst_ratio IS NOT NULL AND pt.worst_ratio < 0.9 THEN pt.red_joints
+            WHEN (COALESCE(array_length(pt.yellow_joints,1),0) > 0) OR pt.has_missing
+                 THEN pt.yellow_joints || pt.missing_joints
             ELSE ARRAY[]::text[]
         END AS limiting_joints
-    FROM per_tech
+    FROM all_pairs p
+    LEFT JOIN per_tech pt ON pt.assessment_id = p.assessment_id
+                         AND pt.technique_id = p.technique_id
 )
 INSERT INTO public.technique_eligibility
     (user_id, athlete_id, assessment_id, technique_id, technique_code, sport, tier, limiting_joints, computed_at)

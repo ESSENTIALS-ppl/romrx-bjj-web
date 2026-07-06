@@ -67,7 +67,9 @@ def classify(assessment, technique):
         required.append((joint, float(v)))
 
     if not required:
-        return None  # technique requires nothing evaluable -> not scored
+        # No threshold on any assessed joint -> nothing we measure can block it,
+        # athlete is ready by rule. (Jim 2026-07-06) GREEN, not skipped.
+        return {'flag': 'green', 'limiting_joints': [], 'worst_ratio': None}
 
     limiting = []
     worst_ratio = None

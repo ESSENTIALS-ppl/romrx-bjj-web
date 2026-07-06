@@ -1,4 +1,4 @@
-# compute-tiers v33 — readiness engine
+# compute-tiers v34 — readiness engine
 
 Fires from the AFTER INSERT trigger on `public.assessments`.
 
@@ -17,7 +17,10 @@ compared to the `_min` threshold:
 - **RED** — any required (measured) joint `< 90%` of its `_min`
 - **YELLOW** — any measured joint in the `90–100%` band, **OR** any required
   joint the athlete never measured (NULL → caution, data incomplete)
-- **GREEN** — every required joint measured **and** `≥` its `_min`
+- **GREEN** — every required joint measured **and** `≥` its `_min`, **OR** the
+  technique has no threshold on any assessed joint (nothing we measure can block
+  it → the athlete is ready by rule). This covers e.g. all BB forearm exercises
+  (we don't assess wrist/forearm ROM) and any technique with no ROM gate.
 
 `limiting_joints[]` lists the joints driving a non-green tier (measured
 shortfalls as `joint:value vs min X`, unmeasured as `joint:not_measured(min X)`).
@@ -37,3 +40,11 @@ mostly RED with real limiting joints.
 Missing-joint handling (unmeasured required joint → YELLOW) was chosen to avoid
 false-greens (e.g. a BB athlete with NULL shoulder_er previously showed 27
 techniques as safe-green; they now correctly show caution).
+
+## v34 change — no-requirement techniques → GREEN
+v33 returned "not scored" (null) for the 48 techniques that carry no threshold
+on any assessed joint (19 core BJJ + all 29 BB forearm exercises), which left
+their prior rows stale. v34 scores them GREEN: nothing we measure can block
+them, so the athlete is ready by rule. Verified live via an insert-clone trigger
+test (send.jim.scott bjj → 98🔴 / 14🟡 / 20🟢, matching the dry-run). Final
+backfill: BJJ 871🔴/92🟡/225🟢, BB 79🔴/157🟡/312🟢 (1736 rows, all fresh).

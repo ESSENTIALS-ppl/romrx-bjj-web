@@ -1,4 +1,6 @@
-// compute-tiers v33 - readiness engine rebuild (R/Y/G worst-joint rule)
+// compute-tiers v34 - readiness engine (R/Y/G worst-joint rule)
+// v34: techniques with NO threshold on any assessed joint -> GREEN (not skipped).
+// Nothing we measure can block them, so the athlete is ready by rule. (Jim 2026-07-06)
 // Fires from AFTER INSERT trigger on public.assessments
 //
 // v33 restores technique readiness scoring that v32 stubbed out.
@@ -12,7 +14,9 @@
 //     - RED    : any required (measured) joint < 90% of its _min
 //     - YELLOW : any measured joint in the 90-100% band, OR any required joint
 //                the athlete never measured (NULL) -> caution, data incomplete
-//     - GREEN  : every required joint measured AND >= its _min
+//     - GREEN  : every required joint measured AND >= its _min, OR the technique
+//                has NO threshold on any assessed joint (nothing we measure can
+//                block it -> athlete is ready by rule, Jim 2026-07-06)
 //   limiting_joints lists the joints driving a non-green tier.
 //
 // Writes tier (GREEN/YELLOW/RED) - the schema's canonical readiness column.
@@ -80,7 +84,7 @@ function athleteValue(a: Record<string, unknown>, joint: string): number | null 
 }
 
 type LimitingJoint = { joint: string; value: number | null; min: number; ratio?: number; reason?: string };
-type TierResult = { tier: "GREEN" | "YELLOW" | "RED"; limiting: LimitingJoint[] } | null;
+type TierResult = { tier: "GREEN" | "YELLOW" | "RED"; limiting: LimitingJoint[] };
 
 function classify(a: Record<string, unknown>, technique: Record<string, unknown>): TierResult {
   const required: { joint: string; thresh: number }[] = [];
@@ -92,7 +96,9 @@ function classify(a: Record<string, unknown>, technique: Record<string, unknown>
     if (!EVALUABLE.has(joint)) continue; // joint not in assessment model -> skip
     required.push({ joint, thresh });
   }
-  if (required.length === 0) return null; // nothing evaluable -> not scored
+  // No threshold on any joint we assess -> nothing we measure can block it,
+  // so the athlete is ready by rule. (Jim 2026-07-06)
+  if (required.length === 0) return { tier: "GREEN", limiting: [] };
 
   const limiting: LimitingJoint[] = [];
   const missing: LimitingJoint[] = [];
@@ -209,7 +215,6 @@ Deno.serve(async (req: Request) => {
 
     for (const t of techniques as Record<string, unknown>[]) {
       const res = classify(assessment, t);
-      if (res == null) { counts.skipped++; continue; }
       counts[res.tier]++;
       rows.push({
         user_id: userId,
