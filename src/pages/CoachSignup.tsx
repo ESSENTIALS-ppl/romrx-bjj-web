@@ -62,7 +62,8 @@ export function CoachSignup() {
         subscription_status: 'pending',
         subscription_tier: 'coach',
         platforms: [SPORT],
-        active_sport: SPORT,
+        // Do NOT write active_sport here. It is a shared, cross-app column and
+        // the BJJ app must never write it; the DB default/trigger owns it.
       }, { onConflict: 'id' })
 
       // Record a timestamped, versioned consent to the ROMRx LLC agreement

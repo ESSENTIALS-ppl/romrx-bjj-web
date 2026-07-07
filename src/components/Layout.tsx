@@ -17,7 +17,6 @@ import {
   Syringe,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { SportSwitcher } from '../sports/SportSwitcher'
 import type { SportConfig } from '../sports/registry'
 
 interface NavItem {
@@ -146,7 +145,7 @@ export function Layout() {
       <header className={cn('sticky top-0 z-10 bg-white border-b', theme.border)}>
         <div className="max-w-5xl mx-auto px-4 flex items-center h-14 gap-1">
           <span className={cn('font-display font-bold mr-4 text-base', theme.brand)}>
-            ROMRx{activeSport.slug !== 'bjj' ? ` · ${activeSport.short_name}` : ''}
+            ROMRx · {activeSport.short_name}
           </span>
           <nav className="flex gap-1 flex-1 overflow-x-auto scrollbar-none">
             {nav.map(({ to, icon: Icon, label, end: isEnd }) => (
@@ -166,7 +165,6 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
-          <SportSwitcher />
           <button
             onClick={handleSignOut}
             className="ml-2 p-2 rounded-full text-charcoal-light hover:bg-red-50 hover:text-red-600 transition-colors"
