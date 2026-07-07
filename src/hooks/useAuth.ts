@@ -2,33 +2,36 @@ import { useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
+// Cross-domain SSO hand-off: romrx.io opens this app with the Supabase session
+// tokens in the URL fragment. We must consume them and establish the session
+// BEFORE the auth guard runs, otherwise the user flashes to /login. Returns true
+// if a session was established from the hash.
+async function consumeSsoHash(): Promise<boolean> {
+  const hash = window.location.hash
+  if (!hash || !hash.includes('access_token')) return false
+
+  const params = new URLSearchParams(hash.slice(1))
+  const access_token = params.get('access_token')
+  const refresh_token = params.get('refresh_token')
+  if (!access_token || !refresh_token) return false
+
+  const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+  // Strip the tokens from the URL so they do not linger, regardless of outcome.
+  history.replaceState(null, '', window.location.pathname + window.location.search)
+  if (error) {
+    console.warn('SSO hash session hand-off failed:', error.message)
+    return false
+  }
+  return true
+}
+
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Cross-domain SSO hand-off: when arriving from romrx.io, the session
-    // tokens are passed in the URL fragment. Consume them BEFORE the auth
-    // guard decides, so the user does not flash to /login. We await
-    // setSession, strip the hash, then fall through to the normal getSession.
-    const consumeHashSession = async () => {
-      const params = new URLSearchParams(window.location.hash.slice(1))
-      const accessToken = params.get('access_token')
-      const refreshToken = params.get('refresh_token')
-
-      if (accessToken && refreshToken) {
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        })
-        // Strip the tokens from the URL so they do not linger.
-        history.replaceState(null, '', window.location.pathname + window.location.search)
-      }
-    }
-
-    consumeHashSession()
-      .catch(() => {})
+    consumeSsoHash()
       .then(() => supabase.auth.getSession())
       .then(({ data }) => {
         setSession(data.session)
