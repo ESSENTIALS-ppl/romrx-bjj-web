@@ -73,7 +73,15 @@ export const DEFAULT_SPORTS: Record<string, SportConfig> = {
   },
 }
 
-export const DEFAULT_SPORT_KEY = 'bjj'
+/**
+ * SITE_SPORT - the hardcoded sport this deployment is. This is a BJJ-only app,
+ * so branding, header labels, and nav are ALWAYS derived from this constant and
+ * NEVER from the shared, mutable users.active_sport field (which is co-owned by
+ * the Bodybuilding and Base HQ apps on the same Supabase backend).
+ */
+export const SITE_SPORT = 'bjj'
+
+export const DEFAULT_SPORT_KEY = SITE_SPORT
 
 export function getSportFallback(slug: string | undefined | null): SportConfig {
   if (slug && DEFAULT_SPORTS[slug]) return DEFAULT_SPORTS[slug]

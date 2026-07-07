@@ -36,12 +36,11 @@ export function ProtectedRoute() {
     return <Navigate to="/onboarding/results" replace />
   }
 
+  // SportProvider is hardcoded to BJJ (SITE_SPORT). We intentionally do NOT
+  // pass profile.active_sport here: branding/nav must never depend on the
+  // shared active_sport field, and this app never writes it either.
   return (
-    <SportProvider
-      userId={user?.id}
-      activeSportSlug={profile?.active_sport}
-      sportsEnabled={profile?.sports_enabled}
-    >
+    <SportProvider>
       <Outlet />
     </SportProvider>
   )

@@ -1,16 +1,19 @@
 /**
- * SportProvider — React context that tracks the user's active sport.
+ * SportProvider - supplies the site's sport config (labels, theme) to the app.
+ *
+ * This is a BJJ-only deployment. The active sport is ALWAYS SITE_SPORT ('bjj'),
+ * hardcoded at the site level. It is NEVER read from the shared, mutable
+ * users.active_sport field (co-owned by the Bodybuilding and Base HQ apps), and
+ * this provider NEVER writes users.active_sport. That keeps the BJJ app's
+ * branding and nav fully independent of whatever active_sport happens to be.
  *
  * Loads:
- *   - All sport_config rows from DB (cached for the session)
- *   - User's `active_sport` + `sports_enabled` from useProfile
+ *   - The BJJ sport_config row from DB (cached for the session; falls back to
+ *     the local default before the fetch resolves to avoid a flash of un-themed UI)
  *
  * Exposes via useSport():
- *   - activeSport:    current SportConfig (theme, labels, feature flags)
- *   - availableSports: SportConfigs the user has access to
- *   - allSports:      every active config in the DB
- *   - setActiveSport(slug):  updates DB + local state
- *   - loading:        true until first fetch completes
+ *   - activeSport: the BJJ SportConfig (theme, labels, feature flags)
+ *   - loading:     true until the first fetch completes
  */
 
 import {
@@ -22,43 +25,27 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase } from '../lib/supabase'
-import {
-  DEFAULT_SPORTS,
-  DEFAULT_SPORT_KEY,
-  getSportFallback,
-  type SportConfig,
-} from './registry'
+import { SITE_SPORT, getSportFallback, type SportConfig } from './registry'
 
 interface SportContextValue {
   activeSport: SportConfig
-  availableSports: SportConfig[]
-  allSports: SportConfig[]
-  setActiveSport: (slug: string) => Promise<void>
   loading: boolean
 }
 
 const SportContext = createContext<SportContextValue | undefined>(undefined)
 
 interface SportProviderProps {
-  userId: string | undefined
-  activeSportSlug: string | undefined
-  sportsEnabled: string[] | undefined
   children: ReactNode
 }
 
-export function SportProvider({
-  userId,
-  activeSportSlug,
-  sportsEnabled,
-  children,
-}: SportProviderProps) {
-  const [allSports, setAllSports] = useState<SportConfig[]>(
-    Object.values(DEFAULT_SPORTS),
+export function SportProvider({ children }: SportProviderProps) {
+  const [config, setConfig] = useState<SportConfig>(() =>
+    getSportFallback(SITE_SPORT),
   )
   const [loading, setLoading] = useState(true)
-  const [optimisticSlug, setOptimisticSlug] = useState<string | null>(null)
 
-  // Fetch sport_config once per session
+  // Fetch the BJJ sport_config row once per session. We only ever query the
+  // SITE_SPORT row, so no bodybuilding config is fetched or considered.
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -67,15 +54,17 @@ export function SportProvider({
         .select(
           'slug, display_name, short_name, body_label, game_label, protocol_label, has_techniques, has_schools, has_coach_portal, theme_accent, is_active',
         )
+        .eq('slug', SITE_SPORT)
         .eq('is_active', true)
+        .maybeSingle()
       if (cancelled) return
       if (error) {
         console.warn('sport_config fetch failed, using defaults:', error.message)
         setLoading(false)
         return
       }
-      if (data && data.length > 0) {
-        setAllSports(data as SportConfig[])
+      if (data) {
+        setConfig(data as SportConfig)
       }
       setLoading(false)
     }
@@ -85,22 +74,7 @@ export function SportProvider({
     }
   }, [])
 
-  const effectiveSlug = optimisticSlug ?? activeSportSlug ?? DEFAULT_SPORT_KEY
-
-  const activeSport = useMemo<SportConfig>(() => {
-    const found = allSports.find((s) => s.slug === effectiveSlug)
-    return found ?? getSportFallback(effectiveSlug)
-  }, [allSports, effectiveSlug])
-
-  const availableSports = useMemo<SportConfig[]>(() => {
-    const slugs =
-      sportsEnabled && sportsEnabled.length > 0
-        ? sportsEnabled
-        : [DEFAULT_SPORT_KEY]
-    return slugs
-      .map((slug) => allSports.find((s) => s.slug === slug) ?? getSportFallback(slug))
-      .filter((s) => s.is_active)
-  }, [allSports, sportsEnabled])
+  const activeSport = config
 
   // Inject theme accent as a CSS variable + data attribute on <html>
   useEffect(() => {
@@ -109,26 +83,10 @@ export function SportProvider({
     root.dataset.sportAccent = activeSport.theme_accent
   }, [activeSport.slug, activeSport.theme_accent])
 
-  async function setActiveSport(slug: string) {
-    if (!userId) return
-    setOptimisticSlug(slug)
-    const { error } = await supabase
-      .from('users')
-      .update({ active_sport: slug })
-      .eq('id', userId)
-    if (error) {
-      console.error('Failed to update active_sport:', error.message)
-      setOptimisticSlug(null)
-    }
-  }
-
-  const value: SportContextValue = {
-    activeSport,
-    availableSports,
-    allSports,
-    setActiveSport,
-    loading,
-  }
+  const value = useMemo<SportContextValue>(
+    () => ({ activeSport, loading }),
+    [activeSport, loading],
+  )
 
   return <SportContext.Provider value={value}>{children}</SportContext.Provider>
 }
