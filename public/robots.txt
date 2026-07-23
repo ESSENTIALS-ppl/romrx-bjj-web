@@ -6,6 +6,7 @@ Allow: /athletes
 Allow: /coaches
 Allow: /gyms
 Allow: /legal
+Allow: /hip-mobility-for-bjj
 
 # Block authenticated dashboard, onboarding, and auth pages
 Disallow: /dashboard/

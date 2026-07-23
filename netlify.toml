@@ -41,6 +41,13 @@
   status = 200
   force  = true
 
+# SEO articles
+[[redirects]]
+  from   = "/hip-mobility-for-bjj"
+  to     = "/hip-mobility-for-bjj.html"
+  status = 200
+  force  = true
+
 # React SPA routes
 [[redirects]]
   from   = "/login"
