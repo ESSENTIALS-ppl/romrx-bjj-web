@@ -5,6 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Canonical Base-first explainer page. All public new-athlete acquisition and
+// assessment/signup entry points route here so onboarding always starts on Base.
+export const BASE_EXPLAINER_URL = 'https://romrx.io/bjj'
+
+// Builds the Base explainer URL, carrying over an incoming query string so
+// campaign parameters survive the redirect. The target is an external origin,
+// so there is no risk of a same-app redirect loop.
+export function baseExplainerUrl(search = ''): string {
+  const query = search.startsWith('?') ? search.slice(1) : search
+  return query ? `${BASE_EXPLAINER_URL}?${query}` : BASE_EXPLAINER_URL
+}
+
 export function tierColor(tier: string | null): string {
   switch (tier) {
     case 'GREEN':  return 'tier-green'

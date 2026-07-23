@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { recordConsent } from '../lib/terms'
 import { Loader2, Users } from 'lucide-react'
 import { DEFAULT_SPORT_KEY } from '../sports/registry'
+import { BASE_EXPLAINER_URL } from '../lib/utils'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
 const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
@@ -247,9 +248,9 @@ export function CoachSignup() {
 
         <p className="text-center text-sm text-charcoal-light">
           Are you an athlete?{' '}
-          <Link to="/signup" className="text-teal font-semibold hover:underline">
+          <a href={BASE_EXPLAINER_URL} className="text-teal font-semibold hover:underline">
             Athlete signup here
-          </Link>
+          </a>
         </p>
         <p className="text-center text-sm text-charcoal-light">
           Already have an account?{' '}
