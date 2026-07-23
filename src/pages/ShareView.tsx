@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Spinner } from '../components/Spinner'
+import { BASE_EXPLAINER_URL } from '../lib/utils'
 
 export function ShareView() {
   const { slug } = useParams<{ slug: string }>()
@@ -49,7 +50,7 @@ export function ShareView() {
               </div>
             ))}
           </div>
-          <a href="https://romrxbjj.com/signup" className="block w-full text-center py-3 bg-amber-400 text-charcoal font-bold rounded-xl hover:bg-amber-500 transition-colors">Get Your Own Game Plan → Free Assessment</a>
+          <a href={BASE_EXPLAINER_URL} className="block w-full text-center py-3 bg-amber-400 text-charcoal font-bold rounded-xl hover:bg-amber-500 transition-colors">Get Your Own Game Plan → Free Assessment</a>
         </div>
       </div>
     </div>

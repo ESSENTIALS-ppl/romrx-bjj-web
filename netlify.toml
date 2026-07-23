@@ -47,10 +47,16 @@
   to     = "/index.html"
   status = 200
 
+# Retired standalone athlete signup. New-athlete onboarding starts on Base, so
+# /signup redirects at the edge to the canonical explainer page before the SPA
+# loads. This is an exact match and does not touch /signup/coach below. Netlify
+# carries the original query string onto the destination, preserving campaign
+# params, and the target is an external origin so there is no redirect loop.
 [[redirects]]
   from   = "/signup"
-  to     = "/index.html"
-  status = 200
+  to     = "https://romrx.io/bjj"
+  status = 302
+  force  = true
 
 [[redirects]]
   from   = "/signup/coach"
