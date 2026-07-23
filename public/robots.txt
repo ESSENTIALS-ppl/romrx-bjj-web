@@ -7,6 +7,10 @@ Allow: /coaches
 Allow: /gyms
 Allow: /legal
 Allow: /hip-mobility-for-bjj
+Allow: /why-are-my-hips-so-tight-from-bjj
+Allow: /shoulder-mobility-exercises-for-bjj
+Allow: /do-you-need-to-stretch-after-bjj
+Allow: /static-stretching-for-bjj
 
 # Block authenticated dashboard, onboarding, and auth pages
 Disallow: /dashboard/

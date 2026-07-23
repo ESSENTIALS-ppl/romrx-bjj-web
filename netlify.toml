@@ -48,6 +48,30 @@
   status = 200
   force  = true
 
+[[redirects]]
+  from   = "/why-are-my-hips-so-tight-from-bjj"
+  to     = "/why-are-my-hips-so-tight-from-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/shoulder-mobility-exercises-for-bjj"
+  to     = "/shoulder-mobility-exercises-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/do-you-need-to-stretch-after-bjj"
+  to     = "/do-you-need-to-stretch-after-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/static-stretching-for-bjj"
+  to     = "/static-stretching-for-bjj.html"
+  status = 200
+  force  = true
+
 # React SPA routes
 [[redirects]]
   from   = "/login"
