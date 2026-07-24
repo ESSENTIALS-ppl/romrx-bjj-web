@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { OnboardingRoute } from './components/OnboardingRoute'
 import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
 import { AuthCallback } from './pages/AuthCallback'
@@ -30,13 +31,20 @@ export default function App() {
         <Route path="/signup/coach"     element={<CoachSignup />} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/confirm"    element={<AuthConfirm />} />
-        <Route path="/onboarding/assessment" element={<Assessment />} />
-        <Route path="/onboarding/results"    element={<ResultsPreview />} />
+
+        {/* Onboarding assessment funnel: authenticated only. A logged-out
+            visitor here is a new athlete who bypassed Base, so OnboardingRoute
+            sends them to the Base explainer rather than the retired standalone
+            wizard. PaymentSuccess self-guards to /login and is left public. */}
+        <Route element={<OnboardingRoute />}>
+          <Route path="/onboarding/assessment" element={<Assessment />} />
+          <Route path="/onboarding/results"    element={<ResultsPreview />} />
+        </Route>
         <Route path="/onboarding/payment-success" element={<PaymentSuccess />} />
         <Route path="/unsubscribe"     element={<Unsubscribe />} />
         <Route path="/game/:slug"       element={<ShareView />} />
 
-        {/* / is handled by Netlify rewrite to marketing.html — this catches any edge case */}
+        {/* / is handled by Netlify rewrite to marketing.html; this catches any edge case */}
         <Route path="/" element={null} />
 
         {/* Protected dashboard routes under /dashboard/* */}
@@ -61,7 +69,7 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Legacy redirects — old /my-body etc. -> /dashboard/my-body */}
+        {/* Legacy redirects: old /my-body etc. -> /dashboard/my-body */}
         <Route path="/my-body"     element={<Navigate to="/dashboard/my-body"     replace />} />
         <Route path="/my-game"     element={<Navigate to="/dashboard/my-game"     replace />} />
         <Route path="/my-protocol" element={<Navigate to="/dashboard/my-protocol" replace />} />
