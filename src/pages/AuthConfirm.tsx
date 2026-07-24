@@ -18,7 +18,7 @@ export function AuthConfirm() {
             console.error('Auth confirm error:', error?.message)
             navigate('/login?error=link_expired', { replace: true })
           } else {
-            navigate('/dashboard/my-body', { replace: true })
+            navigate('/dashboard', { replace: true })
           }
         })
     } else {

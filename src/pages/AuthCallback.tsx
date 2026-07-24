@@ -4,7 +4,9 @@ import { supabase } from '../lib/supabase'
 
 // Handles the magic link redirect from Supabase.
 // Supabase appends access_token/refresh_token to the URL as a hash fragment.
-// This component waits for the session to be established, then redirects to the dashboard.
+// Once the session is established we send the user to /dashboard, the guarded
+// canonical entry. ProtectedRoute then routes by entitlement (unpaid to
+// onboarding, paid to the default section) rather than assuming My Body exists.
 export function AuthCallback() {
   const navigate = useNavigate()
 
@@ -12,7 +14,7 @@ export function AuthCallback() {
     // Give Supabase time to parse the URL hash and establish the session
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate('/dashboard/my-body', { replace: true })
+        navigate('/dashboard', { replace: true })
       }
       // If no session after token processing, go to login
       if (event === 'INITIAL_SESSION' && !session) {
@@ -23,7 +25,7 @@ export function AuthCallback() {
     // Also try getting session immediately (handles cases where already processed)
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        navigate('/dashboard/my-body', { replace: true })
+        navigate('/dashboard', { replace: true })
       }
     })
 

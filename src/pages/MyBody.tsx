@@ -145,7 +145,7 @@ export function MyBody() {
       icon={Activity}
       title="No assessment on file"
       description="Complete your ROM self-assessment to see your body map, joint breakdown, and technique readiness."
-      action={<a href="/dashboard/settings" className="btn-primary text-sm">Get started</a>}
+      action={<a href="/onboarding/assessment" className="btn-primary text-sm">Get started</a>}
     />
   )
 
