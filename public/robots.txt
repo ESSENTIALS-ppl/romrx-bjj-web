@@ -12,6 +12,21 @@ Allow: /why-are-my-hips-so-tight-from-bjj
 Allow: /shoulder-mobility-exercises-for-bjj
 Allow: /do-you-need-to-stretch-after-bjj
 Allow: /static-stretching-for-bjj
+Allow: /hip-flexibility-for-guard-retention
+Allow: /hamstring-flexibility-for-bjj
+Allow: /external-hip-rotation-for-bjj
+Allow: /functional-range-conditioning-for-bjj
+Allow: /pails-and-rails-for-bjj
+Allow: /best-hip-mobility-drills-for-bjj
+Allow: /stretch-before-or-after-bjj
+Allow: /neck-and-cervical-mobility-for-bjj
+Allow: /can-weak-hip-mobility-cause-bjj-injuries
+Allow: /bjj-warm-up-routine
+Allow: /are-you-flexible-enough-for-bjj
+Allow: /ankle-mobility-for-bjj
+Allow: /lower-back-pain-in-bjj
+Allow: /bjj-belt-ranks-explained
+Allow: /how-long-to-get-bjj-black-belt
 
 # Block authenticated dashboard, onboarding, and auth pages
 Disallow: /dashboard/

@@ -78,6 +78,96 @@
   status = 200
   force  = true
 
+[[redirects]]
+  from   = "/hip-flexibility-for-guard-retention"
+  to     = "/hip-flexibility-for-guard-retention.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/hamstring-flexibility-for-bjj"
+  to     = "/hamstring-flexibility-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/external-hip-rotation-for-bjj"
+  to     = "/external-hip-rotation-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/functional-range-conditioning-for-bjj"
+  to     = "/functional-range-conditioning-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/pails-and-rails-for-bjj"
+  to     = "/pails-and-rails-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/best-hip-mobility-drills-for-bjj"
+  to     = "/best-hip-mobility-drills-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/stretch-before-or-after-bjj"
+  to     = "/stretch-before-or-after-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/neck-and-cervical-mobility-for-bjj"
+  to     = "/neck-and-cervical-mobility-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/can-weak-hip-mobility-cause-bjj-injuries"
+  to     = "/can-weak-hip-mobility-cause-bjj-injuries.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/bjj-warm-up-routine"
+  to     = "/bjj-warm-up-routine.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/are-you-flexible-enough-for-bjj"
+  to     = "/are-you-flexible-enough-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/ankle-mobility-for-bjj"
+  to     = "/ankle-mobility-for-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/lower-back-pain-in-bjj"
+  to     = "/lower-back-pain-in-bjj.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/bjj-belt-ranks-explained"
+  to     = "/bjj-belt-ranks-explained.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/how-long-to-get-bjj-black-belt"
+  to     = "/how-long-to-get-bjj-black-belt.html"
+  status = 200
+  force  = true
+
 # React SPA routes
 [[redirects]]
   from   = "/login"
