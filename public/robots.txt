@@ -6,6 +6,7 @@ Allow: /athletes
 Allow: /coaches
 Allow: /gyms
 Allow: /legal
+Allow: /articles
 Allow: /hip-mobility-for-bjj
 Allow: /why-are-my-hips-so-tight-from-bjj
 Allow: /shoulder-mobility-exercises-for-bjj

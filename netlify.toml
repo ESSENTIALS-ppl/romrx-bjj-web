@@ -43,6 +43,12 @@
 
 # SEO articles
 [[redirects]]
+  from   = "/articles"
+  to     = "/articles.html"
+  status = 200
+  force  = true
+
+[[redirects]]
   from   = "/hip-mobility-for-bjj"
   to     = "/hip-mobility-for-bjj.html"
   status = 200
