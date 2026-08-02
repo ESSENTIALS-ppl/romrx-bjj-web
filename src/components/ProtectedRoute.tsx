@@ -2,17 +2,31 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { SportProvider } from '../sports/SportProvider'
+import { evaluateAccess } from '../lib/access'
 
-// Statuses that grant access to /dashboard/*. Trial access is allowed because
-// Stripe issues 'trialing' only after a valid payment method is on file — but
-// see the Signup paths: we never set 'trialing' client-side. The only way to
-// land here in 'trialing' is via a Stripe webhook on a real Stripe trial.
-const PAID_STATUSES = new Set(['active', 'trialing'])
+interface ProtectedRouteProps {
+  /**
+   * Sport slug this route group requires (e.g. 'bjj', 'bodybuilding'). Pass the
+   * sentinel 'active' to require the entitlement for the user's currently active
+   * sport. Omit for Base-only routes, which require just active Base + a completed
+   * assessment.
+   */
+  requireSport?: string
+  /**
+   * Coach/School CRM route group: require active subscription + coach entitlement,
+   * but NOT a completed assessment. Coaches/gyms manage athletes and do not assess
+   * their own body.
+   */
+  requireCoach?: boolean
+}
 
-export function ProtectedRoute() {
+export function ProtectedRoute({ requireSport, requireCoach }: ProtectedRouteProps = {}) {
   const { session, user, loading } = useAuth()
-  const { profile, loading: profileLoading } = useProfile(user?.id)
+  const { profile, assessment, loading: profileLoading } = useProfile(user?.id)
 
+  // Loading gate: never evaluate the access gate (and never render gated content
+  // or redirect) until auth AND profile have resolved. Prevents content flash and
+  // premature redirects.
   if (loading || (session && profileLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -28,12 +42,12 @@ export function ProtectedRoute() {
 
   if (!session) return <Navigate to="/login" replace />
 
-  // Paywall gate. Anyone whose subscription_status is not in PAID_STATUSES
-  // (e.g. 'pending', 'past_due', 'canceled', null) gets routed to the
-  // assessment/checkout flow instead of the dashboard. Coaches use the same
-  // gate — CoachSignup also creates rows as 'pending'.
-  if (profile && !PAID_STATUSES.has(profile.subscription_status)) {
-    return <Navigate to="/onboarding/results" replace />
+  // Three-part gate: base active + completed assessment (+ sport entitlement for
+  // +sport routes). base_status and sport_entitlement both derive from
+  // Stripe-synced state on the profile — never client-only flags.
+  const decision = evaluateAccess({ profile, assessment, requireSport, requireCoach })
+  if (decision.status === 'redirect') {
+    return <Navigate to={decision.to} replace />
   }
 
   // SportProvider is hardcoded to BJJ (SITE_SPORT). We intentionally do NOT
