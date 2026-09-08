@@ -67,6 +67,13 @@ export function CoachSignup() {
         // the BJJ app must never write it; the DB default/trigger owns it.
       }, { onConflict: 'id' })
 
+      // Pre-pay coaches row so get-coach-roster does not 404 if webhook lags.
+      // Entitlement gate remains subscription_status (pending until paid webhook).
+      await supabase.from('coaches').upsert(
+        { user_id: data.user.id, sports: [SPORT] },
+        { onConflict: 'user_id', ignoreDuplicates: true },
+      )
+
       // Record a timestamped, versioned consent to the ROMRx LLC agreement
       // before redirecting to checkout.
       await recordConsent({ userId: data.user.id, signedName: fullName })
@@ -98,7 +105,15 @@ export function CoachSignup() {
             'Authorization': `Bearer ${token}`,
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
-          body: JSON.stringify({ email, full_name: fullName, plan: 'coach', gym, sport: SPORT }),
+          body: JSON.stringify({
+            mode: 'coach',
+            plan: 'coach',
+            user_id: data.user.id,
+            email,
+            full_name: fullName,
+            gym,
+            sport: SPORT,
+          }),
         })
         const { url, error: checkoutErr } = await res.json()
         if (url) { window.location.href = url; return }
