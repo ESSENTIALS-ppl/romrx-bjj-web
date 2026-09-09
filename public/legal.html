@@ -12,11 +12,14 @@
   <script src="/legal-chunk-0.js"></script>
   <script src="/legal-chunk-1.js"></script>
   <script src="/legal-chunk-2.js"></script>
+  <script src="/legal-chunk-3.js"></script>
+  <script src="/legal-chunk-4.js"></script>
+  <script src="/legal-chunk-5.js"></script>
   <script>
   (function () {
     try {
       var parts = window.__LEGAL_B64 || [];
-      if (parts.length < 3) throw new Error('missing chunks');
+      if (parts.length < 6) throw new Error('missing chunks');
       var bin = '';
       for (var i = 0; i < parts.length; i++) {
         bin += atob(parts[i]);
