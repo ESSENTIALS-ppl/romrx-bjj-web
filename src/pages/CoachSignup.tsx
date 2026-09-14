@@ -1,265 +1,107 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
-import { recordConsent } from '../lib/terms'
-import { Loader2, Users } from 'lucide-react'
-import { DEFAULT_SPORT_KEY } from '../sports/registry'
+import { Users, Loader2 } from 'lucide-react'
 import { BASE_EXPLAINER_URL } from '../lib/utils'
 
-const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
-const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
-// Sport this build serves. Single source of truth — change here (or wire to the
-// active sport) when this signup is reused for another ROMRx brand. Threaded
-// into notify-coach-signup so per-brand jim@ emails route correctly.
-const SPORT = DEFAULT_SPORT_KEY
-
+/**
+ * Coach signup is parked until Spring 2027.
+ * No Stripe checkout, no account creation during beta.
+ */
 export function CoachSignup() {
-  const [fullName, setFullName]   = useState('')
-  const [email, setEmail]         = useState('')
-  const [password, setPassword]   = useState('')
-  const [confirm, setConfirm]     = useState('')
-  const [belt, setBelt]           = useState('white')
-  const [gym, setGym]             = useState('')
-  const [role, setRole]           = useState<'instructor' | 'head_coach'>('instructor')
-  const [loading, setLoading]         = useState(false)
-  const [error, setError]             = useState('')
-  const [agreedToTerms, setAgreedToTerms]   = useState(false)
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNotify = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!fullName.trim()) { setError('Full name is required.'); return }
-    if (!gym.trim()) { setError('Gym / Academy name is required.'); return }
-    if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
-    if (password !== confirm) { setError('Passwords do not match.'); return }
-    if (!agreedToTerms)   { setError('You must agree to the Terms of Service to continue.'); return }
-    setLoading(true)
-
-    const { data, error: signUpErr } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          belt,
-          gym,
-          role: 'coach',
-          portal_role: 'coach',
-        },
-      },
-    })
-
-    if (signUpErr) { setError(signUpErr.message); setLoading(false); return }
-
-    if (data.user) {
-      // Create public.users row as coach
-      await supabase.from('users').upsert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        belt,
-        portal_role: 'coach',
-        // See Signup.tsx — 'pending' until Stripe checkout completes.
-        subscription_status: 'pending',
-        subscription_tier: 'coach',
-        platforms: [SPORT],
-        // Do NOT write active_sport here. It is a shared, cross-app column and
-        // the BJJ app must never write it; the DB default/trigger owns it.
-      }, { onConflict: 'id' })
-
-      // Pre-pay coaches row so get-coach-roster does not 404 if webhook lags.
-      // Entitlement gate remains subscription_status (pending until paid webhook).
-      await supabase.from('coaches').upsert(
-        { user_id: data.user.id, sports: [SPORT] },
-        { onConflict: 'user_id', ignoreDuplicates: true },
-      )
-
-      // Record a timestamped, versioned consent to the ROMRx LLC agreement
-      // before redirecting to checkout.
-      await recordConsent({ userId: data.user.id, signedName: fullName })
-
-      // Notify Jim of new coach account creation (pre-payment)
-      // Fire-and-forget — don't block checkout on this
-      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullName, gym, paid: false, sport: SPORT }),
-      }).catch(() => {})
-
-      // Send "complete your payment" email to the coach
-      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-coach-signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullName, gym, paid: false, sendToCoach: true, sport: SPORT }),
-      }).catch(() => {})
-
-      // Get session token for edge function call
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-
-      if (token) {
-        const res = await fetch(CHECKOUT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({
-            mode: 'coach',
-            plan: 'coach',
-            user_id: data.user.id,
-            email,
-            full_name: fullName,
-            gym,
-            sport: SPORT,
-          }),
-        })
-        const { url, error: checkoutErr } = await res.json()
-        if (url) { window.location.href = url; return }
-        if (checkoutErr) { setError(`Payment setup failed: ${checkoutErr}`); setLoading(false); return }
-      }
+    const trimmed = email.trim().toLowerCase()
+    if (!trimmed || !trimmed.includes('@')) {
+      setError('Enter a valid email address.')
+      return
     }
-
-    setLoading(false)
-    setError('Something went wrong. Please try again.')
+    setLoading(true)
+    try {
+      // Prefer Netlify Forms capture when this route is served behind the marketing site.
+      // Fallback: mailto for environments without form handling.
+      const body = new URLSearchParams({
+        'form-name': 'coach-waitlist',
+        email: trimmed,
+        source: 'signup-coach-parked',
+      })
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      }).catch(() => {
+        window.location.href = `mailto:jim@romrx.io?subject=${encodeURIComponent('Coach Spring 2027 notify')}&body=${encodeURIComponent(trimmed)}`
+      })
+      setDone(true)
+    } catch {
+      setError('Something went wrong. Email jim@romrx.io instead.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md space-y-6">
-
-        {/* Header */}
         <div className="text-center">
           <div className="w-12 h-12 bg-teal-light rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users size={22} className="text-teal" />
           </div>
-          <h1 className="font-display font-bold text-teal text-2xl">Create Coach Account</h1>
-          <p className="text-sm text-charcoal-light mt-1">
-            ROMRxBJJ Coach Dashboard · $349/year
+          <p className="text-xs font-bold uppercase tracking-widest text-gold mb-2">Coming Spring 2027</p>
+          <h1 className="font-display font-bold text-teal text-2xl">Coach tools coming Spring 2027</h1>
+          <p className="text-sm text-charcoal-light mt-2">
+            Not open during beta. Base and athlete sport packs come first. Leave your email and we will notify you at Spring 2027.
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-teal-light p-6 space-y-4 shadow-sm">
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Full Name</label>
-            <input
-              type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-              placeholder="Your full name"
-              className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Email Address</label>
-            <input
-              type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="coach@example.com"
-              className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Gym / Academy Name</label>
-            <input
-              type="text" required value={gym} onChange={e => setGym(e.target.value)}
-              placeholder="Your academy name"
-              className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Your Role</label>
-            <div className="grid grid-cols-2 gap-2">
-              {([['instructor', 'Instructor'], ['head_coach', 'Head Coach']] as const).map(([val, label]) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setRole(val)}
-                  className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                    role === val
-                      ? 'bg-teal text-white border-teal'
-                      : 'border-teal-light text-charcoal-light hover:border-teal/40'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Your Belt</label>
-            <div className="flex gap-2 flex-wrap">
-              {BELTS.map(b => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setBelt(b)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all border ${
-                    belt === b
-                      ? 'bg-teal text-white border-teal'
-                      : 'border-teal-light text-charcoal-light hover:border-teal/40'
-                  }`}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Password</label>
-            <input
-              type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="Minimum 8 characters"
-              className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-charcoal">Confirm Password</label>
-            <input
-              type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-              placeholder="Repeat password"
-              className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
-            />
-          </div>
-
-          {/* Terms checkbox */}
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-teal-light accent-teal shrink-0 cursor-pointer" />
-            <span className="text-xs text-charcoal-light leading-relaxed">
-              I have read and agree to the{' '}
-              <a href="/legal" target="_blank" rel="noopener noreferrer" className="text-teal underline font-medium">
-                ROMRx LLC Terms of Service, Privacy Policy &amp; Refund Policy
-              </a>
-              {' '}&mdash; a company-wide agreement with ROMRx LLC (parent of ROMRxBJJ, ROMRxBodyBuilding, and other ROMRx products). All sales are final.
-            </span>
-          </label>
-
-          {error && (
-            <p className="text-xs text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>
+        <div className="bg-white rounded-2xl border border-teal-light p-6 space-y-4 shadow-sm">
+          {done ? (
+            <p className="text-sm text-teal font-semibold text-center">
+              You are on the list. We will notify you when coach tools open Spring 2027.
+            </p>
+          ) : (
+            <form onSubmit={handleNotify} className="space-y-4" name="coach-waitlist" data-netlify="true">
+              <input type="hidden" name="form-name" value="coach-waitlist" />
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-charcoal">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
+                />
+              </div>
+              {error && (
+                <p className="text-xs text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>
+              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3 disabled:opacity-50"
+              >
+                {loading
+                  ? <><Loader2 size={16} className="animate-spin" /> Saving...</>
+                  : 'Notify me for Spring 2027'}
+              </button>
+            </form>
           )}
-
-          <button
-            type="submit"
-            disabled={loading || !agreedToTerms}
-            className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3 mt-2 disabled:opacity-50"
-          >
-            {loading
-              ? <><Loader2 size={16} className="animate-spin" /> Setting up your account...</>
-              : <><Users size={16} /> Create Coach Account &amp; Continue to Payment</>
-            }
-          </button>
-
           <p className="text-center text-xs text-charcoal-light">
-            $349/year · Includes unlimited athlete roster · Cancel anytime
+            Or email{' '}
+            <a href="mailto:jim@romrx.io?subject=Coach%20Spring%202027%20notify" className="text-teal font-semibold hover:underline">
+              jim@romrx.io
+            </a>
           </p>
-        </form>
+          <p className="text-center text-xs text-charcoal-light">
+            Pricing and signup open Spring 2027. Not available in beta.
+          </p>
+        </div>
 
         <p className="text-center text-sm text-charcoal-light">
           Are you an athlete?{' '}
