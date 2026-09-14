@@ -215,6 +215,12 @@
   to     = "/index.html"
   status = 200
 
+# Footer links in Resend drips. SPA Unsubscribe.tsx sets marketing_opt_out.
+[[redirects]]
+  from   = "/unsubscribe"
+  to     = "/index.html"
+  status = 200
+
 # Legacy short paths — React app handles the redirect internally to /dashboard/*
 [[redirects]]
   from   = "/my-body"
