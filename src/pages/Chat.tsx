@@ -44,6 +44,14 @@ function formatLines(text: string) {
     .split('\n').filter(Boolean)
 }
 
+
+function isBaseAthlete(profile: { active_sport?: string | null; platforms?: string[] | null } | null | undefined) {
+  const sport = String(profile?.active_sport ?? '').toLowerCase()
+  if (sport === 'general' || sport === 'base') return true
+  const platforms = (profile?.platforms ?? []).map((p) => String(p).toLowerCase())
+  return platforms.length > 0 && platforms.every((p) => p === 'general' || p === 'base')
+}
+
 export function Chat() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -62,6 +70,8 @@ export function Chat() {
   const endRef = useRef<HTMLDivElement>(null)
 
   const isCoach = profile?.portal_role === 'coach'
+  const chatSport = profile?.active_sport ?? 'bjj'
+  const isBase = !isCoach && isBaseAthlete(profile)
 
   useEffect(() => {
     const saved = localStorage.getItem('romrx_provider_pref')
@@ -102,12 +112,17 @@ export function Chat() {
     if (messages.length === 0 && user && !profileLoading) {
       const name = (profile?.full_name ?? 'there').split(' ')[0]
       const belt = profile?.belt ?? 'white'
-      const coachWelcome = isCoach
-        ? `Hey ${name} - I'm ROMBot, your team intelligence assistant.\n\nI can see your full roster's ROM scores and technique tiers. You can ask about specific athletes or your whole team:\n- "Who on my team is most at risk?"\n- "What's blocking [athlete] from Triangle Choke?"\n- "Who is ready to compete?"\n\nNote: ROMBot provides educational information only and is not medical advice.`
-        : `Hey ${name} \u2014 I'm ROMBot, your mobility intelligence assistant.\n\nI can see your ${belt} belt profile, ROM scores, technique tiers, and protocol. Ask me anything:\n\u2022 "Why is my Triangle Choke RED?"\n\u2022 "What exercises unlock De La Riva?"\n\u2022 "Which techniques am I closest to unlocking?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
-      setMessages([{ role: 'assistant', content: coachWelcome }])
+      let welcome: string
+      if (isCoach) {
+        welcome = `Hey ${name} - I'm ROMBot, your team intelligence assistant.\n\nI can see your full roster's ROM scores and technique tiers. You can ask about specific athletes or your whole team:\n- "Who on my team is most at risk?"\n- "What's blocking [athlete] from Triangle Choke?"\n- "Who is ready to compete?"\n\nNote: ROMBot provides educational information only and is not medical advice.`
+      } else if (isBase) {
+        welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your mobility bands (Needs focus / Building / Steady), priority joints, and daily plan. Ask me anything:\n\u2022 "Which joints need focus?"\n\u2022 "What's my daily plan?"\n\u2022 "How do I build ease in my hips?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
+      } else {
+        welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your ${belt} belt profile, ROM scores, technique tiers, and protocol. Ask me anything:\n\u2022 "Why is my Triangle Choke RED?"\n\u2022 "What exercises unlock De La Riva?"\n\u2022 "Which techniques am I closest to unlocking?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
+      }
+      setMessages([{ role: 'assistant', content: welcome }])
     }
-  }, [user, profile, profileLoading, messages.length, isCoach])
+  }, [user, profile, profileLoading, messages.length, isCoach, isBase])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
@@ -163,7 +178,7 @@ export function Chat() {
           const res = await fetch(AI_CHAT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
-            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+            body: JSON.stringify({ message: msg, sport: chatSport, provider, provider_key: providerKey }),
           })
           const data = await res.json()
           if (data.error) throw new Error(data.error)
@@ -194,7 +209,7 @@ export function Chat() {
           const res = await fetch(AI_CHAT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
-            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+            body: JSON.stringify({ message: msg, sport: chatSport, provider, provider_key: providerKey }),
           })
           const data = await res.json()
           if (data.error) throw new Error(data.error)
@@ -231,7 +246,7 @@ export function Chat() {
           const res = await fetch(AI_CHAT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
-            body: JSON.stringify({ message: msg, sport: 'bjj', provider, provider_key: providerKey }),
+            body: JSON.stringify({ message: msg, sport: chatSport, provider, provider_key: providerKey }),
           })
           const data = await res.json()
           if (data.error) throw new Error(data.error)
@@ -253,7 +268,7 @@ export function Chat() {
       const body: Record<string, unknown> = {
         message: msg,
         conversation_id: convId,
-        sport: 'bjj',
+        sport: chatSport,
         provider,
         provider_key: providerKey,
       }
