@@ -59,11 +59,10 @@ function computePRS(assessment: Record<string, any>): number {
 }
 
 function getPRSTier(score: number): { label: string; color: string; bg: string; desc: string } {
-  if (score >= 85) return { label: 'ELITE',       color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Exceptional ROM profile. Train hard and retest regularly.' }
-  if (score >= 70) return { label: 'STRONG',      color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Good mobility foundation. A few gaps to address.' }
-  if (score >= 55) return { label: 'DEVELOPING',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'ROM limitations are affecting your technique readiness.' }
-  if (score >= 40) return { label: 'RESTRICTED',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'Significant mobility restrictions. Prioritize your protocol.' }
-  return                  { label: 'AT RISK',     color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: 'Multiple AT RISK joints. Prioritize injury prevention immediately.' }
+  // Locked Base bands: 1 Needs focus / 2 Building / 3 Steady (progress-needed tone)
+  if (score >= 70) return { label: 'Steady',      color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Solid mobility foundation. Keep training and retest regularly.' }
+  if (score >= 40) return { label: 'Building',    color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'Progress needed on key joints. Stay consistent with your plan.' }
+  return                  { label: 'Needs focus', color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: 'Priority joints need work. Small daily progress moves you up.' }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,10 +97,10 @@ export function ResultsPreview() {
         .eq('id', user.id)
         .maybeSingle()
 
-      // 'active' and 'trialing' both unlock the dashboard — same set as
+      // 'active' and 'trialing' both unlock the dashboard - same set as
       // ProtectedRoute (PAID_STATUSES). 'trialing' is Stripe-managed and is
       // only ever set by the Stripe webhook, never by the signup form (see
-      // incident 2026-06-10 — historically 'trialing' was seeded client-side,
+      // incident 2026-06-10 - historically 'trialing' was seeded client-side,
       // which bypassed checkout entirely).
       if (userRow?.subscription_status === 'active' || userRow?.subscription_status === 'trialing') {
         navigate('/dashboard/my-body', { replace: true })
@@ -168,12 +167,12 @@ export function ResultsPreview() {
         {/* Header */}
         <div className="text-center">
           <h1 className="font-display font-bold text-warm-white text-2xl">Your Results Are In</h1>
-          <p className="text-sm text-warm-white/60 mt-1">Position Readiness Protocol™ by ROMRx</p>
+          <p className="text-sm text-warm-white/60 mt-1">ROMRx mobility</p>
         </div>
 
         {/* PRS Score Card */}
         <div className="bg-charcoal-dark rounded-2xl border border-teal/30 p-6 text-center">
-          <p className="text-xs font-bold text-teal uppercase tracking-widest mb-4">Position Readiness Score</p>
+          <p className="text-xs font-bold text-teal uppercase tracking-widest mb-4">Mobility band</p>
           <div className={cn('inline-flex items-center justify-center w-32 h-32 rounded-full border-4 mb-4', tier.bg, tier.color === 'text-teal' ? 'border-teal/40' : tier.color === 'text-yellow-tier' ? 'border-yellow-tier/40' : 'border-red-tier/40')}>
             <div>
               <span className={cn('font-display font-bold text-5xl leading-none block', tier.color)}>{prs}</span>
@@ -209,7 +208,7 @@ export function ResultsPreview() {
           </div>
         )}
 
-        {/* Teaser — locked content */}
+        {/* Teaser - locked content */}
         <div className="bg-charcoal-dark rounded-2xl border border-teal/20 p-5 space-y-3 relative overflow-hidden">
           <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
             <div className="text-center space-y-2">
@@ -218,14 +217,14 @@ export function ResultsPreview() {
               <p className="text-xs text-warm-white/60">132 technique ratings, full protocol, ROMBot</p>
             </div>
           </div>
-          <p className="text-xs font-bold text-teal uppercase tracking-wide mb-2">My Game — Technique Readiness</p>
+          <p className="text-xs font-bold text-teal uppercase tracking-wide mb-2">My Game - Technique Readiness</p>
           <div className="flex gap-2">
             <span className="text-xs bg-teal/20 text-teal px-3 py-1 rounded-full font-bold">?? GREEN</span>
             <span className="text-xs bg-yellow-tier-bg text-yellow-tier px-3 py-1 rounded-full font-bold">?? YELLOW</span>
             <span className="text-xs bg-red-tier-bg text-red-tier px-3 py-1 rounded-full font-bold">?? RED</span>
           </div>
           <div className="space-y-2">
-            {['My Protocol — Top 3 Priority Joints', 'My Game — Offense + Defense Flow', 'ROMBot — Ask anything about your data'].map(item => (
+            {['My Protocol - Top 3 Priority Joints', 'My Game - Offense + Defense Flow', 'ROMBot - Ask anything about your data'].map(item => (
               <div key={item} className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-teal/40" />
                 <span className="text-sm text-warm-white/40 blur-sm select-none">{item}</span>
@@ -242,7 +241,7 @@ export function ResultsPreview() {
           className="w-full py-4 bg-gold text-charcoal font-display font-bold text-base rounded-2xl hover:bg-gold-hover transition-colors flex items-center justify-center gap-2"
         >
           {paying ? 'Setting up payment...' : <>
-            <Unlock size={18} /> Unlock My Full Dashboard — $149/yr
+            <Unlock size={18} /> Unlock My Full Dashboard - $149/yr
           </>}
         </button>
         <p className="text-center text-xs text-warm-white/30">
