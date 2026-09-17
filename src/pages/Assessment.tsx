@@ -13,7 +13,7 @@ interface Field {
   unit?: string
   normalLow: number
   normalHigh: number
-  riskBelow: number  // AT RISK threshold
+  riskBelow: number  // Needs focus (band 1) threshold
 }
 
 interface Step {
@@ -285,7 +285,7 @@ function MeasureInput({ field, value, onChange }: {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <label className="text-sm font-semibold text-charcoal">{field.label}</label>
-        <span className="text-xs text-charcoal-light">Normal: {field.normalLow}–{field.normalHigh}{field.unit}</span>
+        <span className="text-xs text-charcoal-light">Normal: {field.normalLow}-{field.normalHigh}{field.unit}</span>
       </div>
       <div className="flex items-center gap-3">
         <input
@@ -304,17 +304,17 @@ function MeasureInput({ field, value, onChange }: {
         <span className="text-sm text-charcoal-light">{field.unit}</span>
         {score === 'risk' && (
           <span className="flex items-center gap-1 text-xs font-semibold text-red-tier bg-red-tier-bg px-2 py-0.5 rounded-full">
-            <AlertTriangle size={10} /> AT RISK
+            <AlertTriangle size={10} /> Focus
           </span>
         )}
         {score === 'functional' && (
           <span className="flex items-center gap-1 text-xs font-semibold text-teal bg-teal-light px-2 py-0.5 rounded-full">
-            <CheckCircle2 size={10} /> FUNCTIONAL
+            <CheckCircle2 size={10} /> Steady
           </span>
         )}
         {score === 'yellow' && (
           <span className="flex items-center gap-1 text-xs font-semibold text-yellow-tier bg-yellow-tier-bg px-2 py-0.5 rounded-full">
-            ⚠ LOW
+            Building
           </span>
         )}
       </div>
