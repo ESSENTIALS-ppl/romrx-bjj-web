@@ -989,8 +989,8 @@ function IssueCard({ ranked, rank }: { ranked: ScoredJoint; rank: number }) {
                 {rankLabel}
               </span>
               {atRisk && (
-                <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-tier bg-red-tier-bg px-2 py-0.5 rounded-full tracking-wider">
-                  <AlertTriangle size={9} /> Focus
+                <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-tier bg-red-tier-bg px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <AlertTriangle size={9} /> AT RISK
                 </span>
               )}
             </div>
@@ -1041,7 +1041,7 @@ function IssueCard({ ranked, rank }: { ranked: ScoredJoint; rank: number }) {
           )}
           <div className="bg-surface rounded-xl px-3 py-1.5">
             <p className="text-[10px] text-charcoal-light font-medium uppercase tracking-wide">Normal</p>
-            <p className="text-xs font-semibold text-charcoal">{def.normalMin}-{def.normalMax}{def.unit}</p>
+            <p className="text-xs font-semibold text-charcoal">{def.normalMin}–{def.normalMax}{def.unit}</p>
           </div>
         </div>
       </button>
