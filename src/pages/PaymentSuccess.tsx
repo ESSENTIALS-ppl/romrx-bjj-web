@@ -108,7 +108,7 @@ export function PaymentSuccess() {
               </button>
             </div>
             <p className="text-xs text-warm-white/40 pt-2">
-              Still having trouble? Email <a href="mailto:jim@romrxbjj.com" className="text-teal underline">jim@romrxbjj.com</a> — we'll fix it immediately.
+              Still having trouble? Email <a href="mailto:hello@romrx.io" className="text-teal underline">hello@romrx.io</a> and we'll look into it right away.
             </p>
           </>
         )}
