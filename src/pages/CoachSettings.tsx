@@ -339,7 +339,7 @@ export function CoachSettings() {
         <div className="space-y-3">
           <div>
             <p className="text-sm font-semibold text-charcoal">Need help?</p>
-            <p className="text-xs text-charcoal-light mt-1">Email us at any time and we will respond within 24 hours.</p>
+            <p className="text-xs text-charcoal-light mt-1">Email us at any time. We aim to reply within 1 business day.</p>
             <a href="mailto:hello@romrx.io" className="inline-block mt-2 text-sm text-teal hover:underline font-medium">
               hello@romrx.io
             </a>
