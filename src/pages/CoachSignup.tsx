@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Users, Loader2 } from 'lucide-react'
-import { BASE_EXPLAINER_URL } from '../lib/utils'
+import { ownedBaseUrl } from '../lib/utils'
 
 /**
  * Coach signup is parked until Spring 2027.
@@ -105,7 +105,7 @@ export function CoachSignup() {
 
         <p className="text-center text-sm text-charcoal-light">
           Are you an athlete?{' '}
-          <a href={BASE_EXPLAINER_URL} className="text-teal font-semibold hover:underline">
+          <a href={ownedBaseUrl('coach_signup_cta')} className="text-teal font-semibold hover:underline">
             Athlete signup here
           </a>
         </p>

@@ -9,6 +9,18 @@ export function cn(...inputs: ClassValue[]) {
 // assessment/signup entry points route here so onboarding always starts on Base.
 export const BASE_EXPLAINER_URL = 'https://romrx.io/bjj'
 
+
+// Owned-site UTM tags on clickable links to the Base page (Growth, 2026-09-29).
+// utm_term is the link placement. Redirects that forward an incoming query
+// (/signup edge rule, the Base URL builder) stay untagged so a visitor's
+// original campaign params are what reach romrx.io.
+const OWNED_SITE_UTM =
+  'utm_campaign=ROMRx_Base_Beta_2026&utm_source=owned&utm_medium=site&utm_content=20260929_owned_romrxbjj_site_utm'
+
+export function ownedBaseUrl(placement: string): string {
+  return `${BASE_EXPLAINER_URL}?${OWNED_SITE_UTM}&utm_term=${encodeURIComponent(placement)}`
+}
+
 // Builds the Base explainer URL, carrying over an incoming query string so
 // campaign parameters survive the redirect. The target is an external origin,
 // so there is no risk of a same-app redirect loop.
