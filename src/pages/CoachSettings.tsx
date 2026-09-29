@@ -144,7 +144,7 @@ export function CoachSettings() {
       if (error || !data?.url) throw new Error('Portal unavailable')
       window.location.href = data.url
     } catch {
-      alert('Could not open billing portal. Contact support@romrxbjj.com.')
+      alert('Could not open billing portal. Contact hello@romrx.io.')
     } finally { setPortalLoading(false) }
   }
 
