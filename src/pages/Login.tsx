@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react'
-import { BASE_EXPLAINER_URL } from '../lib/utils'
+import { ownedBaseUrl } from '../lib/utils'
 
 export function Login() {
   const { session } = useAuth()
@@ -193,7 +193,7 @@ export function Login() {
 
         <p className="text-center text-xs text-charcoal-light mt-4">
           New athlete?{' '}
-          <a href={BASE_EXPLAINER_URL} className="text-teal underline">Create an account</a>
+          <a href={ownedBaseUrl('login_cta')} className="text-teal underline">Create an account</a>
         </p>
         <p className="text-center text-xs text-charcoal-light mt-3">Position Readiness Protocol™ by ROMRx</p>
       </div>
