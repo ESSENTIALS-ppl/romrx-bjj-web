@@ -834,18 +834,18 @@ function AthleteSettings() {
         <Section title="Support">
           <div className="space-y-2 -mt-1">
             <a
-              href="mailto:ROMRxBJJ@gmail.com"
+              href="mailto:hello@romrx.io"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
             >
               <Mail size={15} className="text-teal shrink-0" />
               <span className="flex-1">
                 Email us
-                <span className="block text-xs text-charcoal-light font-normal mt-0.5">ROMRxBJJ@gmail.com</span>
+                <span className="block text-xs text-charcoal-light font-normal mt-0.5">hello@romrx.io</span>
               </span>
               <ChevronRight size={14} className="text-charcoal-light" />
             </a>
             <a
-              href="mailto:ROMRxBJJ@gmail.com?subject=ROMRxBJJ%20Question"
+              href="mailto:hello@romrx.io?subject=ROMRxBJJ%20Question"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-teal-light text-sm font-medium text-charcoal hover:bg-teal-light transition-colors"
             >
               <HelpCircle size={15} className="text-teal shrink-0" />
