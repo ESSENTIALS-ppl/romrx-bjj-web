@@ -70,7 +70,7 @@ export function PaymentSuccess() {
             <Loader2 size={40} className="text-teal mx-auto animate-spin" />
             <h1 className="font-display font-bold text-warm-white text-xl">Activating your membership…</h1>
             <p className="text-sm text-warm-white/60 leading-relaxed">
-              Payment received. We're unlocking your dashboard — this usually takes a few seconds.
+              Payment received. We're unlocking your dashboard. This usually takes a few seconds.
             </p>
           </>
         )}
@@ -88,7 +88,7 @@ export function PaymentSuccess() {
             <Mail size={40} className="text-gold mx-auto" />
             <h1 className="font-display font-bold text-warm-white text-xl">Payment received</h1>
             <p className="text-sm text-warm-white/70 leading-relaxed">
-              Stripe is taking a moment to confirm. You'll get a welcome email the second your membership goes live — usually within a minute.
+              Stripe is taking a moment to confirm. You'll get a welcome email the second your membership goes live, usually within a minute.
             </p>
             <div className="flex flex-col gap-2 pt-2">
               <button
