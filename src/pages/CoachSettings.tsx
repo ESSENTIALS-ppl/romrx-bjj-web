@@ -144,7 +144,7 @@ export function CoachSettings() {
       if (error || !data?.url) throw new Error('Portal unavailable')
       window.location.href = data.url
     } catch {
-      alert('Could not open billing portal. Contact support@romrxbjj.com.')
+      alert('Could not open billing portal. Contact hello@romrx.io.')
     } finally { setPortalLoading(false) }
   }
 
@@ -339,7 +339,7 @@ export function CoachSettings() {
         <div className="space-y-3">
           <div>
             <p className="text-sm font-semibold text-charcoal">Need help?</p>
-            <p className="text-xs text-charcoal-light mt-1">Email us at any time and we will respond within 24 hours.</p>
+            <p className="text-xs text-charcoal-light mt-1">Email us at any time. We aim to reply within 1 business day.</p>
             <a href="mailto:hello@romrx.io" className="inline-block mt-2 text-sm text-teal hover:underline font-medium">
               hello@romrx.io
             </a>
