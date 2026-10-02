@@ -28,6 +28,20 @@
   status = 301
   force  = true
 
+
+# Marketing unsubscribe -> HQ SPA (preserves query string)
+[[redirects]]
+  from   = "/unsubscribe"
+  to     = "https://romrx.io/app/unsubscribe"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/unsubscribe/"
+  to     = "https://romrx.io/app/unsubscribe"
+  status = 301
+  force  = true
+
 # Marketing sub-pages
 [[redirects]]
   from   = "/athletes"
