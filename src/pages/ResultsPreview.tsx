@@ -67,16 +67,16 @@ function getPRSTier(score: number): { label: string; color: string; bg: string; 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTopAsymmetries(assessment: Record<string, any>): Array<{ joint: string; gap: number; left: number; right: number }> {
+function getTopAsymmetries(assessment: Record<string, any>): Array<{ joint: string; gap: number; left: number; right: number; unit: string }> {
   return BILATERAL_JOINTS
     .map(j => {
       const l = assessment[j.l], r = assessment[j.r]
       if (l == null || r == null) return null
-      return { joint: JOINT_LABELS[j.l.replace('_l', '')] ?? j.l, gap: Math.abs(l - r), left: l, right: r }
+      return { joint: JOINT_LABELS[j.l.replace('_l', '')] ?? j.l, gap: Math.abs(l - r), left: l, right: r, unit: j.l.startsWith('ankle_df') ? 'cm' : '°' }
     })
     .filter(Boolean)
     .sort((a, b) => b!.gap - a!.gap)
-    .slice(0, 3) as Array<{ joint: string; gap: number; left: number; right: number }>
+    .slice(0, 3) as Array<{ joint: string; gap: number; left: number; right: number; unit: string }>
 }
 
 export function ResultsPreview() {
@@ -199,9 +199,9 @@ export function ResultsPreview() {
               <div key={i} className="flex items-center justify-between">
                 <span className="text-sm text-warm-white/80">{a.joint}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-warm-white/50">L {a.left}° / R {a.right}°</span>
+                  <span className="text-xs text-warm-white/50">L {a.left}{a.unit === '°' ? '°' : ` ${a.unit}`} / R {a.right}{a.unit === '°' ? '°' : ` ${a.unit}`}</span>
                   <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', a.gap >= 15 ? 'bg-red-tier-bg text-red-tier' : 'bg-yellow-tier-bg text-yellow-tier')}>
-                    {a.gap}° gap
+                    {a.gap}{a.unit === '°' ? '°' : ` ${a.unit}`} gap
                   </span>
                 </div>
               </div>
