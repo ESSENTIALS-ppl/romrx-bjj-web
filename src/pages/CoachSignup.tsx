@@ -35,11 +35,11 @@ export function CoachSignup() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: body.toString(),
       }).catch(() => {
-        window.location.href = `mailto:jim@romrx.io?subject=${encodeURIComponent('Coach Spring 2027 notify')}&body=${encodeURIComponent(trimmed)}`
+        window.location.href = `mailto:hello@romrx.io?subject=${encodeURIComponent('Coach Spring 2027 notify')}&body=${encodeURIComponent(trimmed)}`
       })
       setDone(true)
     } catch {
-      setError('Something went wrong. Email jim@romrx.io instead.')
+      setError('Something went wrong. Email hello@romrx.io instead.')
     } finally {
       setLoading(false)
     }
@@ -94,8 +94,8 @@ export function CoachSignup() {
           )}
           <p className="text-center text-xs text-charcoal-light">
             Or email{' '}
-            <a href="mailto:jim@romrx.io?subject=Coach%20Spring%202027%20notify" className="text-teal font-semibold hover:underline">
-              jim@romrx.io
+            <a href="mailto:hello@romrx.io?subject=Coach%20Spring%202027%20notify" className="text-teal font-semibold hover:underline">
+              hello@romrx.io
             </a>
           </p>
           <p className="text-center text-xs text-charcoal-light">
