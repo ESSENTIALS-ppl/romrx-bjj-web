@@ -66,7 +66,7 @@ function getPRSTier(score: number): { label: string; color: string; bg: string; 
   if (score >= 70) return { label: 'STRONG',      color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Good mobility foundation. A few gaps to address.' }
   if (score >= 55) return { label: 'DEVELOPING',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'ROM limitations are affecting your technique readiness.' }
   if (score >= 40) return { label: 'RESTRICTED',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'Significant mobility restrictions. Prioritize your protocol.' }
-  return                  { label: 'AT RISK',     color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: 'Multiple AT RISK joints. Prioritize injury prevention immediately.' }
+  return                  { label: 'AT RISK',     color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: 'Several joints are in the AT RISK range. Your full dashboard has your plan.' }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -165,6 +165,7 @@ export function ResultsPreview() {
             {tier.label}
           </div>
           <p className="text-sm text-warm-white/70 leading-relaxed">{tier.desc}</p>
+          <p className="text-xs text-warm-white/40 mt-3 leading-relaxed">AT RISK means your measured range is well below the target for these positions. ELITE means you are at or above the targets. Neither is a medical finding, and neither predicts injury.</p>
         </div>
 
         {/* Top asymmetries */}
@@ -185,7 +186,7 @@ export function ResultsPreview() {
                 </div>
               </div>
             ))}
-            <p className="text-xs text-warm-white/40 pt-1">Big left/right gaps are worth a closer look. Your full dashboard shows what to do next.</p>
+            <p className="text-xs text-warm-white/40 pt-1">Left and right sides that differ by a lot are shown above. Your full dashboard has more.</p>
           </div>
         )}
 
@@ -195,17 +196,18 @@ export function ResultsPreview() {
             <div className="text-center space-y-2">
               <Unlock size={28} className="text-gold mx-auto" />
               <p className="text-sm font-bold text-warm-white">Unlock Your Full Dashboard</p>
-              <p className="text-xs text-warm-white/60">Technique readiness ratings, full protocol, ROMBot</p>
+              <p className="text-xs text-warm-white/60">technique ratings, full protocol, ROMBot</p>
             </div>
           </div>
-          <p className="text-xs font-bold text-teal uppercase tracking-wide mb-2">My Game — Technique Readiness</p>
+          <p className="text-xs font-bold text-teal uppercase tracking-wide mb-2">My Game - Technique Readiness</p>
           <div className="flex gap-2">
-            <span className="text-xs bg-teal/20 text-teal px-3 py-1 rounded-full font-bold">🟢 GREEN</span>
-            <span className="text-xs bg-yellow-tier-bg text-yellow-tier px-3 py-1 rounded-full font-bold">🟡 YELLOW</span>
-            <span className="text-xs bg-red-tier-bg text-red-tier px-3 py-1 rounded-full font-bold">🔴 RED</span>
+            <span className="text-xs bg-teal/20 text-teal px-3 py-1 rounded-full font-bold">GREEN</span>
+            <span className="text-xs bg-yellow-tier-bg text-yellow-tier px-3 py-1 rounded-full font-bold">YELLOW</span>
+            <span className="text-xs bg-red-tier-bg text-red-tier px-3 py-1 rounded-full font-bold">RED</span>
           </div>
+          <p className="text-xs text-warm-white/40">Readiness colors compare your range of motion to what a position needs. They are not medical clearance and do not say whether a move is safe for you.</p>
           <div className="space-y-2">
-            {['My Protocol — Top 3 Priority Joints', 'My Game — Offense + Defense Flow', 'ROMBot — Ask anything about your data'].map(item => (
+            {['My Protocol - Top 3 Priority Joints', 'My Game - Offense + Defense Flow', 'ROMBot - Ask about your ROM results'].map(item => (
               <div key={item} className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-teal/40" />
                 <span className="text-sm text-warm-white/40 blur-sm select-none">{item}</span>
@@ -215,19 +217,22 @@ export function ResultsPreview() {
         </div>
 
         {/* CTA */}
-        <p className="text-center text-sm text-warm-white/70">
-          {baseActive
-            ? 'ROMRxBJJ is a $149/yr add-on to your Base.'
-            : 'Base $60/yr + ROMRxBJJ $149/yr = $209/yr.'}
-        </p>
+        {baseActive && (
+          <p className="text-center text-sm text-warm-white/70">ROMRxBJJ is a $149/yr add-on to your Base.</p>
+        )}
         <a
           href={UNLOCK_URL}
           className="w-full py-4 bg-gold text-charcoal font-display font-bold text-base rounded-2xl hover:bg-gold-hover transition-colors flex items-center justify-center gap-2"
         >
           <Unlock size={18} /> {baseActive ? 'Add ROMRxBJJ ($149/yr)' : 'Get Base + ROMRxBJJ ($209/yr)'}
         </a>
+        <p className="text-center text-xs text-warm-white/50">
+          {baseActive
+            ? 'Canceling Base also cancels ROMRxBJJ.'
+            : 'Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Charged January 1, 2027, then every year until you cancel. Card required. Canceling Base also cancels ROMRxBJJ.'}
+        </p>
         <p className="text-center text-xs text-warm-white/30">
-          Cancel anytime · Promo codes accepted at checkout · Results saved permanently
+          Canceling ends your access right away. Promo codes accepted at checkout. ROMRx is for adults 18 and older.
         </p>
       </div>
     </div>
