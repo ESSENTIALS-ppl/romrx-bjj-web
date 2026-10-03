@@ -45,13 +45,6 @@ function formatLines(text: string) {
 }
 
 
-function isBaseAthlete(profile: { active_sport?: string | null; platforms?: string[] | null } | null | undefined) {
-  const sport = String(profile?.active_sport ?? '').toLowerCase()
-  if (sport === 'general' || sport === 'base') return true
-  const platforms = (profile?.platforms ?? []).map((p) => String(p).toLowerCase())
-  return platforms.length > 0 && platforms.every((p) => p === 'general' || p === 'base')
-}
-
 export function Chat() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -70,8 +63,9 @@ export function Chat() {
   const endRef = useRef<HTMLDivElement>(null)
 
   const isCoach = profile?.portal_role === 'coach'
-  const chatSport = profile?.active_sport ?? 'bjj'
-  const isBase = !isCoach && isBaseAthlete(profile)
+  // BJJ app: always ask ROMBot for BJJ (server honors it when the user owns BJJ).
+  const chatSport = 'bjj'
+  const isBase = false // BJJ app: never show the Base (bands) welcome
 
   useEffect(() => {
     const saved = localStorage.getItem('romrx_provider_pref')
@@ -111,14 +105,13 @@ export function Chat() {
   useEffect(() => {
     if (messages.length === 0 && user && !profileLoading) {
       const name = (profile?.full_name ?? 'there').split(' ')[0]
-      const belt = profile?.belt ?? 'white'
       let welcome: string
       if (isCoach) {
         welcome = `Hey ${name} - I'm ROMBot, your team intelligence assistant.\n\nI can see your full roster's ROM scores and technique tiers. You can ask about specific athletes or your whole team:\n- "Who on my team is most at risk?"\n- "What's blocking [athlete] from Triangle Choke?"\n- "Who is ready to compete?"\n\nNote: ROMBot provides educational information only and is not medical advice.`
       } else if (isBase) {
         welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your mobility bands (Needs focus / Building / Steady), priority joints, and daily plan. Ask me anything:\n\u2022 "Which joints need focus?"\n\u2022 "What's my daily plan?"\n\u2022 "How do I build ease in my hips?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       } else {
-        welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your ${belt} belt profile, ROM scores, technique tiers, and protocol. Ask me anything:\n\u2022 "Why is my Triangle Choke RED?"\n\u2022 "What exercises unlock De La Riva?"\n\u2022 "Which techniques am I closest to unlocking?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
+        welcome = `Hey ${name}, I'm ROMBot. I can see your Position Readiness results (AT RISK to ELITE) and your technique ratings (GREEN / YELLOW / RED). Ask me anything:\n\u2022 "Which techniques are GREEN for me?"\n\u2022 "Which joints should I work on first?"\n\u2022 "What does AT RISK mean?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       }
       setMessages([{ role: 'assistant', content: welcome }])
     }

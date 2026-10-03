@@ -807,7 +807,7 @@ function TechCard({
       {isDelay && (
         <div className="pt-2 border-t border-red-100">
           <p className="text-[11px] text-red-tier bg-red-tier-bg rounded-lg px-2.5 py-1.5 leading-snug">
-            Build prerequisite mobility before attempting this technique.
+            This technique asks for more range than your current results show. Talk to your coach.
           </p>
         </div>
       )}
@@ -1537,7 +1537,7 @@ function PositionPlanTab({ eligibility }: { eligibility: TechniqueEligibility[] 
   ]
   return (
     <div className="space-y-4">
-      <PageHeader title="My Full Game Plan" subtitle="Your available techniques by position, filtered to what your body is ready for" />
+      <PageHeader title="My Full Game Plan" subtitle="Your available techniques by position, filtered to your ROM results" />
       {positions.map(pos => {
         const techs = eligibility.filter(e => {
           const t = e.techniques as { category: string }
@@ -1555,7 +1555,7 @@ function PositionPlanTab({ eligibility }: { eligibility: TechniqueEligibility[] 
                 return (
                   <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl bg-green-50">
                     <span className="text-sm font-medium text-charcoal">{t.name}</span>
-                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">READY</span>
+                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">GREEN</span>
                   </div>
                 )
               })}
@@ -1564,7 +1564,7 @@ function PositionPlanTab({ eligibility }: { eligibility: TechniqueEligibility[] 
                 return (
                   <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-xl bg-yellow-50">
                     <span className="text-sm font-medium text-charcoal">{t.name}</span>
-                    <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">DEVELOPING</span>
+                    <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">YELLOW</span>
                   </div>
                 )
               })}
@@ -1933,7 +1933,7 @@ export function MyGame() {
       leglock: 'leg lockers',
     }
 
-    const desc = `Competition plan built on GREEN-only techniques (${greenCount} available). In competition, you execute what is locked in — no experimenting with YELLOW or RED techniques under pressure. Built for ${formatShort[format]} format, ${durationLabels[duration]} matches, defending against ${threatLabels[threat]}.`
+    const desc = `Competition plan built on GREEN-only techniques (${greenCount} available). This plan is built around your GREEN techniques. Built for ${formatShort[format]} format, ${durationLabels[duration]} matches, defending against ${threatLabels[threat]}.`
 
     setCompFlow(flow)
     setCompPlanName(name)
@@ -2058,6 +2058,7 @@ export function MyGame() {
         title="My Game"
         subtitle={`${eligibility.length} techniques rated · ${profile?.belt ?? 'white'} belt`}
       />
+      <p className="text-xs text-charcoal-light">Readiness colors compare your range of motion to what a position needs. They are not medical clearance and do not say whether a move is safe for you.</p>
 
       {/* Tier summary strip */}
       <div className="flex gap-2 flex-wrap">
@@ -2205,7 +2206,7 @@ export function MyGame() {
                     )}
                   >
                     <span className={cn('w-2 h-2 rounded-full inline-block', greenOnly ? 'bg-white' : 'bg-teal')} />
-                    GREEN only (competition ready)
+                    GREEN only (matches your ROM results)
                   </button>
 
                   {/* Gi/No-Gi segmented control */}
@@ -2852,7 +2853,7 @@ export function MyGame() {
                     <div>
                       <p className="text-sm font-bold text-red-700">Competition Mode</p>
                       <p className="text-xs text-red-600 mt-0.5 leading-relaxed">
-                        Only your GREEN-tier techniques will be used. In competition, execute what's locked in — no experimenting under pressure.
+                        Only your GREEN-tier techniques will be used. This plan is built around your GREEN techniques.
                       </p>
                     </div>
                   </div>
