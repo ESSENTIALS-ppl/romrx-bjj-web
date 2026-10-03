@@ -59,6 +59,9 @@ export interface TechniqueEligibility {
   tier: string
   flag: string | null
   limiting_joints: string[] | null
+  // Per-joint results from the server rule (names and colors only). Absent until the server migration lands.
+  joint_status?: { joint: string; status: 'GREEN' | 'YELLOW' | 'RED' | 'GREY' }[] | null
+  status_reason?: string | null
   techniques: {
     code: string
     name: string
@@ -100,7 +103,25 @@ export function useProfile(userId: string | undefined) {
       setProfile(result.profile)
       setAssessment(result.assessment)
       setAssessments(result.assessments ?? [])
-      setEligibility(result.eligibility ?? [])
+      const elig = result.eligibility ?? []
+      setEligibility(elig)
+      // Per-joint statuses live next to the tier on technique_eligibility. get_my_profile does not return them, so read
+      // them directly (self-read RLS) and merge by technique code. Failure leaves the legacy card untouched.
+      try {
+        const { data: js, error: jsErr } = await supabase
+          .from('technique_eligibility')
+          .select('technique_code, joint_status, status_reason, computed_at')
+          .eq('user_id', userId as string)
+          .eq('sport', 'bjj')
+          .order('computed_at', { ascending: false })
+        if (!jsErr && js) {
+          const byCode = new Map<string, { joint_status: TechniqueEligibility['joint_status']; status_reason: string | null }>()
+          for (const r of js as { technique_code: string | null; joint_status: TechniqueEligibility['joint_status']; status_reason: string | null }[]) {
+            if (r.technique_code && !byCode.has(r.technique_code)) byCode.set(r.technique_code, r)
+          }
+          setEligibility(elig.map(e => ({ ...e, ...(byCode.get(e.technique_code) ?? {}) })))
+        }
+      } catch { /* keep legacy */ }
       setLoading(false)
     }
 

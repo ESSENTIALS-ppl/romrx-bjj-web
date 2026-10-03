@@ -8,6 +8,7 @@ import { PageHeader } from '../components/PageHeader'
 import { SectionCard } from '../components/SectionCard'
 import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
+import { JointChips } from '../components/ui/JointChips'
 import { TierBadge } from '../components/ui/TierBadge'
 import { TechniqueDetailSheet } from '../components/ui/TechniqueDetailSheet'
 import { formatJoint, beltColor, cn } from '../lib/utils'
@@ -791,7 +792,10 @@ function TechCard({
         <span className="text-[11px] bg-surface text-charcoal-light px-2 py-0.5 rounded-full capitalize">{tech.category}</span>
         <span className={`text-[11px] px-2 py-0.5 rounded-full capitalize font-medium ${beltColor(tech.belt)}`}>{tech.belt}</span>
       </div>
-      {item.limiting_joints && item.limiting_joints.length > 0 && (
+      {item.joint_status && item.joint_status.length > 0 || item.tier === 'GREY' ? (
+        <JointChips joints={item.joint_status} tier={item.tier} reason={item.status_reason} />
+      ) : null}
+      {!(item.joint_status && item.joint_status.length > 0) && item.tier !== 'GREY' && item.limiting_joints && item.limiting_joints.length > 0 && (
         <div className="pt-2 border-t border-teal-light/60">
           <div className="flex items-center gap-1 mb-1.5">
             <AlertTriangle size={10} className="text-yellow-600" />
