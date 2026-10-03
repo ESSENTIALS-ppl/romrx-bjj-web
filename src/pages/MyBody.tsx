@@ -6,7 +6,7 @@ import { SectionCard } from '../components/SectionCard'
 import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts'
-import { cn, beltColor, formatJoint } from '../lib/utils'
+import { cn, beltColor, formatJoint, BASE_ASSESSMENT_URL } from '../lib/utils'
 import { AlertTriangle, Activity, TrendingUp } from 'lucide-react'
 
 // ── Position Readiness Score ──────────────────────────────────────────────────
@@ -145,7 +145,7 @@ export function MyBody() {
       icon={Activity}
       title="No assessment on file"
       description="Complete your ROM self-assessment to see your body map, joint breakdown, and technique readiness."
-      action={<a href="/onboarding/assessment" className="btn-primary text-sm">Get started</a>}
+      action={<a href={BASE_ASSESSMENT_URL} className="btn-primary text-sm">Get started</a>}
     />
   )
 

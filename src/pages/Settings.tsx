@@ -10,7 +10,7 @@ import {
   UserCheck, UserX, School, KeyRound, CheckCircle2, Bell,
 } from 'lucide-react'
 import { MessageSquarePlus } from 'lucide-react'
-import { beltColor, cn } from '../lib/utils'
+import { beltColor, cn, BASE_ASSESSMENT_URL } from '../lib/utils'
 import { FeedbackWidget } from '../components/FeedbackWidget'
 import {
   requestAccountDeletion, deletionErrorCopy, DELETION_BUTTON_LABEL, DELETION_SUCCESS_COPY,
@@ -777,7 +777,7 @@ function AthleteSettings() {
         <Section title="Assessment History">
           <div className="flex items-center justify-between -mt-2 mb-1">
             <p className="text-xs text-charcoal-light">Your past ROM snapshots</p>
-            <a href="/onboarding/assessment" className="text-xs font-semibold text-teal hover:underline">
+            <a href={BASE_ASSESSMENT_URL} className="text-xs font-semibold text-teal hover:underline">
               + New Assessment
             </a>
           </div>
@@ -790,7 +790,7 @@ function AthleteSettings() {
             <div className="text-center py-6">
               <ClipboardList size={28} className="mx-auto text-charcoal-light mb-2" />
               <p className="text-sm text-charcoal-light mb-2">No assessments on file yet.</p>
-              <a href="/onboarding/assessment" className="inline-block text-sm font-semibold text-teal hover:underline">
+              <a href={BASE_ASSESSMENT_URL} className="inline-block text-sm font-semibold text-teal hover:underline">
                 Take your first assessment
               </a>
             </div>
@@ -821,7 +821,7 @@ function AthleteSettings() {
                         </span>
                       )}
                       <a
-                        href="/onboarding/assessment"
+                        href={BASE_ASSESSMENT_URL}
                         className="flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                       >
                         <TrendingUp size={12} />
