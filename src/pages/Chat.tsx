@@ -45,13 +45,6 @@ function formatLines(text: string) {
 }
 
 
-function isBaseAthlete(profile: { active_sport?: string | null; platforms?: string[] | null } | null | undefined) {
-  const sport = String(profile?.active_sport ?? '').toLowerCase()
-  if (sport === 'general' || sport === 'base') return true
-  const platforms = (profile?.platforms ?? []).map((p) => String(p).toLowerCase())
-  return platforms.length > 0 && platforms.every((p) => p === 'general' || p === 'base')
-}
-
 export function Chat() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -70,8 +63,10 @@ export function Chat() {
   const endRef = useRef<HTMLDivElement>(null)
 
   const isCoach = profile?.portal_role === 'coach'
-  const chatSport = profile?.active_sport ?? 'bjj'
-  const isBase = !isCoach && isBaseAthlete(profile)
+  // This is the BJJ app: always ask ROMBot for BJJ. The server honors it when the user owns BJJ, so a
+  // Base-first account (active_sport = general) gets GREEN/YELLOW/RED, not the Base bands.
+  const chatSport = 'bjj'
+  const isBase = false // BJJ app: never show the Base (bands) welcome
 
   useEffect(() => {
     const saved = localStorage.getItem('romrx_provider_pref')
