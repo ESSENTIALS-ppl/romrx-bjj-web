@@ -4,8 +4,10 @@ import { useAuth } from '../hooks/useAuth'
 import { Spinner } from './Spinner'
 import { baseExplainerUrl } from '../lib/utils'
 
-// Guards the onboarding assessment funnel (/onboarding/assessment,
-// /onboarding/results). These are the authenticated, post-Base in-app steps:
+// Guards the onboarding funnel (/onboarding/assessment, /onboarding/results).
+// WIZARD RETIREMENT (draft): /onboarding/assessment now only redirects to the
+// Base assessment (BaseAssessmentRedirect); /onboarding/results is the paywall.
+// Original note: These are the authenticated, post-Base in-app steps:
 // an existing user takes or retakes the ROM assessment and sees results /
 // checkout. A visitor with no session is a new athlete who reached the
 // assessment outside Base (a stale deep link, old campaign, or bookmark), so
