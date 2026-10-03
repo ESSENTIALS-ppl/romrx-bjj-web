@@ -6,7 +6,10 @@ import { Spinner } from '../components/Spinner'
 import { AlertTriangle, CheckCircle, Unlock, TrendingUp } from 'lucide-react'
 import { cn } from '../lib/utils'
 
-const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
+// F-03: the old button posted {plan:'athlete'} to create-checkout-session, which only accepts
+// mode base|unlock|coach, so it always errored. The Add-sport flow in the main app already handles
+// both cases (Base active: $149 pack checkout; no Base: Base + pack, sent to login first).
+const UNLOCK_URL = 'https://romrx.io/app/unlock/bjj'
 
 // ── PRS scoring algorithm ─────────────────────────────────────────────────────
 const BILATERAL_JOINTS = [
@@ -80,13 +83,12 @@ function getTopAsymmetries(assessment: Record<string, any>): Array<{ joint: stri
 }
 
 export function ResultsPreview() {
-  const { user, session } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [assessment, setAssessment] = useState<Record<string, any> | null>(null)
   const [loading, setLoading]       = useState(true)
-  const [paying, setPaying]         = useState(false)
-  const [error, setError]           = useState('')
+  const [baseActive, setBaseActive] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -94,7 +96,7 @@ export function ResultsPreview() {
       // Check if already paid
       const { data: userRow } = await supabase
         .from('users')
-        .select('subscription_status')
+        .select('subscription_status, base_status')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -107,6 +109,8 @@ export function ResultsPreview() {
         navigate('/dashboard/my-body', { replace: true })
         return
       }
+
+      setBaseActive(userRow?.base_status === 'active')
 
       // Load latest assessment
       const { data } = await supabase
@@ -121,30 +125,6 @@ export function ResultsPreview() {
       setLoading(false)
     })()
   }, [user, navigate])
-
-  const handleUnlock = async () => {
-    if (!session) return
-    setPaying(true)
-    setError('')
-    try {
-      const res = await fetch(CHECKOUT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ email: user?.email, plan: 'athlete' }),
-      })
-      const { url, error: err } = await res.json()
-      if (url) { window.location.href = url; return }
-      setError(err ?? 'Payment setup failed. Please try again.')
-    } catch (e) {
-      setError('Something went wrong. Please try again.')
-    } finally {
-      setPaying(false)
-    }
-  }
 
   if (loading) return <Spinner />
 
@@ -237,18 +217,19 @@ export function ResultsPreview() {
         </div>
 
         {/* CTA */}
-        {error && <p className="text-xs text-center text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>}
-        <button
-          onClick={handleUnlock}
-          disabled={paying}
+        {baseActive && (
+          <p className="text-center text-sm text-warm-white/70">ROMRxBJJ is a $149/yr add-on to your Base.</p>
+        )}
+        <a
+          href={UNLOCK_URL}
           className="w-full py-4 bg-gold text-charcoal font-display font-bold text-base rounded-2xl hover:bg-gold-hover transition-colors flex items-center justify-center gap-2"
         >
-          {paying ? 'Setting up payment...' : <>
-            <Unlock size={18} /> Get Base + ROMRxBJJ ($209/yr)
-          </>}
-        </button>
+          <Unlock size={18} /> {baseActive ? 'Add ROMRxBJJ ($149/yr)' : 'Get Base + ROMRxBJJ ($209/yr)'}
+        </a>
         <p className="text-center text-xs text-warm-white/50">
-          Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Charged January 1, 2027, then every year until you cancel. Card required. Canceling Base also cancels ROMRxBJJ.
+          {baseActive
+            ? 'Canceling Base also cancels ROMRxBJJ.'
+            : 'Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Charged January 1, 2027, then every year until you cancel. Card required. Canceling Base also cancels ROMRxBJJ.'}
         </p>
         <p className="text-center text-xs text-warm-white/30">
           Canceling ends your access right away. Promo codes accepted at checkout. ROMRx is for adults 18 and older.
