@@ -4,6 +4,7 @@ import type { TechniqueEligibility } from '../../hooks/useProfile'
 import { supabase } from '../../lib/supabase'
 import { beltColor, cn } from '../../lib/utils'
 import { TierBadge } from './TierBadge'
+import { JointChips } from './JointChips'
 
 export type TechniqueDescription = {
   when: string
@@ -171,6 +172,9 @@ export function TechniqueDetailSheet({
               <span className="text-[11px] bg-surface text-charcoal-light px-2 py-0.5 rounded-full capitalize">{tech.category}</span>
               <span className={cn('text-[11px] px-2 py-0.5 rounded-full capitalize font-medium', beltColor(tech.belt))}>{tech.belt}</span>
             </div>
+            {(item.joint_status?.length || item.tier === 'GREY') ? (
+              <JointChips joints={item.joint_status} tier={item.tier} reason={item.status_reason} />
+            ) : null}
           </div>
 
           {/* 3–5. Instructional detail (null-safe: hidden entirely when no description) */}

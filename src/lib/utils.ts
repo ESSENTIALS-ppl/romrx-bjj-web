@@ -34,6 +34,7 @@ export function tierColor(tier: string | null): string {
     case 'GREEN':  return 'tier-green'
     case 'YELLOW': return 'tier-yellow'
     case 'RED':    return 'tier-red'
+    case 'GREY':   return 'bg-gray-100 text-gray-600 font-semibold'
     default: return 'bg-gray-100 text-gray-600'
   }
 }
@@ -41,6 +42,7 @@ export function tierColor(tier: string | null): string {
 // DELAY_TECHNIQUE is an internal flag — always surfaces as RED in the UI
 export function tierLabel(tier: string | null, flag: string | null): string {
   if (flag === 'DELAY_TECHNIQUE') return 'RED'
+  if (tier === 'GREY') return 'NOT RATED' // no ROM rule, or a required joint is not measured: never shown as GREEN
   return tier ?? '—'
 }
 
