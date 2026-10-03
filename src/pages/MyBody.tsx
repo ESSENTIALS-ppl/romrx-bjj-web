@@ -205,7 +205,7 @@ export function MyBody() {
                 const i = RADAR_LABELS.length - 1 - ri
                 return (
                   <Radar
-                    key={label}
+                    key={`${label}-${i}`}
                     name={label}
                     dataKey={`v${i}`}
                     stroke={RADAR_COLORS[i]}
