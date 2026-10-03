@@ -2072,6 +2072,7 @@ export function MyGame() {
           </span>
         ))}
       </div>
+      <p className="text-[11px] text-charcoal-light -mt-3">Based on your range of motion only. Not medical advice.</p>
 
       {/* Page tabs */}
       <div className="flex gap-1 bg-surface rounded-2xl p-1 no-print">
