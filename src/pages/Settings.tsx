@@ -724,10 +724,15 @@ function AthleteSettings() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm text-charcoal-light">Plan</p>
-              <span className="text-xs bg-teal-light text-teal font-semibold px-3 py-1 rounded-full capitalize">
-                {profile?.subscription_tier ?? 'free'}
+              <span className="text-xs bg-teal-light text-teal font-semibold px-3 py-1 rounded-xl text-right max-w-[70%]">
+                {!profile?.subscription_tier || profile.subscription_tier === 'free'
+                  ? 'Free through December 31, 2026. Then $60/yr from January 1, 2027, renews yearly until you cancel. Canceling ends your access right away.'
+                  : profile.subscription_tier}
               </span>
             </div>
+            {(profile?.sports_enabled ?? []).includes('bjj') && (
+              <p className="text-xs text-charcoal-light">ROMRxBJJ add-on: $149/yr, renews yearly. Canceling Base also cancels it.</p>
+            )}
 
             <div className="flex items-center justify-between">
               <p className="text-sm text-charcoal-light">Status</p>

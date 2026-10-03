@@ -58,7 +58,7 @@ const STEPS: Step[] = [
   {
     id: 'hip_ir',
     title: 'Hip Internal Rotation',
-    bjjWhy: 'Protects your knee in guard, drives hip escapes, key in leg entanglement defense.',
+    bjjWhy: 'Used in guard passing, knee cuts, hip switches and hip escapes.',
     tool: '✓ Same chair, same phone placement - only the foot direction changes.',
     position: [
       'Stay in the same chair. Do NOT move your position.',
@@ -124,7 +124,7 @@ const STEPS: Step[] = [
   {
     id: 'cervical_lat',
     title: 'Cervical Lateral Flexion',
-    bjjWhy: 'Lateral neck strength protects you in scrambles, headlocks, and turtle position.',
+    bjjWhy: 'Used in scrambles, headlocks and turtle position.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
       'Sit upright in a chair. Feet flat. Back straight.',
@@ -145,7 +145,7 @@ const STEPS: Step[] = [
   {
     id: 'cervical_flex_ext',
     title: 'Cervical Flexion + Extension',
-    bjjWhy: 'Chin-to-chest protects you in front headlocks and guillotines. Looking up matters for bridging and scrambles.',
+    bjjWhy: 'Used in turning, tucking your chin and looking up, in front headlocks, guillotines, bridging and scrambles.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
       'Sit upright in a chair. Feet flat. Back straight.',
@@ -214,7 +214,7 @@ const STEPS: Step[] = [
   {
     id: 'lumbar',
     title: 'Lumbar Flexion + Extension',
-    bjjWhy: 'Guard recovery, hip escapes, and surviving pin pressure all load your lumbar spine.',
+    bjjWhy: 'Used in guard recovery, hip escapes and pin escapes.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Standing + Floor',
     position: [
       'Flexion is standing. Extension is on the floor face down.',

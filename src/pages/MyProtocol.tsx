@@ -541,7 +541,7 @@ const JOINTS: JointDef[] = [
   },
   {
     key: 'cervical_rot', label: 'Cervical Rotation',
-    bjjWhy: 'Awareness, safety, and avoiding neck injury in scrambles',
+    bjjWhy: 'Used in turning, tucking your chin and looking up in scrambles',
     leftKey: 'cervical_rot_l', rightKey: 'cervical_rot_r',
     normalMin: 70, normalMax: 90, riskBelow: 60, unit: '°', rxKey: 'cervical_rot',
   },
@@ -627,12 +627,12 @@ function RetestBanner({ assessedAt }: { assessedAt: string }) {
     status = 'yellow'
     Icon = Clock
     message = `Reassessment due ${retestDateStr}`
-    subtext = 'Your ROM may have shifted -- retest to update your protocol and unlock new techniques'
+    subtext = 'Retest to update your ratings.'
   } else {
     status = 'red'
     Icon = RefreshCw
     message = `Retest overdue by ${Math.abs(daysUntilRetest)} days`
-    subtext = "Retake now to see how much you've improved and update your technique ratings"
+    subtext = 'Retest to see how your results compare.'
   }
 
   const styles = {
@@ -1058,8 +1058,8 @@ function IssueCard({ ranked, rank }: { ranked: ScoredJoint; rank: number }) {
 }
 
 // ── Per-tab "why" copy ──────────────────────────────────────────────────────
-const DAILY_WHY = "This is your minimum effective dose. Research is clear: short, consistent daily mobility work changes range of motion more than long sessions done occasionally. A few minutes a day, every day, is what actually moves your numbers. Do this and you're covered. Everything else is a bonus."
-const FULL_WHY = "Got more time, or want to attack a specific restriction? This is your complete prescription. Every movement from your assessment, organized by the limitations holding back your game. Use it as a deeper session when you can, or as a reference to understand the whole plan. The Daily keeps you progressing. The Full lets you go further."
+const DAILY_WHY = "This is your minimum effective dose. Short, regular sessions are an easy habit to keep. Studies in healthy adults show regular stretching and strength work can raise range of motion over several weeks. Results vary. Everything else is a bonus."
+const FULL_WHY = "Got more time, or want to attack a specific restriction? This is your complete plan. Every movement from your assessment, organized by the areas where your results are lower than the BJJ target ranges. Use it as a deeper session when you can, or as a reference to understand the whole plan. The Daily keeps you progressing. The Full lets you go further."
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export function MyProtocol() {
@@ -1088,7 +1088,7 @@ export function MyProtocol() {
     <EmptyState
       icon={ClipboardList}
       title="No assessment yet"
-      description="Complete your ROM assessment and your personal injury-prevention protocol will appear here."
+      description="Complete your ROM assessment and your personal protocol will appear here."
     />
   )
 
