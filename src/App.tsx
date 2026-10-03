@@ -9,7 +9,7 @@ import { Signup } from './pages/Signup'
 import { BaseAssessmentRedirect } from './components/BaseAssessmentRedirect'
 // TODO(wizard-retirement): src/pages/Assessment.tsx is intentionally unrouted. Rollback is
 // a one-line revert: restore `import { Assessment } from './pages/Assessment'` and the
-// route element below to <Assessment /> (and revert the BASE_ASSESSMENT_URL links).
+// route element below to <Assessment /> (and revert the BASE_RETEST_URL links).
 import { MyBody } from './pages/MyBody'
 import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'

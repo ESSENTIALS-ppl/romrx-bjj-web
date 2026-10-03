@@ -15,10 +15,10 @@ export const BASE_EXPLAINER_URL = 'https://romrx.io/bjj'
 // come from the shared assessments table. NOTE: sessions do not carry from this
 // origin to romrx.io (Base keeps its own login on that origin; the only SSO
 // hand-off is Base -> sport site), so a signed-out Base visitor logs in there.
-export const BASE_ASSESSMENT_URL = 'https://romrx.io/app/onboarding/assessment'
+export const BASE_RETEST_URL = 'https://romrx.io/app/onboarding/assessment'
 
 export function goToBaseAssessment(): void {
-  window.location.assign(BASE_ASSESSMENT_URL)
+  window.location.assign(BASE_RETEST_URL)
 }
 
 
