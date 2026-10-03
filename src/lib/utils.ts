@@ -9,6 +9,17 @@ export function cn(...inputs: ClassValue[]) {
 // assessment/signup entry points route here so onboarding always starts on Base.
 export const BASE_EXPLAINER_URL = 'https://romrx.io/bjj'
 
+// Where a signed-in athlete goes to take or retake the ROM assessment. Base is the
+// only app that assesses ROM. Sessions do NOT carry from this domain to romrx.io
+// (separate origin, separate storage), so we land on Base My Body: Base's own
+// login gate runs first, then a user with no assessment is routed to Base's
+// assessment and a user with one sees Retest there. Rollback: see App.tsx TODO.
+export const BASE_RETEST_URL = 'https://romrx.io/app/dashboard/my-body'
+
+export function goToBaseAssessment(): void {
+  window.location.assign(BASE_RETEST_URL)
+}
+
 
 // Owned-site UTM tags on clickable links to the Base page (Growth, 2026-09-29).
 // utm_term is the link placement. Redirects that forward an incoming query
