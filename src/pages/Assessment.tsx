@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Info, ExternalLink, SkipForward } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { HIP_FLEX_NOT_SCORED_LINE, HIP_FLEX_SIDES_DIFFER_LINE, hipSidesDiffer } from '../lib/hipFlex'
+import { HIP_FLEX_NOT_SCORED_LINE } from '../lib/hipFlex'
+import { HipSidesNote } from '../components/HipSidesNote'
 
 const SUBMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-assessment`
 
@@ -171,7 +172,7 @@ const STEPS: Step[] = [
   {
     id: 'hip_flex',
     title: 'Hip Flexion',
-    bjjWhy: 'How deep your closed guard is - closed guard, rubber guard, and armbar position all need this.',
+    bjjWhy: 'How deep your closed guard is, closed guard, rubber guard, and armbar position all need this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Lying on the floor',
     position: [
       'Lie flat on your back on the floor. Both legs straight.',
@@ -537,9 +538,8 @@ export function Assessment() {
               {step.fields.map(f => (
                 <MeasureInput key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} />
               ))}
-              {step.fields.length === 2 && step.fields.every(f => f.notScored) &&
-                hipSidesDiffer(values[step.fields[0].key], values[step.fields[1].key]) && (
-                <p className="text-xs font-semibold text-charcoal">{HIP_FLEX_SIDES_DIFFER_LINE}</p>
+              {step.fields.length === 2 && step.fields.every(f => f.notScored) && (
+                <HipSidesNote left={values[step.fields[0].key]} right={values[step.fields[1].key]} className="text-xs font-semibold text-charcoal" />
               )}
             </div>
 
