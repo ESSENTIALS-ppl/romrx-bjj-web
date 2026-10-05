@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:utm": "node scripts/utm-forward.test.mjs"
+    "test:utm": "node scripts/utm-forward.test.mjs",
+    "test:hip": "node scripts/hip-not-scored.test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
