@@ -14,6 +14,15 @@ export interface Profile {
   active_sport: string
   /** Slugs of every sport this user can access. Mirrors platforms via DB trigger. Added in PR #2. */
   sports_enabled: string[]
+  /** 'active' once Base is paid. Used with sport_entitlements for the sport-site gate (F-02). */
+  base_status?: string | null
+  grandfathered_at?: string | null
+}
+
+export interface SportEntitlement {
+  sport: string
+  status: string
+  expires_at: string | null
 }
 
 export interface Assessment {
@@ -72,6 +81,7 @@ export function useProfile(userId: string | undefined) {
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [eligibility, setEligibility] = useState<TechniqueEligibility[]>([])
+  const [entitlements, setEntitlements] = useState<SportEntitlement[]>([])
   const [loading, setLoading]       = useState(true)
 
   useEffect(() => {
@@ -95,17 +105,19 @@ export function useProfile(userId: string | undefined) {
         assessment: Assessment | null
         assessments: Assessment[]
         eligibility: TechniqueEligibility[]
+        sport_entitlements?: SportEntitlement[]
       }
 
       setProfile(result.profile)
       setAssessment(result.assessment)
       setAssessments(result.assessments ?? [])
       setEligibility(result.eligibility ?? [])
+      setEntitlements(result.sport_entitlements ?? [])
       setLoading(false)
     }
 
     load()
   }, [userId])
 
-  return { profile, assessment, assessments, eligibility, loading }
+  return { profile, assessment, assessments, eligibility, entitlements, loading }
 }
