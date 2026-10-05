@@ -1,17 +1,18 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
+import { hasSportAccess } from '../lib/access'
 import { SportProvider } from '../sports/SportProvider'
 
 // Statuses that grant access to /dashboard/*. Trial access is allowed because
 // Stripe issues 'trialing' only after a valid payment method is on file — but
 // see the Signup paths: we never set 'trialing' client-side. The only way to
 // land here in 'trialing' is via a Stripe webhook on a real Stripe trial.
-const PAID_STATUSES = new Set(['active', 'trialing'])
+const SITE_SPORT = 'bjj'
 
 export function ProtectedRoute() {
   const { session, user, loading } = useAuth()
-  const { profile, loading: profileLoading } = useProfile(user?.id)
+  const { profile, entitlements, loading: profileLoading } = useProfile(user?.id)
 
   if (loading || (session && profileLoading)) {
     return (
@@ -28,11 +29,11 @@ export function ProtectedRoute() {
 
   if (!session) return <Navigate to="/login" replace />
 
-  // Paywall gate. Anyone whose subscription_status is not in PAID_STATUSES
+  // Paywall gate (F-02): legacy paid status, or Base active + owns this sport. Anyone else
   // (e.g. 'pending', 'past_due', 'canceled', null) gets routed to the
   // assessment/checkout flow instead of the dashboard. Coaches use the same
   // gate — CoachSignup also creates rows as 'pending'.
-  if (profile && !PAID_STATUSES.has(profile.subscription_status)) {
+  if (profile && !hasSportAccess(profile, entitlements, SITE_SPORT)) {
     return <Navigate to="/onboarding/results" replace />
   }
 
