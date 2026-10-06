@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { OnboardingRoute } from './components/OnboardingRoute'
 import { Layout } from './components/Layout'
+import { TermsReacceptGate } from './components/TermsReacceptGate'
 import { Login } from './pages/Login'
 import { AuthCallback } from './pages/AuthCallback'
 import { AuthConfirm } from './pages/AuthConfirm'
@@ -24,6 +25,7 @@ import { ShareView } from './pages/ShareView'
 export default function App() {
   return (
     <BrowserRouter>
+      <TermsReacceptGate />
       <Routes>
         {/* Public routes */}
         <Route path="/login"          element={<Login />} />
