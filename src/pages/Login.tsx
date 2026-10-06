@@ -66,12 +66,15 @@ export function Login() {
       options: { emailRedirectTo: `${window.location.origin}/auth/confirm`, shouldCreateUser: false },
     })
     setLoading(false)
-    if (err) {
+    // Privacy (Stacy, Oct 5): never reveal whether an email has an account. With
+    // shouldCreateUser: false, Supabase answers an unknown email with otp_disabled /
+    // "Signups not allowed for otp" / user not found. Treat that exactly like success:
+    // same screen, same cooldown, no error text.
+    const noAccount = !!err && /signups? not allowed|otp_disabled|user[_ ]not[_ ]found/i.test(`${err.message} ${(err as { code?: string }).code ?? ''}`)
+    if (err && !noAccount) {
       setError(err.message.includes('rate') || err.message.includes('many')
         ? 'Too many attempts. Wait a minute and try again, or use your password instead.'
-        : /signups? not allowed|otp_disabled|user not found/i.test(err.message)
-          ? "We couldn't find an account for that email."
-          : err.message)
+        : err.message)
     } else {
       setMagicSent(true)
       // Set 60-second cooldown, persisted in localStorage so page refresh doesn't bypass it
@@ -167,6 +170,7 @@ export function Login() {
               </div>
               <h2 className="font-display font-bold text-base text-charcoal mb-1">Check your email</h2>
               <p className="text-sm text-charcoal-light">Link sent to <strong>{email}</strong></p>
+              <p className="text-sm text-charcoal-light mt-2" data-testid="magic-new-here">New here? <a href={ownedBaseUrl('login_cta')} className="text-teal underline">Create an account</a>.</p>
               <button onClick={() => { setMagicSent(false); setMode('password') }}
                 className="mt-4 text-teal text-xs underline">
                 Use password instead
@@ -195,10 +199,12 @@ export function Login() {
           )}
         </div>
 
-        <p className="text-center text-xs text-charcoal-light mt-4">
-          New athlete?{' '}
-          <a href={ownedBaseUrl('login_cta')} className="text-teal underline">Create an account</a>
-        </p>
+        {!magicSent && (
+          <p className="text-center text-xs text-charcoal-light mt-4">
+            New athlete?{' '}
+            <a href={ownedBaseUrl('login_cta')} className="text-teal underline">Create an account</a>
+          </p>
+        )}
         <p className="text-center text-xs text-charcoal-light mt-3">Position Readiness Protocol™ by ROMRx</p>
       </div>
     </div>
