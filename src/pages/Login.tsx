@@ -61,13 +61,17 @@ export function Login() {
 
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+      // shouldCreateUser: false. A magic link must never create an account: account creation only
+      // happens where the terms checkbox is shown (Stacy, Oct 5).
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirm`, shouldCreateUser: false },
     })
     setLoading(false)
     if (err) {
       setError(err.message.includes('rate') || err.message.includes('many')
         ? 'Too many attempts. Wait a minute and try again, or use your password instead.'
-        : err.message)
+        : /signups? not allowed|otp_disabled|user not found/i.test(err.message)
+          ? "We couldn't find an account for that email."
+          : err.message)
     } else {
       setMagicSent(true)
       // Set 60-second cooldown, persisted in localStorage so page refresh doesn't bypass it
