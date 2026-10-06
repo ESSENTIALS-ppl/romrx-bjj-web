@@ -1,4 +1,5 @@
 import { useAuth } from '../hooks/useAuth'
+import { BASE_ASSESSMENT_HREF } from '../lib/baseAssessment'
 import { useProfile } from '../hooks/useProfile'
 import type { Assessment } from '../hooks/useProfile'
 import { PageHeader } from '../components/PageHeader'
@@ -145,7 +146,7 @@ export function MyBody() {
       icon={Activity}
       title="No assessment on file"
       description="Complete your ROM self-assessment to see your body map, joint breakdown, and technique readiness."
-      action={<a href="/onboarding/assessment" className="btn-primary text-sm">Get started</a>}
+      action={<a href={BASE_ASSESSMENT_HREF} className="btn-primary text-sm">Get started</a>}
     />
   )
 

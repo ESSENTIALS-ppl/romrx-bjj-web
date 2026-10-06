@@ -6,7 +6,8 @@ import { Login } from './pages/Login'
 import { AuthCallback } from './pages/AuthCallback'
 import { AuthConfirm } from './pages/AuthConfirm'
 import { Signup } from './pages/Signup'
-import { Assessment } from './pages/Assessment'
+import { BaseAssessmentRedirect } from './components/BaseAssessmentRedirect'
+// pages/Assessment.tsx is retired (unrouted, kept until the open hip PR #93 merges; see BaseAssessmentRedirect).
 import { MyBody } from './pages/MyBody'
 import { MyGame } from './pages/MyGame'
 import { MyProtocol } from './pages/MyProtocol'
@@ -36,8 +37,9 @@ export default function App() {
             visitor here is a new athlete who bypassed Base, so OnboardingRoute
             sends them to the Base explainer rather than the retired standalone
             wizard. PaymentSuccess self-guards to /login and is left public. */}
+        {/* The BJJ assessment is retired: the Base assessment on romrx.io is the only one (Jim, Oct 6 2026). */}
+        <Route path="/onboarding/assessment" element={<BaseAssessmentRedirect />} />
         <Route element={<OnboardingRoute />}>
-          <Route path="/onboarding/assessment" element={<Assessment />} />
           <Route path="/onboarding/results"    element={<ResultsPreview />} />
         </Route>
         <Route path="/onboarding/payment-success" element={<PaymentSuccess />} />
