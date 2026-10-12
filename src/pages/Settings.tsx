@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { BASE_ASSESSMENT_HREF } from '../lib/baseAssessment'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -15,53 +16,12 @@ import { FeedbackWidget } from '../components/FeedbackWidget'
 import {
   requestAccountDeletion, deletionErrorCopy, DELETION_BUTTON_LABEL, DELETION_SUCCESS_COPY,
 } from '../lib/accountDeletionRequest'
+import { computePRS } from '../lib/readiness'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
 const SIDES = ['right', 'left']
 
-// ── PRS helpers (mirrors MyBody.tsx) ─────────────────────────────────────────
-const PRS_BILATERAL = [
-  { l: 'hip_er_l',        r: 'hip_er_r',        riskBelow: 40,  normalMin: 40  },
-  { l: 'hip_ir_l',        r: 'hip_ir_r',        riskBelow: 30,  normalMin: 30  },
-  { l: 'hip_abd_l',       r: 'hip_abd_r',       riskBelow: 30,  normalMin: 40  },
-  { l: 'hip_flex_l',      r: 'hip_flex_r',      riskBelow: 100, normalMin: 100 },
-  { l: 'shoulder_er_l',   r: 'shoulder_er_r',   riskBelow: 60,  normalMin: 60  },
-  { l: 'shoulder_flex_l', r: 'shoulder_flex_r', riskBelow: 120, normalMin: 140 },
-  { l: 'ankle_df_l',      r: 'ankle_df_r',      riskBelow: 10,  normalMin: 10  },
-  { l: 'cervical_lat_l', r: 'cervical_lat_r', riskBelow: 30, normalMin: 40 },
-
-]
-const PRS_UNILATERAL = [
-  { key: 'lumbar_flex', riskBelow: 40, normalMin: 40 },
-  { key: 'lumbar_ext',  riskBelow: 15, normalMin: 20 },
-  { key: 'cervical_flex', riskBelow: 35, normalMin: 45 },
-  { key: 'cervical_ext',  riskBelow: 40, normalMin: 55 },
-]
-
-function computePRS(a: Assessment): number {
-  let score = 100
-  for (const j of PRS_BILATERAL) {
-    const l = (a as unknown as Record<string, number | null>)[j.l]
-    const r = (a as unknown as Record<string, number | null>)[j.r]
-    if (l != null && r != null) {
-      const minVal = Math.min(l, r)
-      const gap    = Math.abs(l - r)
-      if (minVal < j.riskBelow) score -= 8
-      else if (minVal < j.normalMin) score -= 4
-      if (gap >= 15) score -= 6
-      else if (gap >= 8) score -= 3
-    }
-  }
-  for (const j of PRS_UNILATERAL) {
-    const v = (a as unknown as Record<string, number | null>)[j.key]
-    if (v != null) {
-      if (v < j.riskBelow) score -= 6
-      else if (v < j.normalMin) score -= 3
-    }
-  }
-  return Math.max(0, Math.min(100, Math.round(score)))
-}
-
+// ── PRS helpers: computePRS is shared in ../lib/readiness (hip flexion is not in the score) ──
 function getPRSTier(s: number) {
   if (s >= 85) return { label: 'ELITE',      color: 'text-teal',        bg: 'bg-teal-light' }
   if (s >= 70) return { label: 'STRONG',     color: 'text-teal',        bg: 'bg-teal-light' }
@@ -777,7 +737,7 @@ function AthleteSettings() {
         <Section title="Assessment History">
           <div className="flex items-center justify-between -mt-2 mb-1">
             <p className="text-xs text-charcoal-light">Your past ROM snapshots</p>
-            <a href="/onboarding/assessment" className="text-xs font-semibold text-teal hover:underline">
+            <a href={BASE_ASSESSMENT_HREF} className="text-xs font-semibold text-teal hover:underline">
               + New Assessment
             </a>
           </div>
@@ -790,7 +750,7 @@ function AthleteSettings() {
             <div className="text-center py-6">
               <ClipboardList size={28} className="mx-auto text-charcoal-light mb-2" />
               <p className="text-sm text-charcoal-light mb-2">No assessments on file yet.</p>
-              <a href="/onboarding/assessment" className="inline-block text-sm font-semibold text-teal hover:underline">
+              <a href={BASE_ASSESSMENT_HREF} className="inline-block text-sm font-semibold text-teal hover:underline">
                 Take your first assessment
               </a>
             </div>
@@ -821,7 +781,7 @@ function AthleteSettings() {
                         </span>
                       )}
                       <a
-                        href="/onboarding/assessment"
+                        href={BASE_ASSESSMENT_HREF}
                         className="flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                       >
                         <TrendingUp size={12} />

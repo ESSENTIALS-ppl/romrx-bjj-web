@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { goToBaseAssessment } from '../lib/baseAssessment'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Spinner } from '../components/Spinner'
 import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { cn } from '../lib/utils'
+import { rangeText, sourceText } from '../lib/protocolRange'
 import {
   AlertTriangle, ChevronDown, ChevronUp, CheckCircle2, Circle,
   ClipboardList, Dumbbell, Flame, PersonStanding,
@@ -494,20 +495,28 @@ interface JointDef {
   riskBelow: number
   unit: string
   rxKey: string
+  rangeSource?: string  // Base source line under the range (io assessmentSteps rangeSource / hipFlexCopy); none = no line
+  hideRange?: boolean  // true = no range line on the card (shoulder ER: no typical range for the tucked-elbow test)
 }
 
+// Oct 6 2026 (Jim YES 12:10 PM; Quinn calls 12:25 PM): normalMin / normalMax = the Base target and the Base displayed range
+// (hip ER 29-43, hip IR 26-40, hip flexion / straight-leg raise 60-80, shoulder flexion 140-180). Ankle 6 cm, neck rotation 70 and
+// neck side bend 38 have no Base range; their max is the study mean + 1 SD (ankle 13, rotation 88, side bend 53).
+// Shoulder ER (tucked elbow): min 40, no range line (hideRange). riskBelow = round(old riskBelow x new/old target).
+// Hip abduction, lumbar, thoracic and neck flexion/extension are unchanged. Mirrors protocol_joint_ranking() normal_min
+// (romrxbjj-v2 20261006170000).
 const JOINTS: JointDef[] = [
   {
     key: 'hip_er', label: 'Hip External Rotation',
     bjjWhy: 'Triangles, De La Riva guard, seated guard mobility',
     leftKey: 'hip_er_l', rightKey: 'hip_er_r',
-    normalMin: 40, normalMax: 60, riskBelow: 40, unit: '°', rxKey: 'hip_er',
+    normalMin: 29, normalMax: 43, riskBelow: 26, unit: '°', rxKey: 'hip_er', rangeSource: 'Simoneau et al., 1998',
   },
   {
     key: 'hip_ir', label: 'Hip Internal Rotation',
     bjjWhy: 'Guard passing, knee cuts, hip switches in scrambles',
     leftKey: 'hip_ir_l', rightKey: 'hip_ir_r',
-    normalMin: 30, normalMax: 45, riskBelow: 30, unit: '°', rxKey: 'hip_ir',
+    normalMin: 26, normalMax: 40, riskBelow: 17, unit: '°', rxKey: 'hip_ir', rangeSource: 'Simoneau et al., 1998',
   },
   {
     key: 'hip_abd', label: 'Hip Abduction',
@@ -515,35 +524,32 @@ const JOINTS: JointDef[] = [
     leftKey: 'hip_abd_l', rightKey: 'hip_abd_r',
     normalMin: 40, normalMax: 50, riskBelow: 30, unit: '°', rxKey: 'hip_abd',
   },
+  // Hip flexion is not in this list: it is saved for each leg and never ranked as a priority joint (src/lib/hipFlex.ts).
   {
-    key: 'hip_flex', label: 'Hip Flexion',
-    bjjWhy: 'Closed guard, armbar mechanics, guard retention',
-    leftKey: 'hip_flex_l', rightKey: 'hip_flex_r',
-    normalMin: 100, normalMax: 120, riskBelow: 100, unit: '°', rxKey: 'hip_flex',
-  },
-  {
+    // Oct 12 2026: Base shoulder ER is the standing goal-post test again (target 85, Quinn Oct 6 8:19 PM). riskBelow = round(60 x 85/90) = 57.
+    // No range line (Stacy Oct 6: no standing general-adult source), so hideRange stays.
     key: 'shoulder_er', label: 'Shoulder External Rotation',
     bjjWhy: 'Defending Americana / Kimura, grip fighting, frames',
     leftKey: 'shoulder_er_l', rightKey: 'shoulder_er_r',
-    normalMin: 60, normalMax: 90, riskBelow: 60, unit: '°', rxKey: 'shoulder_er',
+    normalMin: 85, normalMax: 110, riskBelow: 57, unit: '°', rxKey: 'shoulder_er', hideRange: true,
   },
   {
     key: 'shoulder_flex', label: 'Shoulder Flexion',
     bjjWhy: 'Spider guard, overhead sweeps, rear naked choke mechanics',
     leftKey: 'shoulder_flex_l', rightKey: 'shoulder_flex_r',
-    normalMin: 140, normalMax: 180, riskBelow: 120, unit: '°', rxKey: 'shoulder_flex',
+    normalMin: 140, normalMax: 180, riskBelow: 93, unit: '°', rxKey: 'shoulder_flex', rangeSource: 'Gill et al., 2020',
   },
   {
     key: 'ankle_df', label: 'Ankle Dorsiflexion',
     bjjWhy: 'Base, balance, and proprioception in every standing position',
     leftKey: 'ankle_df_l', rightKey: 'ankle_df_r',
-    normalMin: 10, normalMax: 20, riskBelow: 10, unit: 'cm', rxKey: 'ankle_df',
+    normalMin: 6, normalMax: 13, riskBelow: 3, unit: 'cm', rxKey: 'ankle_df',
   },
   {
     key: 'cervical_rot', label: 'Cervical Rotation',
     bjjWhy: 'Used in turning, tucking your chin and looking up in scrambles',
     leftKey: 'cervical_rot_l', rightKey: 'cervical_rot_r',
-    normalMin: 70, normalMax: 90, riskBelow: 60, unit: '°', rxKey: 'cervical_rot',
+    normalMin: 70, normalMax: 88, riskBelow: 53, unit: '°', rxKey: 'cervical_rot',
   },
   {
     key: 'lumbar', label: 'Lumbar Spine',
@@ -602,7 +608,6 @@ function scoreJoints(assessment: Record<string, any>): ScoredJoint[] {
 
 // ── Retest status banner ──────────────────────────────────────────────────────
 function RetestBanner({ assessedAt }: { assessedAt: string }) {
-  const navigate = useNavigate()
   const now = new Date()
   const assessed = new Date(assessedAt)
   const daysSince = Math.floor((now.getTime() - assessed.getTime()) / (1000 * 60 * 60 * 24))
@@ -648,7 +653,7 @@ function RetestBanner({ assessedAt }: { assessedAt: string }) {
 
   return (
     <button
-      onClick={() => navigate('/onboarding/assessment')}
+      onClick={goToBaseAssessment}
       className={cn(
         'w-full flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition-opacity hover:opacity-80',
         styles[status]
@@ -1033,16 +1038,19 @@ function IssueCard({ ranked, rank }: { ranked: ScoredJoint; rank: number }) {
               </div>
               {severity > 0 && (
                 <div className="bg-red-tier-bg rounded-xl px-3 py-1.5">
-                  <p className="text-[10px] text-red-tier font-bold uppercase tracking-wide">Below Normal</p>
+                  <p className="text-[10px] text-red-tier font-bold uppercase tracking-wide">Below typical range</p>
                   <p className="text-sm font-bold text-red-tier">{severity}{def.unit}</p>
                 </div>
               )}
             </>
           )}
-          <div className="bg-surface rounded-xl px-3 py-1.5">
-            <p className="text-[10px] text-charcoal-light font-medium uppercase tracking-wide">Normal</p>
-            <p className="text-xs font-semibold text-charcoal">{def.normalMin}–{def.normalMax}{def.unit}</p>
-          </div>
+          {rangeText(def) !== null && (
+            <div className="bg-surface rounded-xl px-3 py-1.5">
+              <p className="text-[10px] text-charcoal-light font-medium uppercase tracking-wide">Typical range</p>
+              <p className="text-xs font-semibold text-charcoal">{rangeText(def)}</p>
+              {sourceText(def) !== null && <p className="text-[10px] text-charcoal-light">{sourceText(def)}</p>}
+            </div>
+          )}
         </div>
       </button>
 

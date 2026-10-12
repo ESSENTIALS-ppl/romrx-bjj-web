@@ -1,71 +1,65 @@
 import { supabase } from './supabase'
 
-// Bump this string whenever the /legal Terms of Service are materially updated.
-// It is stored on each consent row so we have a timestamped record of exactly
-// which version of the ROMRx LLC agreement a user accepted.
-export const TERMS_VERSION = '2026-09-21'
+/**
+ * Terms acceptance record (Stacy ruling Oct 5 2026, PASS on romrx-io-web #147; BJJ/BB scope Oct 5).
+ *
+ * The romrx.io/legal page holds Terms, Privacy and Refund. The not-medical-advice / train-at-your-own-choice
+ * (waiver) language is Terms section 3 on that page, accepted by the same checkbox, so one version string
+ * covers terms and waiver. Change it whenever the /legal "Effective" date changes, together with
+ * public.current_terms_version() and romrx-io-web app/src/lib/termsConsent.ts.
+ *
+ * Records are written by the database, never by a client insert that can fail silently:
+ *  - account creation: signUp metadata + the auth.users trigger (fails closed: no record, no account)
+ *  - re-accept screen: public.record_terms_reaccept (server timestamp, signed-in user only)
+ * No IP address is recorded.
+ */
+export const TERMS_VERSION = '2026-10-03'
+export const MEDICAL_WAIVER_VERSION = TERMS_VERSION
 
-// The medical waiver / assumption-of-risk language lives in the same /legal
-// document (Sections 5 & 6), so it shares the Terms version.
-export const MEDICAL_WAIVER_VERSION = '2026-09-21'
+/** Re-accept screen shows the romrx.io signup checkbox text exactly, so it shares that wording id. */
+export const REACCEPT_CONSENT_TEXT_VERSION = 'signup-checkbox-2026-10-05'
+export const REACCEPT_CONSENT_SOURCE = 'romrxbjj.com/app/reaccept'
+
+export function clipUserAgent(ua: string | undefined | null): string {
+  return (ua ?? '').slice(0, 512)
+}
 
 /**
- * Records a user's acceptance of the ROMRx LLC Terms of Service, Privacy Policy,
- * Refund Policy, and medical/assumption-of-risk waiver.
- *
- * Calls the `submit-consent` edge function (which captures the caller IP from
- * the x-forwarded-for header server-side — the browser cannot read its own
- * public IP). Falls back to a direct insert if the edge function call fails so
- * we never lose the consent record entirely, but the IP will be null on the
- * fallback path. See incident 2026-06-10 (Garth Price: ip_address recorded
- * as null because recordConsent was doing a direct insert).
+ * Re-accept gate flag. Default OFF. Production: VITE_TERMS_REACCEPT_GATE=on (Sunday batch, after the
+ * migration). Non-production hosts only: ?reaccept_gate=1 latches it on for this tab for review.
  */
-export async function recordConsent(params: {
-  userId: string
-  signedName: string
-}): Promise<void> {
+export const REACCEPT_GATE_LATCH_KEY = 'romrx.reacceptGatePreview'
+export function isReacceptGateEnabled(
+  envFlag: string | undefined,
+  hostname: string,
+  search: string,
+  storage: Pick<Storage, 'getItem' | 'setItem'> | null,
+): boolean {
+  if ((envFlag ?? '').toLowerCase() === 'on') return true
+  if (hostname === 'romrxbjj.com' || hostname === 'www.romrxbjj.com') return false
   try {
-    const { data: sessionData } = await supabase.auth.getSession()
-    const token = sessionData.session?.access_token
-    if (!token) throw new Error('no session')
-
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-consent`
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        termsVersion: TERMS_VERSION,
-        medicalWaiverVersion: MEDICAL_WAIVER_VERSION,
-        signedName: params.signedName,
-      }),
-    })
-
-    if (res.ok) return
-
-    // Edge function rejected the call — log it and fall through to direct insert
-    // so we still capture the consent (just without the IP).
-    const errBody = await res.text().catch(() => '')
-    console.error('submit-consent edge function failed:', res.status, errBody)
-    throw new Error(`edge function ${res.status}`)
-  } catch (e) {
-    console.error('recordConsent edge path failed, falling back to direct insert:', e)
-    try {
-      const { error } = await supabase.from('consents').insert({
-        user_id: params.userId,
-        terms_version: TERMS_VERSION,
-        medical_waiver_version: MEDICAL_WAIVER_VERSION,
-        signed_name: params.signedName,
-        user_agent:
-          typeof navigator !== 'undefined' ? navigator.userAgent : null,
-        // ip_address intentionally null here — see edge function path above.
-      })
-      if (error) console.error('recordConsent fallback insert failed:', error.message)
-    } catch (e2) {
-      console.error('recordConsent fallback threw:', e2)
-    }
+    if (new URLSearchParams(search).get('reaccept_gate') === '1') storage?.setItem(REACCEPT_GATE_LATCH_KEY, '1')
+    return storage?.getItem(REACCEPT_GATE_LATCH_KEY) === '1'
+  } catch {
+    return false
   }
+}
+
+/** Routes where the gate never shows (signed-out flows, auth hops, opt-out and share links). */
+export function reacceptGateSkipsPath(pathname: string): boolean {
+  const p = pathname.replace(/\/+$/, '') || '/'
+  return ['/login', '/signup', '/auth/callback', '/auth/confirm', '/unsubscribe', '/game'].some(
+    (x) => p === x || p.startsWith(x + '/'),
+  )
+}
+
+/** Records the re-accept through the server function. Returns false if it could not be saved. */
+export async function recordTermsReaccept(userAgent: string | undefined | null): Promise<boolean> {
+  const { error } = await supabase.rpc('record_terms_reaccept', {
+    p_terms_version: TERMS_VERSION,
+    p_consent_text_version: REACCEPT_CONSENT_TEXT_VERSION,
+    p_source: REACCEPT_CONSENT_SOURCE,
+    p_user_agent: clipUserAgent(userAgent),
+  })
+  return !error
 }
