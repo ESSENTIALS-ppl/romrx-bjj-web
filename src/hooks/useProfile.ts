@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { latestPerTechnique } from '../lib/eligibility'
 
 export interface Profile {
   id: string
@@ -108,10 +109,25 @@ export function useProfile(userId: string | undefined) {
         sport_entitlements?: SportEntitlement[]
       }
 
+      // One tier per technique, newest first (lib/eligibility). get_my_profile returns
+      // rows for every assessment, so a retest would otherwise list each technique twice.
+      // Falls back to the RPC rows if this read fails.
+      let eligibilityRows: TechniqueEligibility[] = result.eligibility ?? []
+      if (result.assessment) {
+        const { data: teRows, error: teError } = await supabase
+          .from('technique_eligibility')
+          .select('id, technique_id, technique_code, tier, flag, limiting_joints, computed_at, techniques(code, name, belt, category)')
+          .eq('user_id', userId)
+          .eq('sport', 'bjj')
+        if (!teError && teRows && teRows.length > 0) {
+          eligibilityRows = latestPerTechnique(teRows as unknown as (TechniqueEligibility & { computed_at: string | null })[])
+        }
+      }
+
       setProfile(result.profile)
       setAssessment(result.assessment)
       setAssessments(result.assessments ?? [])
-      setEligibility(result.eligibility ?? [])
+      setEligibility(eligibilityRows)
       setEntitlements(result.sport_entitlements ?? [])
       setLoading(false)
     }
