@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Info, ExternalLink, SkipForward } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { HIP_FLEX_NOT_SCORED_LINE } from '../lib/hipFlex'
+import { HipSidesNote } from '../components/HipSidesNote'
 
 const SUBMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-assessment`
 
@@ -11,9 +13,11 @@ interface Field {
   key: string
   label: string
   unit?: string
-  normalLow: number
-  normalHigh: number
-  riskBelow: number  // AT RISK threshold
+  normalLow?: number
+  normalHigh?: number
+  riskBelow?: number  // AT RISK threshold
+  /** Saved for each leg, not scored: no range, no color, no badge (hip flexion). */
+  notScored?: boolean
 }
 
 interface Step {
@@ -168,7 +172,7 @@ const STEPS: Step[] = [
   {
     id: 'hip_flex',
     title: 'Hip Flexion',
-    bjjWhy: 'How deep your closed guard is - closed guard, rubber guard, and armbar position all need this.',
+    bjjWhy: 'How deep your closed guard is, closed guard, rubber guard, and armbar position all need this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Lying on the floor',
     position: [
       'Lie flat on your back on the floor. Both legs straight.',
@@ -183,8 +187,9 @@ const STEPS: Step[] = [
     mistake: 'Bending the knee as the leg rises, or going so high that the low back arches off the floor.',
     mistakeFix: 'Your leg stays completely straight the whole time. Stop before your low back lifts - once it arches, you have gone past your true range.',
     fields: [
-      { key: 'hip_flex_l', label: 'Left', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
-      { key: 'hip_flex_r', label: 'Right', unit: '°', normalLow: 100, normalHigh: 120, riskBelow: 100 },
+      // Hip flexion is saved for each leg and not scored (no range, no badge). See src/lib/hipFlex.ts.
+      { key: 'hip_flex_l', label: 'Left', unit: '°', notScored: true },
+      { key: 'hip_flex_r', label: 'Right', unit: '°', notScored: true },
     ],
   },
 
@@ -269,6 +274,7 @@ const SETUP_STEPS = [
 
 // ── Live scoring helper ───────────────────────────────────────────────────────
 function getScore(val: string, field: Field) {
+  if (field.notScored || field.riskBelow == null || field.normalLow == null) return null
   const n = parseFloat(val)
   if (isNaN(n) || val === '') return null
   if (n < field.riskBelow) return 'risk'
@@ -285,7 +291,9 @@ function MeasureInput({ field, value, onChange }: {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <label className="text-sm font-semibold text-charcoal">{field.label}</label>
-        <span className="text-xs text-charcoal-light">Normal: {field.normalLow}–{field.normalHigh}{field.unit}</span>
+        {!field.notScored && (
+          <span className="text-xs text-charcoal-light">Normal: {field.normalLow}–{field.normalHigh}{field.unit}</span>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <input
@@ -318,6 +326,9 @@ function MeasureInput({ field, value, onChange }: {
           </span>
         )}
       </div>
+      {field.notScored && (
+        <p className="text-xs text-charcoal-light">{HIP_FLEX_NOT_SCORED_LINE}</p>
+      )}
     </div>
   )
 }
@@ -527,6 +538,9 @@ export function Assessment() {
               {step.fields.map(f => (
                 <MeasureInput key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} />
               ))}
+              {step.fields.length === 2 && step.fields.every(f => f.notScored) && (
+                <HipSidesNote left={values[step.fields[0].key]} right={values[step.fields[1].key]} className="text-xs font-semibold text-charcoal" />
+              )}
             </div>
 
             {/* Hands-free screenshot tip */}
