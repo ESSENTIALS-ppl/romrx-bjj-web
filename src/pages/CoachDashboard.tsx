@@ -29,10 +29,10 @@ const TYPE_LABEL: Record<string, string> = {
 }
 
 const RAMP_STEPS = [
-  { key: 'raise',      label: 'R — Raise',      minutes: '3 min', field: 'raise_drills',      bg: 'bg-teal',      text: 'text-white' },
-  { key: 'activate',   label: 'A — Activate',   minutes: '5 min', field: 'activate_drills',   bg: 'bg-gold',      text: 'text-charcoal' },
-  { key: 'mobilize',   label: 'M — Mobilize',   minutes: '5 min', field: 'mobilize_drills',   bg: 'bg-charcoal',  text: 'text-white' },
-  { key: 'potentiate', label: 'P — Potentiate', minutes: '7 min', field: 'potentiate_drills', bg: 'bg-teal-dark', text: 'text-white' },
+  { key: 'raise',      label: 'R: Raise',      minutes: '3 min', field: 'raise_drills',      bg: 'bg-teal',      text: 'text-white' },
+  { key: 'activate',   label: 'A: Activate',   minutes: '5 min', field: 'activate_drills',   bg: 'bg-gold',      text: 'text-charcoal' },
+  { key: 'mobilize',   label: 'M: Mobilize',   minutes: '5 min', field: 'mobilize_drills',   bg: 'bg-charcoal',  text: 'text-white' },
+  { key: 'potentiate', label: 'P: Potentiate', minutes: '7 min', field: 'potentiate_drills', bg: 'bg-teal-dark', text: 'text-white' },
 ] as const
 
 const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black']
@@ -365,7 +365,7 @@ function PromoteDialog({ athlete, attendance, onPromote, onClose }: {
             </div>
           ))}
         </div>
-        <p className="text-[10px] text-charcoal-light italic pt-0.5">Signals are guidance only — your call as the coach.</p>
+        <p className="text-[10px] text-charcoal-light italic pt-0.5">Signals are guidance only. Your call as the coach.</p>
       </div>
       <p className="text-xs font-semibold text-charcoal">Promote to:</p>
       <div className="flex gap-1.5 flex-wrap">
@@ -506,7 +506,7 @@ function InjuryForm({ athlete, session, onClose }: {
   return (
     <div className="mt-3 border-t border-teal-light pt-3 space-y-2">
       <p className="text-xs font-semibold text-charcoal flex items-center gap-1.5">
-        <Syringe size={12} className="text-red-tier" /> Report Injury — {athlete.name}
+        <Syringe size={12} className="text-red-tier" /> Report Injury: {athlete.name}
       </p>
       <div className="grid grid-cols-2 gap-2">
         <select value={bodyPart} onChange={e => setBodyPart(e.target.value)}
@@ -531,7 +531,7 @@ function InjuryForm({ athlete, session, onClose }: {
       <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Optional notes..."
         className="w-full text-sm rounded-xl border border-teal-light bg-surface px-3 py-2 focus:outline-none focus:border-teal transition-colors resize-none" />
       {err && <p className="text-xs text-red-tier">{err}</p>}
-      {saved && <p className="text-xs text-green-tier flex items-center gap-1"><CheckCircle2 size={12} /> Injury logged. Stage 0 — Off Mat assigned.</p>}
+      {saved && <p className="text-xs text-green-tier flex items-center gap-1"><CheckCircle2 size={12} /> Injury logged. Stage 0: Off Mat assigned.</p>}
       <div className="flex gap-2 justify-end">
         <button onClick={onClose} className="text-xs text-charcoal-light hover:text-charcoal px-3 py-1.5 rounded-lg transition-colors">Cancel</button>
         <button onClick={handleSubmit} disabled={saving || saved} className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50 bg-red-tier hover:bg-red-tier/90">
@@ -902,7 +902,7 @@ function TechniqueReadinessPanel({ session, code }: {
                         {j.actual !== null && (
                           <span className="font-semibold text-charcoal">{j.actual}°</span>
                         )}
-                        <span className={cn('font-medium', sevColor)}>— {sevLabel}</span>
+                        <span className={cn('font-medium', sevColor)}>{sevLabel}</span>
                       </div>
                     )
                   })}
@@ -1143,7 +1143,7 @@ function WarmupTab({ session, techniques, loadingTechs, selectedCode, setSelecte
               <FileText size={13} className="text-teal" /> Session Notes
             </p>
             <p className="text-[11px] text-charcoal-light">
-              Optional notes for this session — included when you log to Journal below.
+              Optional notes for this session, included when you log to Journal below.
             </p>
             <textarea
               value={sessionNotes}
@@ -1481,10 +1481,10 @@ function prepPhaseForWeeksOut(weeksOut: number): { phase: string; focus: string;
 function romClearance(t: { green: number; yellow: number; red: number; total: number }, hasActiveInjury: boolean):
   { label: string; color: string; cleared: boolean; reason: string } {
   if (t.total === 0) return { label: 'No ROM Data', color: 'bg-surface text-charcoal-light', cleared: false, reason: 'Athlete has not been assessed yet.' }
-  if (hasActiveInjury) return { label: 'Hold — Active Injury', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: 'Active injury on return-to-mat protocol. Clear injury before competing.' }
+  if (hasActiveInjury) return { label: 'Hold: Active Injury', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: 'Active injury on return-to-mat protocol. Clear injury before competing.' }
   const redPct = t.red / t.total
   const greenPct = t.green / t.total
-  if (redPct > 0.3) return { label: 'Not Cleared', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: `${t.red} technique${t.red !== 1 ? 's' : ''} in red ROM tier — mobility gaps to address.` }
+  if (redPct > 0.3) return { label: 'Not Cleared', color: 'bg-red-tier-bg text-red-tier', cleared: false, reason: `${t.red} technique${t.red !== 1 ? 's' : ''} in red ROM tier. Mobility gaps to address.` }
   if (greenPct < 0.5) return { label: 'Cleared w/ Caution', color: 'bg-yellow-tier-bg text-yellow-tier', cleared: true, reason: 'Developing ROM — cleared to compete, monitor flagged joints.' }
   return { label: 'ROM Cleared', color: 'bg-green-tier-bg text-green-tier', cleared: true, reason: 'Mobility supports full competition readiness.' }
 }
@@ -1574,11 +1574,11 @@ function CompetitorTile({ athlete, record, activeInjuries, onUpdateRecord, onRem
         {hasActiveInjury && (
           <div className="rounded-xl bg-red-50 border border-red-200 p-3 space-y-1">
             <span className="flex items-center gap-1.5 text-[10px] font-bold text-red-tier uppercase tracking-wide">
-              <Syringe size={11} /> Active Injury — Return-to-Mat
+              <Syringe size={11} /> Active Injury: Return-to-Mat
             </span>
             {activeInjuries.map((inj, i) => (
               <p key={i} className="text-[11px] text-charcoal leading-snug">
-                {inj.body_part} — Stage {inj.stage}/9 {(STAGE_LABELS[inj.stage]?.name) ? `(${STAGE_LABELS[inj.stage].name})` : ''}
+                {inj.body_part}: Stage {inj.stage}/9 {(STAGE_LABELS[inj.stage]?.name) ? `(${STAGE_LABELS[inj.stage].name})` : ''}
               </p>
             ))}
           </div>
@@ -1641,7 +1641,7 @@ function CompetitorTile({ athlete, record, activeInjuries, onUpdateRecord, onRem
             <Flame size={11} /> Day-of RAMP Warmup
           </span>
           <p className="text-[11px] text-charcoal-light leading-snug">
-            Raise · Activate · Mobilize · Potentiate — prioritize this athlete's flagged joints
+            Raise · Activate · Mobilize · Potentiate. Prioritize this athlete's flagged joints
             {athlete.priorityJoints.length > 0
               ? `: ${athlete.priorityJoints.slice(0, 3).map(j => formatJointName(j.joint)).join(', ')}.`
               : '.'}
@@ -1717,7 +1717,7 @@ function CompetitorsTab({ roster, competitors, injuriesByAthlete, loading, onUpd
           <div className="space-y-1">
             <h2 className="font-display font-bold text-charcoal text-lg leading-tight">My Competitors</h2>
             <p className="text-sm text-charcoal-light leading-relaxed">
-              Athletes you've marked <span className="font-semibold text-gold">Ready for Competition</span> on the roster appear here — with ROM clearance, periodized prep, weight cut, and day-of warmup. Uncheck an athlete and they leave this list.
+              Athletes you've marked <span className="font-semibold text-gold">Ready for Competition</span> on the roster appear here, with ROM clearance, periodized prep, weight cut, and day-of warmup. Uncheck an athlete and they leave this list.
             </p>
           </div>
         </div>
@@ -1736,7 +1736,7 @@ function CompetitorsTab({ roster, competitors, injuriesByAthlete, loading, onUpd
         </div>
       )}
       <p className="text-xs text-charcoal-light text-center pt-1">
-        Readiness and clearance are computed from the same ROM and injury data on your dashboard — intelligence no other platform offers.
+        Readiness and clearance are computed from the same ROM and injury data on your dashboard. Intelligence no other platform offers.
       </p>
     </div>
   )
@@ -1801,23 +1801,23 @@ const STAGE_GUIDE: Record<number, {
 }> = {
   0: {
     name: 'Off Mat', color: 'text-red-tier', band: 'Protect',
-    description: 'Complete rest — no physical activity affecting injury.',
+    description: 'Complete rest: no physical activity affecting injury.',
     why: 'Tissue is in the acute/inflammatory phase. Loading it now risks re-injury and a longer total layoff.',
     what: 'Complete rest from anything that loads the injury. Off the mat entirely. Manage pain and swelling.',
     how: 'Pain at rest is gone and daily-life movement is pain-free before moving to Stage 1.',
   },
   1: {
     name: 'Cardio Only', color: 'text-red-tier', band: 'Protect',
-    description: 'Bike, swim, walk — no grappling contact.',
+    description: 'Bike, swim, walk: no grappling contact.',
     why: 'Keep the engine and uninjured body conditioned without stressing the healing tissue.',
-    what: 'Low-impact cardio that does not involve the injured area — bike, swim, walk. Zero grappling contact.',
+    what: 'Low-impact cardio that does not involve the injured area: bike, swim, walk. Zero grappling contact.',
     how: 'Cardio is pain-free and the athlete can move the injured area through a basic range without pain.',
   },
   2: {
     name: 'Solo Movement', color: 'text-gold', band: 'Reintroduce',
     description: 'Individual movement patterns, no contact.',
     why: 'Restore range of motion and reawaken movement patterns before adding any external load.',
-    what: 'Solo mobility and BJJ movement patterns — shrimps, bridges, rolls — at the athlete\'s own pace. Still no contact.',
+    what: 'Solo mobility and BJJ movement patterns at the athlete\'s own pace: shrimps, bridges, rolls. Still no contact.',
     how: 'Full or near-full range restored, solo movements pain-free at normal speed.',
   },
   3: {
@@ -1830,7 +1830,7 @@ const STAGE_GUIDE: Record<number, {
   4: {
     name: 'Technical Drilling', color: 'text-gold', band: 'Reintroduce',
     description: 'Compliant partner, zero resistance.',
-    why: 'First reintroduction of a partner — controlled load to test tolerance without unpredictability.',
+    why: 'First reintroduction of a partner: controlled load to test tolerance without unpredictability.',
     what: 'Drilling with a fully compliant partner at zero resistance. Partner gives no surprises.',
     how: 'Controlled partner drilling is pain-free with no swelling or soreness the next day.',
   },
@@ -1857,17 +1857,17 @@ const STAGE_GUIDE: Record<number, {
   },
   8: {
     name: 'Full Training', color: 'text-green-tier', band: 'Return',
-    description: 'No modifications — full intensity.',
+    description: 'No modifications, full intensity.',
     why: 'Tissue tolerates full training load; restrictions are no longer needed.',
-    what: 'Normal training — full intensity, no restrictions. Train like everyone else.',
+    what: 'Normal training: full intensity, no restrictions. Train like everyone else.',
     how: 'Sustained full training with zero symptoms qualifies the athlete for competition clearance.',
   },
   9: {
     name: 'Competition Ready', color: 'text-green-tier', band: 'Return',
-    description: 'Competition cleared — coach sign-off required.',
+    description: 'Competition cleared. Coach sign-off required.',
     why: 'Athlete has proven full tolerance and is cleared for the demands of competition.',
     what: 'Cleared for competition prep and competing. Coach has signed off on full readiness.',
-    how: 'This is the final stage — clear the injury to take the athlete off the protocol.',
+    how: 'This is the final stage. Clear the injury to take the athlete off the protocol.',
   },
 }
 
@@ -1933,7 +1933,7 @@ function InjuryCard({
       {!isCleared && (
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <p className={cn('text-xs font-bold', stageInfo.color)}>Stage {injury.stage}/9 — {stageInfo.name}</p>
+            <p className={cn('text-xs font-bold', stageInfo.color)}>Stage {injury.stage}/9: {stageInfo.name}</p>
             {/* Quick − / + stage steppers, always visible */}
             <div className="flex items-center gap-1.5">
               <button onClick={() => advance(injury.stage - 1)} disabled={saving || injury.stage <= 0}
@@ -1975,7 +1975,7 @@ function InjuryCard({
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-charcoal uppercase tracking-wide">Next Stage</p>
               <p className={cn('text-xs font-semibold', STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.color)}>
-                Stage {Math.min(injury.stage + 1, 9)} — {STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.name}
+                Stage {Math.min(injury.stage + 1, 9)}: {STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.name}
               </p>
               <p className="text-[10px] text-charcoal-light">{STAGE_LABELS[Math.min(injury.stage + 1, 9)]?.description}</p>
             </div>
@@ -2103,7 +2103,7 @@ function StageCheatSheet() {
         className="w-full flex items-center justify-between gap-2 text-left">
         <span className="flex items-center gap-2">
           <BookOpen size={15} className="text-teal" />
-          <span className="text-sm font-bold text-charcoal">Return-to-Mat Protocol — Coach Cheat Sheet</span>
+          <span className="text-sm font-bold text-charcoal">Return-to-Mat Protocol: Coach Cheat Sheet</span>
         </span>
         <ChevronDown size={16} className={cn('text-charcoal-light transition-transform', open && 'rotate-180')} />
       </button>
@@ -2423,7 +2423,7 @@ export function CoachDashboard({ defaultSection = 'team' }: { defaultSection?: T
   }, [defaultSection, pendingFromRoute])
 
   const sectionTitle = {
-    team: `My Team${!rosterLoading ? ` — ${roster.length} athlete${roster.length !== 1 ? 's' : ''}` : ''}`,
+    team: `My Team${!rosterLoading ? `: ${roster.length} athlete${roster.length !== 1 ? 's' : ''}` : ''}`,
     coaching: 'My Coaching',
     competitions: 'My Competitors',
     injury: 'My Injury',

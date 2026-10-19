@@ -292,7 +292,7 @@ function MeasureInput({ field, value, onChange }: {
       <div className="flex items-center justify-between">
         <label className="text-sm font-semibold text-charcoal">{field.label}</label>
         {!field.notScored && (
-          <span className="text-xs text-charcoal-light">Normal: {field.normalLow}–{field.normalHigh}{field.unit}</span>
+          <span className="text-xs text-charcoal-light">Normal: {field.normalLow}-{field.normalHigh}{field.unit}</span>
         )}
       </div>
       <div className="flex items-center gap-3">

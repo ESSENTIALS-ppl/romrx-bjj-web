@@ -153,7 +153,7 @@ export function Chat() {
 
       setGamePlanBanner(`Refining: ${payload.label}`)
       const techList = payload.techniques
-        .map((t, i) => `${i + 1}. ${t.name} (${t.code}) — ${t.tier.toUpperCase()} • ${t.category}`)
+        .map((t, i) => `${i + 1}. ${t.name} (${t.code}): ${t.tier.toUpperCase()} • ${t.category}`)
         .join('\n')
       const branchList = payload.branches?.length
         ? '\n\nBranches:\n' + payload.branches
@@ -228,7 +228,7 @@ export function Chat() {
         pressure: 'pressure passer',
       }
       const opponentNote = opponent && opponentLabels[opponent]
-        ? ` My training partner tends to be a ${opponentLabels[opponent]} — help me build a plan that counters their tendencies while staying within my GREEN and YELLOW technique library.`
+        ? ` My training partner tends to be a ${opponentLabels[opponent]}. Help me build a plan that counters their tendencies while staying within my GREEN and YELLOW technique library.`
         : ''
       setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
       const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}.${opponentNote} Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
