@@ -42,6 +42,9 @@ function getTopAsymmetries(assessment: Record<string, any>): Array<{ joint: stri
     .slice(0, 3) as Array<{ joint: string; gap: number; left: number; right: number }>
 }
 
+// Packs stay locked until January 2027. VITE_PACKS_OPEN=on at build time restores the live buy flow. Lock copy: Stacy PASS Oct 19.
+const PACKS_OPEN = import.meta.env.VITE_PACKS_OPEN === 'on'
+
 export function ResultsPreview() {
   const { user, session } = useAuth()
   const navigate = useNavigate()
@@ -86,6 +89,7 @@ export function ResultsPreview() {
   }, [user, navigate])
 
   const handleUnlock = async () => {
+    if (!PACKS_OPEN) return // packs locked: never start a checkout or collect a card
     if (!session) return
     setPaying(true)
     setError('')
@@ -200,6 +204,11 @@ export function ResultsPreview() {
         </div>
 
         {/* CTA */}
+        {!PACKS_OPEN ? (
+          <button type="button" disabled aria-disabled="true" className="w-full py-4 bg-gold/40 text-charcoal/70 font-display font-bold text-base rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed">
+            Opens January 2027
+          </button>
+        ) : (<>
         {error && <p className="text-xs text-center text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>}
         <button
           onClick={handleUnlock}
@@ -211,10 +220,11 @@ export function ResultsPreview() {
           </>}
         </button>
         <p className="text-center text-xs text-warm-white/50">
-          Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Charged January 1, 2027, then every year until you cancel. Card required. Canceling Base also cancels ROMRxBJJ.
+          Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Charged January 1, 2027, then every year until you cancel. A card is needed at checkout. Canceling Base also cancels ROMRxBJJ.
         </p>
+        </>)}
         <p className="text-center text-xs text-warm-white/30">
-          Canceling ends your access right away. Promo codes accepted at checkout. ROMRx is for adults 18 and older.
+          {PACKS_OPEN ? 'Canceling ends your access right away. Promo codes accepted at checkout. ' : ''}ROMRx is for adults 18 and older.
         </p>
       </div>
     </div>
