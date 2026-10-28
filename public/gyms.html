@@ -134,11 +134,15 @@
     <span class="feature-chip">School branding + athlete portal</span>
   </div>
 
-  <div class="email-form">
-    <input class="email-input" id="gym-email" type="email" placeholder="Your gym email address" />
-    <button class="btn-gold" onclick="notifyMe()">Notify Me When Ready</button>
-  </div>
-  <div class="success" id="success-msg">You are on the early access list. We will reach out when Gym plans launch.</div>
+  <form class="email-form" data-waitlist-form>
+    <input type="hidden" name="role" value="gym" />
+    <input class="email-input" name="name" type="text" placeholder="Your name" aria-label="Your name" autocomplete="name" maxlength="100" required />
+    <input class="email-input" id="gym-email" name="email" type="email" placeholder="Your gym email address" aria-label="Your gym email address" autocomplete="email" maxlength="254" required />
+    <button class="btn-gold" type="submit">Notify Me When Ready</button>
+  </form>
+  <div class="back-link" data-waitlist-consent></div>
+  <div class="success" id="success-msg" data-waitlist-success hidden>You are on the early access list. We will reach out when Gym plans launch.</div>
+  <div class="success" data-waitlist-error role="alert" hidden></div>
 
   <div class="back-link">
     <a href="/">&larr; Back to ROMRxBJJ.com</a> &nbsp;&middot;&nbsp;
@@ -152,15 +156,6 @@
     <div style="margin-top:6px;">ROMRx&#8482; and related marks are trademarks of ROMRx LLC. All rights reserved.</div>
   </footer>
 
-  <script>
-    function notifyMe() {
-      const email = document.getElementById('gym-email').value.trim();
-      if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
-      document.getElementById('success-msg').style.display = 'block';
-      document.querySelector('.email-form').style.opacity = '0.4';
-      document.querySelector('.email-form').style.pointerEvents = 'none';
-      // TODO: wire to email capture edge function or Mailchimp
-    }
-  </script>
+  <script src="/waitlist.js" defer></script>
 </body>
 </html>

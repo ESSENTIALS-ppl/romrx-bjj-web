@@ -2,12 +2,23 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Users, Loader2 } from 'lucide-react'
 import { ownedBaseUrl } from '../lib/utils'
+import {
+  submitWaitlist,
+  isValidWaitlistEmail,
+  WAITLIST_MSG_ERR,
+  WAITLIST_MSG_NAME,
+  WAITLIST_MSG_EMAIL,
+  WAITLIST_CONSENT_LEAD,
+  WAITLIST_CONSENT_LINK_TEXT,
+  WAITLIST_CONSENT_LINK_URL,
+} from '../lib/waitlist'
 
 /**
  * Coach signup is parked until Spring 2027.
  * No Stripe checkout, no account creation during beta.
  */
 export function CoachSignup() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -15,34 +26,23 @@ export function CoachSignup() {
 
   const handleNotify = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading) return
     setError('')
-    const trimmed = email.trim().toLowerCase()
-    if (!trimmed || !trimmed.includes('@')) {
-      setError('Enter a valid email address.')
+    const trimmedName = name.trim()
+    const trimmed = email.trim()
+    if (!trimmedName || trimmedName.length > 100) {
+      setError(WAITLIST_MSG_NAME)
+      return
+    }
+    if (!isValidWaitlistEmail(trimmed)) {
+      setError(WAITLIST_MSG_EMAIL)
       return
     }
     setLoading(true)
-    try {
-      // Prefer Netlify Forms capture when this route is served behind the marketing site.
-      // Fallback: mailto for environments without form handling.
-      const body = new URLSearchParams({
-        'form-name': 'coach-waitlist',
-        email: trimmed,
-        source: 'signup-coach-parked',
-      })
-      await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      }).catch(() => {
-        window.location.href = `mailto:hello@romrx.io?subject=${encodeURIComponent('Coach Spring 2027 notify')}&body=${encodeURIComponent(trimmed)}`
-      })
-      setDone(true)
-    } catch {
-      setError('Something went wrong. Email hello@romrx.io instead.')
-    } finally {
-      setLoading(false)
-    }
+    const ok = await submitWaitlist({ name: trimmedName, email: trimmed, role: 'coach' })
+    setLoading(false)
+    if (ok) setDone(true)
+    else setError(WAITLIST_MSG_ERR)
   }
 
   return (
@@ -65,13 +65,27 @@ export function CoachSignup() {
               You are on the list. We will notify you when coach tools open Spring 2027.
             </p>
           ) : (
-            <form onSubmit={handleNotify} className="space-y-4" name="coach-waitlist" data-netlify="true">
-              <input type="hidden" name="form-name" value="coach-waitlist" />
+            <form onSubmit={handleNotify} className="space-y-4" noValidate>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-charcoal">Name</label>
+                <input
+                  type="text"
+                  required
+                  autoComplete="name"
+                  maxLength={100}
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
+                />
+              </div>
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-charcoal">Email</label>
                 <input
                   type="email"
                   required
+                  autoComplete="email"
+                  maxLength={254}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -90,6 +104,10 @@ export function CoachSignup() {
                   ? <><Loader2 size={16} className="animate-spin" /> Saving...</>
                   : 'Notify me for Spring 2027'}
               </button>
+              <p className="text-center text-xs text-charcoal-light">
+                {WAITLIST_CONSENT_LEAD}
+                <a href={WAITLIST_CONSENT_LINK_URL} className="text-teal underline">{WAITLIST_CONSENT_LINK_TEXT}</a>.
+              </p>
             </form>
           )}
           <p className="text-center text-xs text-charcoal-light">
