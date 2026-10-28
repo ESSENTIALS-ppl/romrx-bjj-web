@@ -6,6 +6,7 @@ import {
   submitWaitlist,
   isValidWaitlistEmail,
   WAITLIST_MSG_ERR,
+  WAITLIST_MSG_RATE,
   WAITLIST_MSG_NAME,
   WAITLIST_MSG_EMAIL,
   WAITLIST_CONSENT_LEAD,
@@ -20,6 +21,7 @@ import {
 export function CoachSignup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [hp, setHp] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
@@ -39,10 +41,10 @@ export function CoachSignup() {
       return
     }
     setLoading(true)
-    const ok = await submitWaitlist({ name: trimmedName, email: trimmed, role: 'coach' })
+    const result = await submitWaitlist({ name: trimmedName, email: trimmed, role: 'coach', hp_website: hp })
     setLoading(false)
-    if (ok) setDone(true)
-    else setError(WAITLIST_MSG_ERR)
+    if (result === 'ok') setDone(true)
+    else setError(result === 'rate_limited' ? WAITLIST_MSG_RATE : WAITLIST_MSG_ERR)
   }
 
   return (
@@ -92,6 +94,16 @@ export function CoachSignup() {
                   className="w-full px-4 py-2.5 rounded-xl border border-teal-light bg-surface text-sm focus:outline-none focus:border-teal transition-colors"
                 />
               </div>
+              <input
+                type="text"
+                name="hp_website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={hp}
+                onChange={e => setHp(e.target.value)}
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+              />
               {error && (
                 <p className="text-xs text-red-tier bg-red-tier-bg rounded-xl px-3 py-2">{error}</p>
               )}
