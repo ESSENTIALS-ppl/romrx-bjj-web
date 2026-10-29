@@ -71,35 +71,6 @@
       border-radius: 20px;
       font-weight: 500;
     }
-    .email-form { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
-    .email-input {
-      padding: 14px 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,128,128,0.4);
-      background: rgba(255,255,255,0.06);
-      color: #FAF9F6;
-      font-size: 0.95rem;
-      width: 280px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .email-input::placeholder { color: rgba(250,249,246,0.35); }
-    .email-input:focus { border-color: #008080; }
-    .btn-gold {
-      padding: 14px 28px;
-      background: #FFB347;
-      color: #36454F;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      white-space: nowrap;
-    }
-    .btn-gold:hover { background: #FFA733; transform: translateY(-1px); }
-    .success { display: none; color: #008080; font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
     .back-link { margin-top: 40px; font-size: 0.85rem; opacity: 0.5; }
     .back-link a { color: #008080; text-decoration: none; }
     .back-link a:hover { text-decoration: underline; }
@@ -134,12 +105,6 @@
     <span class="feature-chip">School branding + athlete portal</span>
   </div>
 
-  <div class="email-form">
-    <input class="email-input" id="gym-email" type="email" placeholder="Your gym email address" />
-    <button class="btn-gold" onclick="notifyMe()">Notify Me When Ready</button>
-  </div>
-  <div class="success" id="success-msg">You are on the early access list. We will reach out when Gym plans launch.</div>
-
   <div class="back-link">
     <a href="/">&larr; Back to ROMRxBJJ.com</a> &nbsp;&middot;&nbsp;
     <a href="/coaches">For Coaches</a> &nbsp;&middot;&nbsp;
@@ -151,16 +116,5 @@
     <div style="margin-top:10px;">&#169; 2026 ROMRx LLC &middot; Dublin, Ohio</div>
     <div style="margin-top:6px;">ROMRx&#8482; and related marks are trademarks of ROMRx LLC. All rights reserved.</div>
   </footer>
-
-  <script>
-    function notifyMe() {
-      const email = document.getElementById('gym-email').value.trim();
-      if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
-      document.getElementById('success-msg').style.display = 'block';
-      document.querySelector('.email-form').style.opacity = '0.4';
-      document.querySelector('.email-form').style.pointerEvents = 'none';
-      // TODO: wire to email capture edge function or Mailchimp
-    }
-  </script>
 </body>
 </html>
