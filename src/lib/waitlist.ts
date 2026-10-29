@@ -8,7 +8,7 @@
 export const WAITLIST_URL = 'https://cqzvqzwwevnflinxgnpp.supabase.co/functions/v1/join-waitlist'
 export const WAITLIST_SITE = 'bjj' as const
 
-export type WaitlistRole = 'coach' | 'trainer' | 'gym' | 'school'
+export type WaitlistRole = 'coach'
 
 // Stacy's consent line (STACY-WAITLIST-COPY-20261028-1935). Render as: LEAD + <a href=URL>LINK_TEXT</a> + '.'
 export const WAITLIST_CONSENT_LEAD =
