@@ -103,6 +103,7 @@
     .waitlist-error { color:#8b1a1a;background:#fde8e8;border-radius:6px;padding:8px 12px;font-size:.85rem;font-weight:600; margin-top: 8px; display: none; }
     .back-link { margin-top: 40px; font-size: 0.85rem; opacity: 0.5; }
     .back-link a { color: #008080; text-decoration: none; }
+    .back-link[data-waitlist-consent] { opacity: 1; }
     .back-link a:hover { text-decoration: underline; }
     .site-footer {
       margin-top: 48px;
@@ -142,7 +143,7 @@
     <input class="email-input" id="gym-email" name="email" type="email" placeholder="Your gym email address" aria-label="Your gym email address" autocomplete="email" maxlength="254" required />
     <button class="btn-gold" type="submit">Notify Me When Ready</button>
   </form>
-  <div class="back-link" data-waitlist-consent></div>
+  <div class="back-link" data-waitlist-consent data-link-style="color:#FFB347;text-decoration:underline;"></div>
   <div class="success" id="success-msg" data-waitlist-success hidden>You are on the early access list. We will reach out when Gym plans launch.</div>
   <div class="waitlist-error" data-waitlist-error role="alert" hidden></div>
 

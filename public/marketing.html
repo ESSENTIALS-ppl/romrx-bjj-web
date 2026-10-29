@@ -194,6 +194,24 @@
     }
     .path-card.coming-soon .path-cta { color: rgba(250,249,246,0.35); }
 
+    /* For Coaches card waitlist form (same look as the email-input on /gyms) */
+    .path-card .email-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .path-card .email-input {
+      padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,128,128,0.4);
+      background: rgba(255,255,255,0.06); color: #FAF9F6; font-size: 0.9rem;
+      width: 100%; max-width: 100%; outline: none; transition: border-color 0.2s;
+    }
+    .path-card .email-input::placeholder { color: rgba(250,249,246,0.35); }
+    .path-card .email-input:focus { border-color: #008080; }
+    .path-card .btn-gold {
+      padding: 12px 20px; background: #FFB347; color: #36454F; font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 0.9rem; border: none; border-radius: 10px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .path-card .btn-gold:hover { background: #FFA733; }
+    .path-card .path-note { font-size: 0.75rem; line-height: 1.5; color: rgba(250,249,246,0.7); margin-top: 10px; }
+    .path-card .waitlist-error { color:#8b1a1a;background:#fde8e8;border-radius:6px;padding:8px 12px;font-size:.85rem;font-weight:600; margin-top: 10px; }
+
     /* Footer */
     .footer {
       text-align: center;
@@ -242,10 +260,10 @@
       </a>
 
       <!-- Coaches -->
-      <a href="/coaches" class="path-card">
+      <div class="path-card">
         <span class="path-icon">&#x1F4CB;</span>
         <span class="path-badge coming">Coming Spring 2027</span>
-        <div class="path-title">For Coaches</div>
+        <div class="path-title"><a href="/coaches" style="color:inherit;text-decoration:none;">For Coaches</a></div>
         <p class="path-desc">See every athlete's ROM profile, asymmetry flags, and technique readiness - before they walk on the mat.</p>
         <ul class="path-features">
           <li>Full roster with G/Y/R technique counts</li>
@@ -253,8 +271,20 @@
           <li>RAMP warmup generator per technique</li>
           <li>Coach notes + belt progression</li>
         </ul>
-        <div class="path-cta">Coming Spring 2027</div>
-      </a>
+        <div>
+          <form class="email-form" data-waitlist-form>
+            <input type="hidden" name="role" value="coach" />
+            <input type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+            <input class="email-input" type="text" name="name" placeholder="Your name" aria-label="Your name" autocomplete="name" maxlength="100" required />
+            <input class="email-input" type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" maxlength="254" required />
+            <button class="btn-gold" type="submit">Notify me</button>
+          </form>
+          <p class="path-cta" data-waitlist-success hidden></p>
+          <p class="waitlist-error" data-waitlist-error role="alert" hidden></p>
+          <p class="path-note" data-waitlist-consent data-link-style="color:#FFB347;text-decoration:underline;"></p>
+        </div>
+        <a href="/coaches" class="path-cta" style="text-decoration:none;">Learn more &rarr;</a>
+      </div>
 
       <!-- Schools -->
       <a href="/schools" class="path-card coming-soon" style="text-decoration:none;">
@@ -280,5 +310,6 @@
     <div style="margin-top:6px;">ROMRx&#8482; and related marks are trademarks of ROMRx LLC. All rights reserved.</div>
   </footer>
 
+<script src="/waitlist.js" defer></script>
 </body>
 </html>
