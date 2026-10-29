@@ -99,11 +99,9 @@
       white-space: nowrap;
     }
     .btn-gold:hover { background: #FFA733; transform: translateY(-1px); }
-    .success { display: none; color: #FFB347; font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
-    .waitlist-error { color:#8b1a1a;background:#fde8e8;border-radius:6px;padding:8px 12px;font-size:.85rem;font-weight:600; margin-top: 8px; display: none; }
+    .success { display: none; color: #008080; font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
     .back-link { margin-top: 40px; font-size: 0.85rem; opacity: 0.5; }
     .back-link a { color: #008080; text-decoration: none; }
-    .back-link[data-waitlist-consent] { opacity: 1; }
     .back-link a:hover { text-decoration: underline; }
     .site-footer {
       margin-top: 48px;
@@ -136,16 +134,11 @@
     <span class="feature-chip">School branding + athlete portal</span>
   </div>
 
-  <form class="email-form" data-waitlist-form>
-    <input type="hidden" name="role" value="gym" />
-    <input type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
-    <input class="email-input" name="name" type="text" placeholder="Your name" aria-label="Your name" autocomplete="name" maxlength="100" required />
-    <input class="email-input" id="gym-email" name="email" type="email" placeholder="Your gym email address" aria-label="Your gym email address" autocomplete="email" maxlength="254" required />
-    <button class="btn-gold" type="submit">Notify Me When Ready</button>
-  </form>
-  <div class="back-link" data-waitlist-consent data-link-style="color:#FFB347;text-decoration:underline;"></div>
-  <div class="success" id="success-msg" data-waitlist-success hidden>You are on the early access list. We will reach out when Gym plans launch.</div>
-  <div class="waitlist-error" data-waitlist-error role="alert" hidden></div>
+  <div class="email-form">
+    <input class="email-input" id="gym-email" type="email" placeholder="Your gym email address" />
+    <button class="btn-gold" onclick="notifyMe()">Notify Me When Ready</button>
+  </div>
+  <div class="success" id="success-msg">You are on the early access list. We will reach out when Gym plans launch.</div>
 
   <div class="back-link">
     <a href="/">&larr; Back to ROMRxBJJ.com</a> &nbsp;&middot;&nbsp;
@@ -159,6 +152,15 @@
     <div style="margin-top:6px;">ROMRx&#8482; and related marks are trademarks of ROMRx LLC. All rights reserved.</div>
   </footer>
 
-  <script src="/waitlist.js" defer></script>
+  <script>
+    function notifyMe() {
+      const email = document.getElementById('gym-email').value.trim();
+      if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+      document.getElementById('success-msg').style.display = 'block';
+      document.querySelector('.email-form').style.opacity = '0.4';
+      document.querySelector('.email-form').style.pointerEvents = 'none';
+      // TODO: wire to email capture edge function or Mailchimp
+    }
+  </script>
 </body>
 </html>
