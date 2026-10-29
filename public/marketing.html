@@ -195,6 +195,8 @@
     .path-card.coming-soon .path-cta { color: rgba(250,249,246,0.35); }
 
     /* For Coaches card waitlist form (same look as the email-input on /gyms) */
+    .path-card > .path-title > a::after { content: ''; position: absolute; inset: 0; }
+    .path-card .path-form { position: relative; z-index: 1; }
     .path-card .email-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
     .path-card .email-input {
       padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(0,128,128,0.4);
@@ -272,7 +274,7 @@
           <li>Coach notes + belt progression</li>
         </ul>
         <div class="path-cta">Coming Spring 2027</div>
-        <div>
+        <div class="path-form">
           <form class="email-form" data-waitlist-form>
             <input type="hidden" name="role" value="coach" />
             <input type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
