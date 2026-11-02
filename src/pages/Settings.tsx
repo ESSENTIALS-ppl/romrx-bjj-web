@@ -54,6 +54,8 @@ import { CoachSettings } from './CoachSettings'
 
 // Router: coaches get CoachSettings, athletes get AthleteSettings
 // MUST be a separate component so hook call order is never violated
+const SHOW_NOTIFICATIONS = false
+
 export function Settings() {
   const { user } = useAuth()
   const isCoach = user?.user_metadata?.portal_role === 'coach' ||
@@ -854,7 +856,8 @@ function AthleteSettings() {
           <FeedbackWidget />
         </Section>
 
-        {/* ── NOTIFICATIONS ── */}
+        {/* ── NOTIFICATIONS (hidden FG-04: no sender is live yet; restore when FG-09 to FG-12 ship) ── */}
+        {SHOW_NOTIFICATIONS && (
         <Section title="Notifications" icon={<Bell size={14} />}>
           {notifLoading ? (
             <div className="flex items-center gap-2 py-2">
@@ -998,6 +1001,7 @@ function AthleteSettings() {
             </div>
           )}
         </Section>
+        )}
 
         {/* ── ACCOUNT ── */}
         <Section title="Account">
