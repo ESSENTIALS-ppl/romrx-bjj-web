@@ -362,7 +362,7 @@ export function CoachSettings() {
       {/* ── Feedback ── */}
       <Section title="Send Feedback" icon={MessageSquarePlus}>
         <p className="text-xs text-charcoal-light">
-          Found a bug or have an idea? Let us know — your account is attached automatically.
+          Found a bug or have an idea? Let us know - your account is attached automatically.
         </p>
         <FeedbackWidget />
       </Section>
