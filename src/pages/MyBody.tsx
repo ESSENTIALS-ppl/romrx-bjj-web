@@ -166,7 +166,7 @@ export function MyBody() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <SectionCard title="ROM Profile">
+        <SectionCard title="ROM Protocol">
           <ResponsiveContainer width="100%" height={280}>
             <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
               <PolarGrid stroke="#cde0e0" />
