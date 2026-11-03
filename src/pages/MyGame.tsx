@@ -1182,7 +1182,7 @@ function BranchBuilder({
           <div key={i} className="space-y-1">
             {/* Step label */}
             <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider px-1">
-              Step {i + 1} - {step.category}
+              Step {i + 1}: {step.category}
             </p>
 
             {branch ? (
@@ -1921,11 +1921,11 @@ export function MyGame() {
       mma: 'MMA / No-Gi',
     }
 
-    const name = `Comp Plan - ${formatShort[format]}`
+    const name = `Comp Plan: ${formatShort[format]}`
     const greenCount = effectiveEligibility.filter(e => e.tier === 'GREEN' && !e.flag).length
     const durationLabels: Record<CompDuration, string> = {
       under5: 'under 5 minutes',
-      '5to8': '5–8 minutes',
+      '5to8': '5-8 minutes',
       over8: '8+ minutes',
     }
     const threatLabels: Record<CompThreat, string> = {
@@ -2739,7 +2739,7 @@ export function MyGame() {
                             <ArrowDown size={14} className="text-charcoal-light mx-3 my-0" />
 
                             <p className="text-xs font-bold text-charcoal uppercase tracking-wide px-1 mb-1">
-                              Step {i + 1} - {cat}
+                              Step {i + 1}: {cat}
                             </p>
 
                             {eligible.length === 0 ? (
@@ -2889,7 +2889,7 @@ export function MyGame() {
                           <p className="text-sm font-semibold text-charcoal">What's your competition format?</p>
                           <div className="grid grid-cols-1 gap-3">
                             {([
-                              ['points',     'Points Match',      'IBJJF style - position dominant',         Trophy] as const,
+                              ['points',     'Points Match',      'IBJJF style: position dominant',         Trophy] as const,
                               ['submission', 'Submission Only',   'Pure submission hunting',                  Zap] as const,
                               ['mma',        'MMA / No-Gi',       'Leg locks open, aggression focus',         Flame] as const,
                             ]).map(([val, label, sub, Icon]) => (
@@ -2925,9 +2925,9 @@ export function MyGame() {
                           </div>
                           <div className="grid grid-cols-1 gap-3">
                             {([
-                              ['under5', 'Under 5 minutes', 'White/blue belt divisions - intensity matters',   Flame] as const,
-                              ['5to8',   '5–8 minutes',     'Middle divisions',                                Brain] as const,
-                              ['over8',  '8+ minutes',      'Advanced - endurance and patience',               Star] as const,
+                              ['under5', 'Under 5 minutes', 'White/blue belt divisions: intensity matters',   Flame] as const,
+                              ['5to8',   '5-8 minutes',     'Middle divisions',                                Brain] as const,
+                              ['over8',  '8+ minutes',      'Advanced: endurance and patience',               Star] as const,
                             ]).map(([val, label, sub, Icon]) => (
                               <button
                                 key={val}

@@ -39,15 +39,15 @@ const STEPS: Step[] = [
   {
     id: 'hip_er',
     title: 'Hip External Rotation',
-    bjjWhy: 'Opens your guard game - triangles, De La Riva, and seated guard all need this.',
+    bjjWhy: 'Opens your guard game: triangles, De La Riva, and seated guard all need this.',
     tool: 'iPhone: Measure → Level  ·  Android: Simple Inclinometer  ·  Firm chair',
     position: [
       'Sit in a firm chair. Both feet flat on the floor, knees at 90°.',
-      'Hold your phone against the FRONT of your shin (just below your knee). Screen faces FORWARD - away from your leg. Long edge runs along your shinbone.',
+      'Hold your phone against the FRONT of your shin (just below your knee). Screen faces FORWARD, away from your leg. Long edge runs along your shinbone.',
       'Tap to zero. The phone should read close to 0°.',
     ],
     howTo: [
-      'Keep your thigh pressed down. Slowly swing your foot INWARD - toward your other leg.',
+      'Keep your thigh pressed down. Slowly swing your foot INWARD, toward your other leg.',
       'Stop when you feel a firm stretch or your thigh starts to lift off the chair. Read the number.',
       'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
@@ -62,19 +62,19 @@ const STEPS: Step[] = [
     id: 'hip_ir',
     title: 'Hip Internal Rotation',
     bjjWhy: 'Used in guard passing, knee cuts, hip switches and hip escapes.',
-    tool: '✓ Same chair, same phone placement - only the foot direction changes.',
+    tool: '✓ Same chair, same phone placement. Only the foot direction changes.',
     position: [
       'Stay in the same chair. Do NOT move your position.',
       'Phone is still on the front of your shin, screen facing forward.',
       'Tap to re-zero at center before each leg.',
     ],
     howTo: [
-      'Keep your thigh pressed down. Slowly swing your foot OUTWARD - away from your other leg.',
+      'Keep your thigh pressed down. Slowly swing your foot OUTWARD, away from your other leg.',
       'Stop when you feel a firm stretch or one butt cheek starts to lift. Read the number.',
       'Record it. Return to center. Re-zero. Switch legs and repeat.',
     ],
     mistake: 'One butt cheek lifts off the chair.',
-    mistakeFix: 'You must stay sitting evenly on both sides. The moment one side lifts - that is your endpoint. Record it.',
+    mistakeFix: 'You must stay sitting evenly on both sides. The moment one side lifts. That is your endpoint. Record it.',
     fields: [
       { key: 'hip_ir_l', label: 'Left', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
       { key: 'hip_ir_r', label: 'Right', unit: '°', normalLow: 30, normalHigh: 45, riskBelow: 30 },
@@ -84,7 +84,7 @@ const STEPS: Step[] = [
     id: 'shoulder_er',
     title: 'Shoulder External Rotation',
     bjjWhy: 'Kimura defense, shoulder frames, and posting your hand to avoid the sweep all require this.',
-    tool: 'iPhone: Measure - Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
+    tool: 'iPhone: Measure, Level  ·  Android: Simple Inclinometer  ·  Seated in chair',
     position: [
       'Sit upright. Raise one arm straight out to the side at shoulder height, like a T. Bend your elbow to 90°.',
       'Hold your phone in that hand, screen facing toward you. That is your starting position.',
@@ -96,7 +96,7 @@ const STEPS: Step[] = [
       'Record the number. Re-zero and repeat with the opposite arm.',
     ],
     mistake: 'Your shoulder shrugs up or your elbow drops below shoulder height.',
-    mistakeFix: 'Keep your shoulder pressed down and your elbow at the same height the whole time. From the elbow to the shoulder, the arm only rotates - it does not lift up or drop down.',
+    mistakeFix: 'Keep your shoulder pressed down and your elbow at the same height the whole time. From the elbow to the shoulder, the arm only rotates. It does not lift up or drop down.',
     fields: [
       { key: 'shoulder_er_l', label: 'Left', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
       { key: 'shoulder_er_r', label: 'Right', unit: '°', normalLow: 60, normalHigh: 90, riskBelow: 60 },
@@ -118,7 +118,7 @@ const STEPS: Step[] = [
       'Record it. Shake out your arm. Re-zero. Repeat on the other side.',
     ],
     mistake: 'Leaning your upper body backward or shrugging your shoulder to get the arm higher.',
-    mistakeFix: 'Keep your body tall and still. The moment your back starts to arch or your shoulder creeps up toward your ear - that is your true end range. Record it there.',
+    mistakeFix: 'Keep your body tall and still. The moment your back starts to arch or your shoulder creeps up toward your ear. That is your true end range. Record it there.',
     fields: [
       { key: 'shoulder_flex_l', label: 'Left', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
       { key: 'shoulder_flex_r', label: 'Right', unit: '°', normalLow: 140, normalHigh: 180, riskBelow: 120 },
@@ -139,7 +139,7 @@ const STEPS: Step[] = [
       'Read the number. Re-zero. Tilt your ear toward your right shoulder. Read and record both sides.',
     ],
     mistake: 'Shrugging your shoulder up to meet your ear.',
-    mistakeFix: 'Keep both shoulders pressed down the whole time. Only your head moves. If your shoulder rises - that reading does not count.',
+    mistakeFix: 'Keep both shoulders pressed down the whole time. Only your head moves. If your shoulder rises. That reading does not count.',
     fields: [
       { key: 'cervical_lat_l', label: 'Left', unit: '°', normalLow: 40, normalHigh: 45, riskBelow: 30 },
       { key: 'cervical_lat_r', label: 'Right', unit: '°', normalLow: 40, normalHigh: 45, riskBelow: 30 },
@@ -184,7 +184,7 @@ const STEPS: Step[] = [
       'Record it. Lower the leg slowly. Re-zero. Repeat on the other side.',
     ],
     mistake: 'Bending the knee as the leg rises, or going so high that the low back arches off the floor.',
-    mistakeFix: 'Your leg stays completely straight the whole time. Stop before your low back lifts - once it arches, you have gone past your true range.',
+    mistakeFix: 'Your leg stays completely straight the whole time. Stop before your low back lifts. Once it arches, you have gone past your true range.',
     fields: [
       // Hip flexion is saved for each leg and not scored (no range, no badge). See src/lib/hipFlex.ts.
       { key: 'hip_flex_l', label: 'Left', unit: '°', notScored: true },
@@ -230,7 +230,7 @@ const STEPS: Step[] = [
       'Extension: Press up on one arm into a cobra, keeping your hips flat on the floor. Read the number at your end range.',
     ],
     mistake: 'Rounding the back to get lower on flexion, or letting your hips lift off the floor during the cobra.',
-    mistakeFix: 'For flexion, the stretch in the back of your legs is your true stopping point. For extension, your hips stay flat on the floor the entire time - only your chest rises.',
+    mistakeFix: 'For flexion, the stretch in the back of your legs is your true stopping point. For extension, your hips stay flat on the floor the entire time. Only your chest rises.',
     fields: [
       { key: 'lumbar_flex', label: 'Flexion', unit: '°', normalLow: 40, normalHigh: 80, riskBelow: 40 },
       { key: 'lumbar_ext', label: 'Extension', unit: '°', normalLow: 20, normalHigh: 30, riskBelow: 15 },
@@ -241,7 +241,7 @@ const STEPS: Step[] = [
   {
     id: 'ankle_df',
     title: 'Ankle Dorsiflexion',
-    bjjWhy: 'Your base and balance in every standing position - takedowns, sprawls, and passing guard.',
+    bjjWhy: 'Your base and balance in every standing position: takedowns, sprawls, and passing guard.',
     tool: 'Tape measure or ruler  ·  Standing knee-to-wall test (measure in centimeters)',
     position: [
       'Remove your shoes. Stand barefoot facing a wall with a tape measure on the floor pointing straight out from the wall.',
@@ -263,10 +263,10 @@ const STEPS: Step[] = [
 ]
 
 const SETUP_STEPS = [
-  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app (pre-installed on all iPhones). Tap Level at the bottom. You will see a number in degrees that changes as you tilt the phone - that is your angle.' },
-  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps - free on Google Play. Open it and you will see your angle in degrees, just like a digital level.' },
-  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier - they hold the phone and read the angle while you focus on moving. You can do it solo using the screenshot tip on each step.' },
-  { icon: '🔄', label: 'Warm up first - 5 minutes', detail: '1) Walk or march in place for 2 minutes.  2) Arm circles - 10 forward, 10 backward.  3) Hip circles - big loops with your hips like a hula hoop, 10 each way.  4) Leg swings - hold a wall, swing each leg front-to-back 10 times then side-to-side 10 times.  5) Slow neck turns - look left and right, 5 times each way.  Wear shorts and a t-shirt.' },
+  { icon: '📱', label: 'iPhone', detail: 'Open the Measure app (pre-installed on all iPhones). Tap Level at the bottom. You will see a number in degrees that changes as you tilt the phone. That is your angle.' },
+  { icon: '🤖', label: 'Android', detail: 'Download "Simple Inclinometer" by Syleos Apps, free on Google Play. Open it and you will see your angle in degrees, just like a digital level.' },
+  { icon: '🤝', label: 'Partner (recommended)', detail: 'A partner makes this much easier. They hold the phone and read the angle while you focus on moving. You can do it solo using the screenshot tip on each step.' },
+  { icon: '🔄', label: 'Warm up first: 5 minutes', detail: '1) Walk or march in place for 2 minutes.  2) Arm circles: 10 forward, 10 backward.  3) Hip circles: big loops with your hips like a hula hoop, 10 each way.  4) Leg swings: hold a wall, swing each leg front-to-back 10 times then side-to-side 10 times.  5) Slow neck turns: look left and right, 5 times each way.  Wear shorts and a t-shirt.' },
   { icon: '📸', label: 'Solo tip', detail: 'When you cannot tap the screen: say "Hey Siri, take a screenshot" (iPhone) or "Hey Google, take a screenshot" (Android). Read the number right after.' },
   { icon: '⏭️', label: 'Skip is always OK', detail: 'If a position is too difficult or you need a partner for a step and do not have one, tap Skip. Your score is based on what you completed. You can always come back and fill in any skipped measurements later.' },
 ]
@@ -291,7 +291,7 @@ function MeasureInput({ field, value, onChange }: {
       <div className="flex items-center justify-between">
         <label className="text-sm font-semibold text-charcoal">{field.label}</label>
         {!field.notScored && (
-          <span className="text-xs text-charcoal-light">Normal: {field.normalLow}–{field.normalHigh}{field.unit}</span>
+          <span className="text-xs text-charcoal-light">Normal: {field.normalLow}-{field.normalHigh}{field.unit}</span>
         )}
       </div>
       <div className="flex items-center gap-3">
@@ -355,7 +355,7 @@ export function Assessment() {
   }
 
   const submit = async () => {
-    if (!session) { setError('Session expired - please sign in again.'); return }
+    if (!session) { setError('Session expired. Please sign in again.'); return }
     setLoading(true); setError('')
     const payload: Record<string, number | null> = {}
     for (const [k, v] of Object.entries(values)) {
@@ -406,14 +406,14 @@ export function Assessment() {
               <div>
                 <p className="text-sm font-semibold text-teal">The method in 4 words: Place. Zero. Move. Read.</p>
                 <p className="text-xs text-teal/80 mt-1 leading-relaxed">
-                  Hold phone flat against the body part. Tap screen to zero it. Move slowly to your end range. Read the number - ignore any minus sign. Each step tells you exactly where to hold the phone and which direction to move.
+                  Hold phone flat against the body part. Tap screen to zero it. Move slowly to your end range. Read the number. Ignore any minus sign. Each step tells you exactly where to hold the phone and which direction to move.
                 </p>
               </div>
             </div>
           </div>
 
           <button onClick={() => setPhase('measure')} className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3">
-            I'm ready - Start assessment <ChevronRight size={18} />
+            I'm ready. Start assessment <ChevronRight size={18} />
           </button>
           <p className="text-center text-xs text-charcoal-light">You can skip any measurement you can't do and retest later.</p>
         </div>

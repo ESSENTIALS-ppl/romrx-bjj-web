@@ -130,9 +130,9 @@ export function Chat() {
       const name = (profile?.full_name ?? 'there').split(' ')[0]
       let welcome: string
       if (isCoach) {
-        welcome = `Hey ${name} - I'm ROMBot, your team intelligence assistant.\n\nI can see your full roster's ROM scores and technique tiers. You can ask about specific athletes or your whole team:\n- "Who on my team is most at risk?"\n- "What's blocking [athlete] from Triangle Choke?"\n- "Who is ready to compete?"\n\nNote: ROMBot provides educational information only and is not medical advice.`
+        welcome = `Hey ${name}, I'm ROMBot, your team intelligence assistant.\n\nI can see your full roster's ROM scores and technique tiers. You can ask about specific athletes or your whole team:\n- "Who on my team is most at risk?"\n- "What's blocking [athlete] from Triangle Choke?"\n- "Who is ready to compete?"\n\nNote: ROMBot provides educational information only and is not medical advice.`
       } else if (isBase) {
-        welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your mobility bands (Needs focus / Building / Steady), priority joints, and daily plan. Ask me anything:\n\u2022 "Which joints need focus?"\n\u2022 "What's my daily plan?"\n\u2022 "How do I build ease in my hips?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
+        welcome = `Hey ${name}, I'm ROMBot, your mobility intelligence assistant.\n\nI can see your mobility bands (Needs focus / Building / Steady), priority joints, and daily plan. Ask me anything:\n\u2022 "Which joints need focus?"\n\u2022 "What's my daily plan?"\n\u2022 "How do I build ease in my hips?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       } else {
         welcome = `Hey ${name}, I'm ROMBot. I can see your Protocol results (AT RISK to ELITE) and your technique ratings (GREEN / YELLOW / RED). Ask me anything:\n\u2022 "Which techniques are GREEN for me?"\n\u2022 "Which joints should I work on first?"\n\u2022 "What does AT RISK mean?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       }
@@ -176,7 +176,7 @@ export function Chat() {
 
       setGamePlanBanner(`Refining: ${payload.label}`)
       const techList = payload.techniques
-        .map((t, i) => `${i + 1}. ${t.name} (${t.code}) - ${t.tier.toUpperCase()} • ${t.category}`)
+        .map((t, i) => `${i + 1}. ${t.name} (${t.code}): ${t.tier.toUpperCase()} • ${t.category}`)
         .join('\n')
       const branchList = payload.branches?.length
         ? '\n\nBranches:\n' + payload.branches
@@ -251,7 +251,7 @@ export function Chat() {
         pressure: 'pressure passer',
       }
       const opponentNote = opponent && opponentLabels[opponent]
-        ? ` My training partner tends to be a ${opponentLabels[opponent]} - help me build a plan that counters their tendencies while staying within my GREEN and YELLOW technique library.`
+        ? ` My training partner tends to be a ${opponentLabels[opponent]}. Help me build a plan that counters their tendencies while staying within my GREEN and YELLOW technique library.`
         : ''
       setGamePlanBanner(`Building your game plan: ${startLabel.split(',')[0]}, ${finishLabel.split(' (')[0]}, ${styleLabel} style`)
       const msg = `Build me a personalized BJJ game plan. I prefer ${startLabel}. My go-to finish is ${finishLabel}. My game style is ${styleLabel}.${opponentNote} Give me: a creative name for this game plan, a 4-step technique flow using only my available techniques (technique names, no codes), and explain why each technique fits my mobility profile.`
@@ -327,7 +327,7 @@ export function Chat() {
       {isCoach && (
         <div className="flex items-center gap-2 bg-teal-light border border-teal/20 rounded-xl px-3 py-2 mb-2">
           <span className="text-xs font-medium text-teal flex-1">
-            Team mode - ROMBot has full access to all your athletes' ROM profiles and technique readiness
+            Team mode: ROMBot has full access to all your athletes' ROM profiles and technique readiness
           </span>
         </div>
       )}
@@ -345,7 +345,7 @@ export function Chat() {
       {/* Disclaimer banner */}
       <div className="flex items-start gap-2 bg-surface border border-teal-light rounded-xl px-3 py-2 mb-2">
         <span className="text-xs text-charcoal-light leading-relaxed">
-          <span className="font-semibold text-charcoal">Educational use only.</span> ROMBot is not medical advice - consult a healthcare professional for pain or injury. ROMBot is also not a black belt - consult your coach before attempting new techniques.
+          <span className="font-semibold text-charcoal">Educational use only.</span> ROMBot is not medical advice. Consult a healthcare professional for pain or injury. ROMBot is also not a black belt. Consult your coach before attempting new techniques.
         </span>
       </div>
 
