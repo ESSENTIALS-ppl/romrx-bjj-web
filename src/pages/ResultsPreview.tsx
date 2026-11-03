@@ -134,7 +134,7 @@ export function ResultsPreview() {
         {/* Header */}
         <div className="text-center">
           <h1 className="font-display font-bold text-warm-white text-2xl">Your Results Are In</h1>
-          <p className="text-sm text-warm-white/60 mt-1">Protocol™ by ROMRx</p>
+          <p className="text-sm text-warm-white/60 mt-1">Protocol by ROMRx</p>
         </div>
 
         {/* PRS Score Card */}

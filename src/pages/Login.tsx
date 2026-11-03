@@ -205,7 +205,7 @@ export function Login() {
             <a href={ownedBaseUrl('login_cta')} className="text-teal underline">Create an account</a>
           </p>
         )}
-        <p className="text-center text-xs text-charcoal-light mt-3">Protocol™ by ROMRx</p>
+        <p className="text-center text-xs text-charcoal-light mt-3">Protocol by ROMRx</p>
       </div>
     </div>
   )
