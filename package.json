@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test:utm": "node scripts/utm-forward.test.mjs",
     "test:hip": "node scripts/hip-scored.test.mjs",
+    "test:color-movement": "node scripts/color-movement-derive.test.mjs",
     "test:minimums": "node scripts/minimums-rescale.test.mjs",
     "test:export": "node scripts/export-my-data.test.mjs",
     "test:optin": "node scripts/reminder-opt-in.test.mjs"
