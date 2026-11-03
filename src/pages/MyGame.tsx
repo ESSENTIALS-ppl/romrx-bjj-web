@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import type { TechniqueEligibility } from '../hooks/useProfile'
 import { PageHeader } from '../components/PageHeader'
+import { ColorMovement } from '../components/ColorMovement'
 import { SectionCard } from '../components/SectionCard'
 import { EmptyState } from '../components/EmptyState'
 import { Spinner } from '../components/Spinner'
@@ -2068,6 +2069,8 @@ export function MyGame() {
           </span>
         ))}
       </div>
+
+      <ColorMovement />
 
       {/* Page tabs */}
       <div className="flex gap-1 bg-surface rounded-2xl p-1 no-print">

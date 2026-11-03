@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Spinner } from '../components/Spinner'
 import { AlertTriangle, CheckCircle, Unlock, TrendingUp } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { useHipFlexCutover } from '../lib/hipFlexCutover'
 import { computePRS, readinessBand, PRS_BILATERAL } from '../lib/readiness'
 import { BAND_FULL, BAND_DESC } from '../lib/mobilityBands'
 
@@ -44,6 +45,7 @@ function getTopAsymmetries(assessment: Record<string, any>): Array<{ joint: stri
 }
 
 export function ResultsPreview() {
+  useHipFlexCutover() // re-render when the FG-36 cutover is read
   const { user, session } = useAuth()
   const navigate = useNavigate()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

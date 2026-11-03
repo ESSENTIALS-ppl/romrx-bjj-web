@@ -9,7 +9,10 @@ import { Spinner } from '../components/Spinner'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { cn, beltColor, formatJoint } from '../lib/utils'
 import { AlertTriangle, Activity, TrendingUp } from 'lucide-react'
-import { computePRS, readinessBand, hipFlexScored } from '../lib/readiness'
+import { useHipFlexCutover } from '../lib/hipFlexCutover'
+import { computePRS, readinessBand, scoredView } from '../lib/readiness'
+import { JOINT_SCORE_TARGETS, jointDisplayRowsForAssessment, formatMeasure, type JointDisplayRow } from '../lib/mobilityBands'
+import { isLumbarKey } from '../lib/lumbarFlag'
 import { BAND_FULL } from '../lib/mobilityBands'
 
 // ── Position Readiness Score ──────────────────────────────────────────────────
@@ -23,13 +26,11 @@ function getPRSTier(a: object) {
   return { label: BAND_FULL[1],    color: 'text-red-tier',   bg: 'bg-red-tier-bg',     ring: 'border-red-tier/40' }
 }
 
-// Elite BJJ athlete targets - scoring against these gives meaningful differentiation
-// Most well-trained athletes score 70-85%, restrictions show clearly below 65%
+// Per-joint targets are Base's (JOINT_SCORE_TARGETS in lib/mobilityBands.ts), not the old pack elite numbers (Grant Nov 2 2026).
 const OPTIMAL: Record<string, number> = {
-  'Hip Flex': 120, 'Hip ER': 80,  'Hip IR': 50,  'Hip Abd': 60,
-  'Shoulder ER': 95, 'Shoulder Flex': 180, 'Ankle DF': 20,
-  'Lumbar Flex': 70, 'Lumbar Ext': 35,
-  'Cervical Lat': 50, 'Cervical Flex': 65, 'Cervical Ext': 75,
+  'Hip Flex': JOINT_SCORE_TARGETS.hip_flex, 'Hip ER': JOINT_SCORE_TARGETS.hip_er, 'Hip IR': JOINT_SCORE_TARGETS.hip_ir, 'Hip Abd': JOINT_SCORE_TARGETS.hip_abd,
+  'Shoulder ER': JOINT_SCORE_TARGETS.shoulder_er, 'Shoulder Flex': JOINT_SCORE_TARGETS.shoulder_flex, 'Ankle DF': JOINT_SCORE_TARGETS.ankle_df,
+  'Cervical Lat': JOINT_SCORE_TARGETS.cervical_lat, 'Cervical Flex': JOINT_SCORE_TARGETS.cervical_flex, 'Cervical Ext': JOINT_SCORE_TARGETS.cervical_ext,
 }
 
 function norm(val: number, optimal: number) {
@@ -43,8 +44,6 @@ const JOINTS = [
   { key: 'Shoulder ER',  get: (a: Assessment) => norm(Math.max(a.shoulder_er_l ?? 0, a.shoulder_er_r ?? 0), OPTIMAL['Shoulder ER']) },
   { key: 'Shoulder Flex',get: (a: Assessment) => norm(Math.max(a.shoulder_flex_l ?? 0, a.shoulder_flex_r ?? 0), OPTIMAL['Shoulder Flex']) },
   { key: 'Ankle DF',     get: (a: Assessment) => norm(Math.max(a.ankle_df_l ?? 0, a.ankle_df_r ?? 0), OPTIMAL['Ankle DF']) },
-  { key: 'Lumbar Flex',  get: (a: Assessment) => norm(a.lumbar_flex ?? 0, OPTIMAL['Lumbar Flex']) },
-  { key: 'Lumbar Ext',   get: (a: Assessment) => norm(a.lumbar_ext ?? 0, OPTIMAL['Lumbar Ext']) },
   { key: 'Cerv Lat',     get: (a: Assessment) => norm(Math.max(a.cervical_lat_l ?? 0, a.cervical_lat_r ?? 0), OPTIMAL['Cervical Lat']) },
   { key: 'Cerv Flex',    get: (a: Assessment) => norm(a.cervical_flex ?? 0, OPTIMAL['Cervical Flex']) },
   { key: 'Cerv Ext',     get: (a: Assessment) => norm(a.cervical_ext ?? 0, OPTIMAL['Cervical Ext']) },
@@ -58,14 +57,18 @@ function buildRadar(assessments: Assessment[]) {
   })
 }
 
-function JointBar({ label, left, right, midline, optimal }: {
-  label: string; left?: number | null; right?: number | null
-  midline?: number | null; optimal: number
-}) {
-  const best = midline ?? Math.max(left ?? 0, right ?? 0)
-  const pct  = Math.min(100, Math.round((best / optimal) * 100))
+// Joint names stay as this site already shows them; Base's row label is the fallback.
+const JOINT_LABEL: Record<string, string> = {}
+
+// Hip flexion is hidden (unmeasured) for assessments saved before the FG-36 cutover.
+const hipView = (a: Assessment) => scoredView(a) as Assessment
+
+function JointBar({ row, label }: { row: JointDisplayRow; label: string }) {
+  // Base's own per-joint rows (worse side, % of the Base target, Base band). A joint the user did not measure draws nothing.
+  const { left, right, midline, pct, band, unit } = row
+  if (pct == null) return null
   const asym = left != null && right != null ? Math.abs(left - right) : 0
-  const isBad = pct < 75
+  const isBad = band === 1
 
   return (
     <div className="flex items-center gap-3 py-2">
@@ -73,23 +76,23 @@ function JointBar({ label, left, right, midline, optimal }: {
         <p className={cn('text-xs font-medium', isBad ? 'text-red-tier' : 'text-charcoal')}>{label}</p>
         {asym > 10 && (
           <p className="text-xs text-gold flex items-center gap-0.5 mt-0.5">
-            <AlertTriangle size={9} /> {asym}° gap
+            <AlertTriangle size={9} /> {formatMeasure(asym)}{unit} gap
           </p>
         )}
       </div>
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all duration-500',
-            pct >= 100 ? 'bg-teal' : pct >= 75 ? 'bg-gold' : 'bg-red-400')}
+            band === 3 ? 'bg-teal' : band === 2 ? 'bg-gold' : 'bg-red-400')}
           style={{ width: `${pct}%` }}
         />
       </div>
       <div className="w-20 text-right shrink-0 text-xs text-charcoal-light">
-        {midline != null ? `${midline}°` : `${left ?? 0}° / ${right ?? 0}°`}
+        {midline != null ? `${formatMeasure(midline)}${unit}` : `${formatMeasure(left)}${unit} / ${formatMeasure(right)}${unit}`}
       </div>
       <div className="w-8 text-right shrink-0">
         <span className={cn('text-xs font-bold',
-          pct >= 100 ? 'text-teal' : pct >= 75 ? 'text-yellow-600' : 'text-red-tier')}>
+          band === 3 ? 'text-teal' : band === 2 ? 'text-yellow-600' : 'text-red-tier')}>
           {pct}%
         </span>
       </div>
@@ -98,6 +101,7 @@ function JointBar({ label, left, right, midline, optimal }: {
 }
 
 export function MyBody() {
+  useHipFlexCutover() // re-render when the FG-36 cutover is read
   const { user } = useAuth()
   const { profile, assessment, assessments, loading } = useProfile(user?.id)
 
@@ -222,20 +226,11 @@ export function MyBody() {
         </SectionCard>
       </div>
 
-      <SectionCard title="Joint Breakdown" subtitle="Best side shown · % of optimal range">
+      <SectionCard title="Joint Breakdown" subtitle="Worse side shown - % of your Base target">
         <div className="divide-y divide-teal-light/60">
-          <JointBar label="Hip ER"         left={assessment.hip_er_l}        right={assessment.hip_er_r}        optimal={OPTIMAL['Hip ER']} />
-          <JointBar label="Hip IR"         left={assessment.hip_ir_l}        right={assessment.hip_ir_r}        optimal={OPTIMAL['Hip IR']} />
-          <JointBar label="Hip Abduction"  left={assessment.hip_abd_l}       right={assessment.hip_abd_r}       optimal={OPTIMAL['Hip Abd']} />
-          {hipFlexScored(assessment) && <JointBar label="Hip Flexion"   left={assessment.hip_flex_l}       right={assessment.hip_flex_r}       optimal={OPTIMAL['Hip Flex']} />}
-          <JointBar label="Shoulder ER"    left={assessment.shoulder_er_l}   right={assessment.shoulder_er_r}   optimal={OPTIMAL['Shoulder ER']} />
-          <JointBar label="Shoulder Flex"  left={assessment.shoulder_flex_l} right={assessment.shoulder_flex_r} optimal={OPTIMAL['Shoulder Flex']} />
-          <JointBar label="Ankle DF"       left={assessment.ankle_df_l}      right={assessment.ankle_df_r}      optimal={OPTIMAL['Ankle DF']} />
-          <JointBar label="Lumbar Flex"    midline={assessment.lumbar_flex}   optimal={OPTIMAL['Lumbar Flex']} />
-          <JointBar label="Lumbar Ext"     midline={assessment.lumbar_ext}    optimal={OPTIMAL['Lumbar Ext']} />
-          <JointBar label="Cervical Lat Flex" left={assessment.cervical_lat_l}  right={assessment.cervical_lat_r}  optimal={OPTIMAL['Cervical Lat']} />
-          <JointBar label="Cervical Flex"   midline={assessment.cervical_flex}  optimal={OPTIMAL['Cervical Flex']} />
-          <JointBar label="Cervical Ext"    midline={assessment.cervical_ext}   optimal={OPTIMAL['Cervical Ext']} />
+          {jointDisplayRowsForAssessment(hipView(assessment))
+            .filter(r => !isLumbarKey(r.key))
+            .map(r => <JointBar key={r.key} row={r} label={JOINT_LABEL[r.key] ?? r.label} />)}
         </div>
       </SectionCard>
     </div>
