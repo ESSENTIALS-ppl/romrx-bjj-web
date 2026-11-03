@@ -36,6 +36,15 @@
     .footer{background:#1c2429;padding:40px 24px;text-align:center;margin-top:40px}
     .footer-logo{font-family:Montserrat,sans-serif;font-weight:800;color:var(--teal);margin-bottom:8px}
     .footer-copy{font-size:.75rem;color:rgba(255,255,255,.25)}
+    .section .email-input{color:var(--charcoal);background:rgba(54,69,79,.06);border-color:rgba(54,69,79,.35)}
+    .section .email-input::placeholder{color:rgba(54,69,79,.5)}
+    .email-form{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+    .email-input{padding:14px 20px;border-radius:10px;border:1px solid rgba(0,128,128,.4);background:rgba(255,255,255,.06);color:#FAF9F6;font-size:.95rem;width:280px;outline:none;transition:border-color .2s}
+    .email-input::placeholder{color:rgba(250,249,246,.35)}
+    .email-input:focus{border-color:#008080}
+    button.btn{border:none;cursor:pointer;font-size:.95rem}
+    .hero [data-waitlist-consent]{color:rgba(255,255,255,.72)}
+    p.waitlist-error{color:#8b1a1a;background:#fde8e8;border-radius:6px;padding:8px 12px;font-size:.85rem;font-weight:600;margin-top:12px;margin-bottom:12px}
   </style>
 <script src="/utm-forward.js" defer></script>
 </head>
@@ -52,13 +61,30 @@
     <div class="badge">Coming Spring 2027</div>
     <h1>Coach tools come Spring 2027</h1>
     <p class="sub">Not open during beta. Athlete tools are live. Coach and school tools open Spring 2027. Get notified when the coach portal opens.</p>
-    <a class="btn" href="mailto:hello@romrx.io?subject=ROMRxBJJ%20coach%20notify%20Spring%202027">Notify me</a>
-    <p class="note">No signup during beta. Email hello@romrx.io to join the notify list.</p>
+    <form class="email-form" data-waitlist-form>
+      <input type="hidden" name="role" value="coach" />
+      <input type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+      <input class="email-input" type="text" name="name" placeholder="Your name" aria-label="Your name" autocomplete="name" maxlength="100" required />
+      <input class="email-input" type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" maxlength="254" required />
+      <button class="btn" type="submit">Notify me</button>
+    </form>
+    <p class="sub" data-waitlist-success hidden></p>
+    <p class="waitlist-error" data-waitlist-error role="alert" hidden></p>
+    <p class="note" data-waitlist-consent data-link-style="color:inherit;text-decoration:underline;"></p>
   </section>
   <section class="section">
     <h2>What is coming</h2>
     <p>Coach roster tools, ROM-aware programming, and school-linked coach access. Pricing and account creation stay parked until Spring 2027.</p>
-    <a class="btn" href="mailto:hello@romrx.io?subject=ROMRxBJJ%20coach%20notify%20Spring%202027">Email for updates</a>
+    <form class="email-form" data-waitlist-form>
+      <input type="hidden" name="role" value="coach" />
+      <input type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+      <input class="email-input" type="text" name="name" placeholder="Your name" aria-label="Your name" autocomplete="name" maxlength="100" required />
+      <input class="email-input" type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" maxlength="254" required />
+      <button class="btn" type="submit">Notify me</button>
+    </form>
+    <p data-waitlist-success hidden></p>
+    <p class="waitlist-error" data-waitlist-error role="alert" hidden></p>
+    <p data-waitlist-consent data-link-style="text-decoration:underline;"></p>
   </section>
   <footer class="footer">
     <div class="footer-logo">ROMRxBJJ&#8482;</div>
@@ -66,5 +92,6 @@
     <div class="footer-copy" style="margin-top:10px;">&#169; 2026 ROMRx LLC &middot; Dublin, Ohio</div>
     <div class="footer-copy" style="margin-top:6px;">ROMRx&#8482; and related marks are trademarks of ROMRx LLC. All rights reserved.</div>
   </footer>
+  <script src="/waitlist.js" defer></script>
 </body>
 </html>
