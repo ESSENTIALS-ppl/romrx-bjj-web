@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Info, ExternalLink, SkipForward } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { HIP_FLEX_NOT_SCORED_LINE } from '../lib/hipFlex'
 import { HipSidesNote } from '../components/HipSidesNote'
 
 const SUBMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-assessment`
@@ -326,9 +325,6 @@ function MeasureInput({ field, value, onChange }: {
           </span>
         )}
       </div>
-      {field.notScored && (
-        <p className="text-xs text-charcoal-light">{HIP_FLEX_NOT_SCORED_LINE}</p>
-      )}
     </div>
   )
 }

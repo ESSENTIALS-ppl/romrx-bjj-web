@@ -16,18 +16,19 @@ import { FeedbackWidget } from '../components/FeedbackWidget'
 import {
   requestAccountDeletion, deletionErrorCopy, DELETION_BUTTON_LABEL, DELETION_SUCCESS_COPY,
 } from '../lib/accountDeletionRequest'
-import { computePRS } from '../lib/readiness'
+import { computePRS, readinessBand } from '../lib/readiness'
+import { BAND_FULL } from '../lib/mobilityBands'
 
 const BELTS = ['white', 'blue', 'purple', 'brown', 'black']
 const SIDES = ['right', 'left']
 
 // ── PRS helpers: computePRS is shared in ../lib/readiness (hip flexion is not in the score) ──
-function getPRSTier(s: number) {
-  if (s >= 85) return { label: 'ELITE',      color: 'text-teal',        bg: 'bg-teal-light' }
-  if (s >= 70) return { label: 'STRONG',     color: 'text-teal',        bg: 'bg-teal-light' }
-  if (s >= 55) return { label: 'DEVELOPING', color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg' }
-  if (s >= 40) return { label: 'RESTRICTED', color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg' }
-  return              { label: 'AT RISK',    color: 'text-red-tier',    bg: 'bg-red-tier-bg' }
+function getPRSTier(a: object) {
+  // FG-37 J1: Base bands (Steady / Building / Needs focus) from the same worst-joint rule as Base mobilityBands.ts
+  const band = readinessBand(a)
+  if (band === 3) return { label: BAND_FULL[3],      color: 'text-teal',        bg: 'bg-teal-light' }
+  if (band === 2) return { label: BAND_FULL[2], color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg' }
+  return { label: BAND_FULL[1],    color: 'text-red-tier',    bg: 'bg-red-tier-bg' }
 }
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
@@ -760,7 +761,7 @@ function AthleteSettings() {
             <div className="divide-y divide-teal-light/60">
               {assessments.map((a, i) => {
                 const prs  = computePRS(a)
-                const tier = getPRSTier(prs)
+                const tier = getPRSTier(a)
                 return (
                   <div key={a.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                     <div className="flex items-center gap-3">

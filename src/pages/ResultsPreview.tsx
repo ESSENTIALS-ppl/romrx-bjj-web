@@ -6,7 +6,8 @@ import { supabase } from '../lib/supabase'
 import { Spinner } from '../components/Spinner'
 import { AlertTriangle, CheckCircle, Unlock, TrendingUp } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { computePRS, PRS_BILATERAL } from '../lib/readiness'
+import { computePRS, readinessBand, PRS_BILATERAL } from '../lib/readiness'
+import { BAND_FULL, BAND_DESC } from '../lib/mobilityBands'
 
 const CHECKOUT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`
 
@@ -21,12 +22,12 @@ const JOINT_LABELS: Record<string, string> = {
   lumbar_flex: 'Lumbar Flexion', lumbar_ext: 'Lumbar Extension',
 }
 
-function getPRSTier(score: number): { label: string; color: string; bg: string; desc: string } {
-  if (score >= 85) return { label: 'ELITE',       color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Exceptional ROM profile. Train hard and retest regularly.' }
-  if (score >= 70) return { label: 'STRONG',      color: 'text-teal',       bg: 'bg-teal-light',       desc: 'Good mobility foundation. A few gaps to address.' }
-  if (score >= 55) return { label: 'DEVELOPING',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'ROM limitations are affecting your technique readiness.' }
-  if (score >= 40) return { label: 'RESTRICTED',  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: 'Significant mobility restrictions. Prioritize your protocol.' }
-  return                  { label: 'AT RISK',     color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: 'Several joints are in the AT RISK range. Your full dashboard has your plan.' }
+function getPRSTier(a: object): { label: string; color: string; bg: string; desc: string } {
+  // FG-37 J1: Base bands (Steady / Building / Needs focus), same worst-joint rule as Base mobilityBands.ts
+  const band = readinessBand(a)
+  if (band === 3) return { label: BAND_FULL[3],       color: 'text-teal',       bg: 'bg-teal-light',       desc: BAND_DESC[3] }
+  if (band === 2) return { label: BAND_FULL[2],  color: 'text-yellow-tier', bg: 'bg-yellow-tier-bg',  desc: BAND_DESC[2] }
+  return { label: BAND_FULL[1],     color: 'text-red-tier',   bg: 'bg-red-tier-bg',     desc: BAND_DESC[1] }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,7 +122,7 @@ export function ResultsPreview() {
   )
 
   const prs = computePRS(assessment)
-  const tier = getPRSTier(prs)
+  const tier = getPRSTier(assessment)
   const asymmetries = getTopAsymmetries(assessment)
 
   return (
@@ -148,7 +149,6 @@ export function ResultsPreview() {
             {tier.label}
           </div>
           <p className="text-sm text-warm-white/70 leading-relaxed">{tier.desc}</p>
-          <p className="text-xs text-warm-white/40 mt-3 leading-relaxed">AT RISK means your measured range is well below the target for these positions. ELITE means you are at or above the targets. Neither is a medical finding, and neither predicts injury.</p>
         </div>
 
         {/* Top asymmetries */}
