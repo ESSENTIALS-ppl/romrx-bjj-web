@@ -134,7 +134,7 @@ export function Chat() {
       } else if (isBase) {
         welcome = `Hey ${name} - I'm ROMBot, your mobility intelligence assistant.\n\nI can see your mobility bands (Needs focus / Building / Steady), priority joints, and daily plan. Ask me anything:\n\u2022 "Which joints need focus?"\n\u2022 "What's my daily plan?"\n\u2022 "How do I build ease in my hips?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       } else {
-        welcome = `Hey ${name}, I'm ROMBot. I can see your Position Readiness results (AT RISK to ELITE) and your technique ratings (GREEN / YELLOW / RED). Ask me anything:\n\u2022 "Which techniques are GREEN for me?"\n\u2022 "Which joints should I work on first?"\n\u2022 "What does AT RISK mean?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
+        welcome = `Hey ${name}, I'm ROMBot. I can see your Protocol results (AT RISK to ELITE) and your technique ratings (GREEN / YELLOW / RED). Ask me anything:\n\u2022 "Which techniques are GREEN for me?"\n\u2022 "Which joints should I work on first?"\n\u2022 "What does AT RISK mean?"\n\nNote: ROMBot provides educational information only and is not medical advice. Consult a healthcare professional before changing your training if you have pain or injury.`
       }
       setMessages([{ role: 'assistant', content: welcome }])
     }

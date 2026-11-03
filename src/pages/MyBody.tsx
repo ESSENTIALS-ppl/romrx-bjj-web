@@ -146,7 +146,7 @@ export function MyBody() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <TrendingUp size={13} className={tier.color} />
-            <span className={cn('text-xs font-bold uppercase tracking-wider', tier.color)}>Position Readiness Score</span>
+            <span className={cn('text-xs font-bold uppercase tracking-wider', tier.color)}>Protocol Score</span>
           </div>
           <p className={cn('text-lg font-bold leading-tight', tier.color)}>{tier.label}</p>
           <p className="text-xs text-charcoal-light mt-0.5">Retest every 6 weeks to track progress</p>

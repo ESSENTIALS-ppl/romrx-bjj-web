@@ -134,12 +134,12 @@ export function ResultsPreview() {
         {/* Header */}
         <div className="text-center">
           <h1 className="font-display font-bold text-warm-white text-2xl">Your Results Are In</h1>
-          <p className="text-sm text-warm-white/60 mt-1">Position Readiness Protocol™ by ROMRx</p>
+          <p className="text-sm text-warm-white/60 mt-1">Protocol™ by ROMRx</p>
         </div>
 
         {/* PRS Score Card */}
         <div className="bg-charcoal-dark rounded-2xl border border-teal/30 p-6 text-center">
-          <p className="text-xs font-bold text-teal uppercase tracking-widest mb-4">Position Readiness Score</p>
+          <p className="text-xs font-bold text-teal uppercase tracking-widest mb-4">Protocol Score</p>
           <div className={cn('inline-flex items-center justify-center w-32 h-32 rounded-full border-4 mb-4', tier.bg, tier.color === 'text-teal' ? 'border-teal/40' : tier.color === 'text-yellow-tier' ? 'border-yellow-tier/40' : 'border-red-tier/40')}>
             <div>
               <span className={cn('font-display font-bold text-5xl leading-none block', tier.color)}>{prs}</span>
