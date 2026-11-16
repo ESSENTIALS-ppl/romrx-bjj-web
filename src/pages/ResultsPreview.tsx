@@ -212,9 +212,9 @@ export function ResultsPreview() {
             <Unlock size={18} /> Get Base + ROMRxBJJ ($209/yr)
           </>}
         </button>
-        {/* STACY TO CLEAR (2026-10-26): pack opens Spring 2027, Base still charged Jan 1, 2027 */}
+        {/* Pack date line: Jim's exact 'Coming Spring 2027' (L879/L1001, L1019). Base still charged Jan 1, 2027 */}
         <p className="text-center text-xs text-warm-white/50">
-          Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Base is charged January 1, 2027, then every year until you cancel. Sport packs open Spring 2027. We'll email you when they open. Card required. Canceling Base also cancels ROMRxBJJ.
+          Base is required. Base $60/yr + ROMRxBJJ $149/yr = $209/yr. Base is charged January 1, 2027, then every year until you cancel. Coming Spring 2027. Card required. Canceling Base also cancels ROMRxBJJ.
         </p>
         <p className="text-center text-xs text-warm-white/30">
           Canceling ends your access right away. Promo codes accepted at checkout. ROMRx is for adults 18 and older.
