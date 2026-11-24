@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Spinner } from '../components/Spinner'
 import { AlertTriangle, CheckCircle, Unlock, TrendingUp } from 'lucide-react'
+import { startBaseCheckout } from '../lib/baseCheckout'
 import { cn } from '../lib/utils'
 import { useHipFlexCutover } from '../lib/hipFlexCutover'
 import { computePRS, readinessBand, PRS_BILATERAL } from '../lib/readiness'
@@ -89,22 +90,18 @@ export function ResultsPreview() {
   }, [user, navigate])
 
   const handleUnlock = async () => {
-    if (!session) return
+    if (!session || !user) return
     setPaying(true)
     setError('')
     try {
-      const res = await fetch(CHECKOUT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ email: user?.email, plan: 'athlete' }),
-      })
-      const { url, error: err } = await res.json()
-      if (url) { window.location.href = url; return }
-      setError(err ?? 'Payment setup failed. Please try again.')
+      // P1-33: Base-only checkout, no pack in the cart (see src/lib/baseCheckout.ts).
+      const r = await startBaseCheckout(
+        { url: CHECKOUT_URL, accessToken: session.access_token, anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY, userId: user.id, email: user.email ?? '' },
+        fetch,
+        (url) => { window.location.href = url },
+      )
+      if (r.ok) return
+      setError(r.error)
     } catch (e) {
       setError('Something went wrong. Please try again.')
     } finally {
