@@ -57,7 +57,7 @@ export function CoachSignup() {
           <p className="text-xs font-bold uppercase tracking-widest text-gold mb-2">Coming Spring 2027</p>
           <h1 className="font-display font-bold text-teal text-2xl">Coach tools coming Spring 2027</h1>
           <p className="text-sm text-charcoal-light mt-2">
-            Not open during beta. Base and athlete sport packs come first. Leave your email and we will notify you at Spring 2027.
+            Not open yet. Base and athlete sport packs come first. Leave your email and we will notify you at Spring 2027.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export function CoachSignup() {
             </a>
           </p>
           <p className="text-center text-xs text-charcoal-light">
-            Pricing and signup open Spring 2027. Not available in beta.
+            Pricing and signup open Spring 2027. Not available yet.
           </p>
         </div>
 
